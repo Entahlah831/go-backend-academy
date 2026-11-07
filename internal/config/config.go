@@ -135,7 +135,7 @@ func Load() (*Config, error) {
 		RateLimitBurst:       float64(p.int("RATE_LIMIT_BURST", 40)),
 		TrustedProxyCIDRs:    trustedNets,
 		MaxRequestBodyBytes:  int64(p.int("MAX_REQUEST_BODY_BYTES", 1048576)),
-		EnableLocalToolchain: p.bool("ENABLE_LOCAL_GO_TOOLCHAIN", true),
+		EnableLocalToolchain: p.bool("ENABLE_LOCAL_GO_TOOLCHAIN", false),
 		SandboxTimeout:       time.Duration(p.int("SANDBOX_TIMEOUT_MS", 3000)) * time.Millisecond,
 		AIProvider:           getEnv("AI_PROVIDER", "none"),
 		AIBaseURL:            getEnv("AI_BASE_URL", "http://127.0.0.1:11434"),

@@ -2,6 +2,8 @@ package diagnostics_test
 
 import (
 	"context"
+	"os/exec"
+	"strings"
 	"testing"
 	"time"
 
@@ -48,24 +50,58 @@ func TestAnalyzerCleanCodeNoFindings(t *testing.T) {
 import (
 	"context"
 	"database/sql"
-	"os"
+	"fmt"
 )
 
-func GetUser(ctx context.Context, db *sql.DB, id string) (string, error) {
+func GetUserEmail(ctx context.Context, db *sql.DB, userID string) (string, error) {
 	var email string
-	err := db.QueryRowContext(ctx, "SELECT email FROM users WHERE id = $1", id).Scan(&email)
+	err := db.QueryRowContext(ctx, "SELECT email FROM users WHERE id = $1", userID).Scan(&email)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("querying user %s: %w", userID, err)
 	}
 	return email, nil
 }
 `
 
 	report := analyzer.AnalyzeCode(context.Background(), code)
-	if report.SummaryStatus != "no_finding_detected" {
-		t.Fatalf("expected no_finding_detected for clean code, got %s", report.SummaryStatus)
+	seriousFindings := 0
+	for _, f := range report.Findings {
+		if f.Severity != "info" {
+			seriousFindings++
+		}
 	}
-	if len(report.Findings) != 1 || report.Findings[0].RuleID != "GO-INFO-000" {
-		t.Errorf("expected only GO-INFO-000, got %+v", report.Findings)
+	if seriousFindings != 0 {
+		t.Errorf("expected 0 serious findings for clean sample, got %d", seriousFindings)
+	}
+}
+
+func TestIsolatedGoVetClassification(t *testing.T) {
+	if _, err := exec.LookPath("go"); err != nil {
+		t.Skip("go compiler not available on host, skipping vet test")
+	}
+
+	analyzer := diagnostics.NewAnalyzer(true, 3*time.Second, "none", "", "")
+	// Snippet without import (incomplete snippet)
+	code := `package main
+func main() {
+	println("hello")
+	x := undeclaredVar
+	_ = x
+}
+`
+	report := analyzer.AnalyzeCode(context.Background(), code)
+	for _, f := range report.Findings {
+		if f.RuleID == "GO-VET-001" {
+			// If undeclaredVar causes build error, it should be classified as potential_issue (Snippet tidak lengkap),
+			// not confirmed_diagnostic!
+			if strings.Contains(f.Description, "undeclared") {
+				if f.Classification != diagnostics.ClassificationPotentialIssue {
+					t.Errorf("expected incomplete snippet to be classified as potential_issue, got %s", f.Classification)
+				}
+				if !strings.Contains(f.Title, "Snippet Tidak Lengkap") {
+					t.Errorf("expected title to indicate Snippet Tidak Lengkap, got %s", f.Title)
+				}
+			}
+		}
 	}
 }

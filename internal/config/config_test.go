@@ -41,3 +41,15 @@ func TestProductionPostgresPasswordGuard(t *testing.T) {
 		t.Errorf("expected password to match, got %s", cfg.PostgresPassword)
 	}
 }
+
+func TestDefaultEnableLocalToolchainIsFalse(t *testing.T) {
+	t.Setenv("APP_ENV", "development")
+	t.Setenv("ENABLE_LOCAL_GO_TOOLCHAIN", "")
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("unexpected error loading default config: %v", err)
+	}
+	if cfg.EnableLocalToolchain != false {
+		t.Errorf("expected EnableLocalToolchain to default to false, got %v", cfg.EnableLocalToolchain)
+	}
+}

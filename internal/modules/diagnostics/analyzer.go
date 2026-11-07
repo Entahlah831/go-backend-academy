@@ -135,6 +135,8 @@ func hasRegexpCompileInsideFunc(uncommented string) (bool, int) {
 	return false, 0
 }
 
+var vetSem = make(chan struct{}, 2) // max 2 concurrent go vet processes
+
 func (a *Analyzer) AnalyzeCode(ctx context.Context, code string) AnalysisReport {
 	var findings []DiagnosticFinding
 	uncommented := exercises.StripGoComments(code)
@@ -441,14 +443,28 @@ func (a *Analyzer) AnalyzeCode(ctx context.Context, code string) AnalysisReport 
 	if a.enableLocalToolchain {
 		if goPath, err := exec.LookPath("go"); err == nil && goPath != "" {
 			toolExecuted, toolOut = a.runIsolatedGoVet(ctx, goPath, code)
-			if toolOut != "" {
+			if toolExecuted && toolOut != "" {
+				classification := ClassificationConfirmedDiagnostic
+				severity := "high"
+				title := "Go Compiler / go vet Diagnostic Output"
+				whyItMatters := "Confirmed syntax, type-checking, or go vet analyzer diagnostic reported directly by the Go toolchain."
+
+				lowerOut := strings.ToLower(toolOut)
+				if strings.Contains(lowerOut, "undefined:") || strings.Contains(lowerOut, "undeclared") ||
+					strings.Contains(lowerOut, "could not import") || strings.Contains(lowerOut, "imported and not used") {
+					classification = ClassificationPotentialIssue
+					severity = "medium"
+					title = "Snippet Tidak Lengkap / Kesalahan Sintaks"
+					whyItMatters = "Kode tidak dapat dikompilasi lengkap karena ada impor atau variabel yang belum terdefinisi dalam potongan kode independen ini."
+				}
+
 				findings = append(findings, DiagnosticFinding{
 					RuleID:              "GO-VET-001",
-					Classification:      ClassificationConfirmedDiagnostic,
-					Severity:            "high",
-					Title:               "Go Compiler / go vet Diagnostic Output",
+					Classification:      classification,
+					Severity:            severity,
+					Title:               title,
 					Description:         toolOut,
-					WhyItMatters:        "Confirmed syntax, type-checking, or go vet analyzer diagnostic reported directly by the Go toolchain.",
+					WhyItMatters:        whyItMatters,
 					SuggestedCorrection: "Resolve the compiler or go vet error reported at the line number above.",
 					RelatedLessonID:     "l1-toolchain-modules-packages",
 					ReferenceURL:        "https://pkg.go.dev/cmd/vet",
@@ -487,6 +503,13 @@ func (a *Analyzer) AnalyzeCode(ctx context.Context, code string) AnalysisReport 
 }
 
 func (a *Analyzer) runIsolatedGoVet(ctx context.Context, goBinary, code string) (bool, string) {
+	select {
+	case vetSem <- struct{}{}:
+		defer func() { <-vetSem }()
+	default:
+		return false, "Server sedang sibuk, verifikasi go vet dilewati."
+	}
+
 	tmpDir, err := os.MkdirTemp("", "gba-vet-*")
 	if err != nil {
 		return false, ""
@@ -507,7 +530,38 @@ func (a *Analyzer) runIsolatedGoVet(ctx context.Context, goBinary, code string) 
 
 	cmd := exec.CommandContext(vetCtx, goBinary, "vet", filePath)
 	cmd.Dir = tmpDir
+
+	cleanEnv := []string{
+		"CGO_ENABLED=0",
+		"GOPROXY=off",
+		"GOFLAGS=-mod=mod",
+		"GOTOOLCHAIN=local",
+		"GOCACHE=" + filepath.Join(tmpDir, ".gocache"),
+	}
+	if p := os.Getenv("PATH"); p != "" {
+		cleanEnv = append(cleanEnv, "PATH="+p)
+	}
+	if h := os.Getenv("HOME"); h != "" {
+		cleanEnv = append(cleanEnv, "HOME="+h)
+	}
+	if up := os.Getenv("USERPROFILE"); up != "" {
+		cleanEnv = append(cleanEnv, "USERPROFILE="+up)
+	}
+	if sd := os.Getenv("SYSTEMDRIVE"); sd != "" {
+		cleanEnv = append(cleanEnv, "SYSTEMDRIVE="+sd)
+	}
+	if sr := os.Getenv("SYSTEMROOT"); sr != "" {
+		cleanEnv = append(cleanEnv, "SYSTEMROOT="+sr)
+	}
+	if wd := os.Getenv("WINDIR"); wd != "" {
+		cleanEnv = append(cleanEnv, "WINDIR="+wd)
+	}
+	cmd.Env = cleanEnv
+
 	out, err := cmd.CombinedOutput()
+	if vetCtx.Err() != nil {
+		return false, "go vet dihentikan (melebihi batas waktu)"
+	}
 	if err != nil {
 		return true, strings.TrimSpace(string(out))
 	}
