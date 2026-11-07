@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Go Backend Academy: Production Engineering, Architecture &amp; Offline Diagnostics Platform</title>
   <meta name="description" content="Production Go backend engineering academy covering HTTP lifecycles, concurrency, database internals, architecture patterns, and 100% offline static code diagnostics." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;500&family=Host+Grotesk:wght@400;500&display=swap" rel="stylesheet">
   <style>
 /* Hallmark · modern-minimal · theme: console (dealt 2/3, seed offline-backend-engineering-academy-301b·cf2c1cb1·2026-11-07·r0) · scope: app · posture: restrained · hero: index · spine: step · job: Developer Learning Environment · nav: sidebar · footer: rule */
 /* Hallmark · dropped https://cdn.tailwindcss.com/3.4.17 · replaced runtime Tailwind CDN script with native Console CSS token stylesheet */
@@ -431,7 +428,7 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-ac
           <a href="https://go.dev/doc/" target="_blank" rel="noopener noreferrer">go.dev/doc</a>
           <a href="https://go.dev/ref/spec" target="_blank" rel="noopener noreferrer">Go Spec</a>
           <a href="https://pkg.go.dev/std" target="_blank" rel="noopener noreferrer">pkg.go.dev/std</a>
-          <a href="https://www.postgresql.org/docs/" target="_blank" rel="noopener noreferrer">PostgreSQL 18</a>
+          <a href="https://www.postgresql.org/docs/" target="_blank" rel="noopener noreferrer">PostgreSQL 17+</a>
           <a href="https://www.sqlite.org/docs.html" target="_blank" rel="noopener noreferrer">SQLite WAL</a>
           <a href="https://api-security.owasp.org/editions/2023/en/0x11-t10/" target="_blank" rel="noopener noreferrer">Owasp API 2023</a>
         </div>
@@ -790,7 +787,7 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-ac
           </div>
 
           <div class="control-group" role="tablist" aria-label="Database Engines">
-            <button type="button" data-dbengine="postgresql" class="db-scen-tab is-active">PostgreSQL 18</button>
+            <button type="button" data-dbengine="postgresql" class="db-scen-tab is-active">PostgreSQL 17+</button>
             <button type="button" data-dbengine="mysql" class="db-scen-tab">MySQL 8.4 (InnoDB)</button>
             <button type="button" data-dbengine="mariadb" class="db-scen-tab">MariaDB 11.4</button>
             <button type="button" data-dbengine="sqlite" class="db-scen-tab">SQLite 3.40+ (WAL)</button>
@@ -1966,21 +1963,21 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
       },
       "references": [
         {
-          "title": "PostgreSQL 18 Documentation: Chapter 13. Concurrency Control (MVCC)",
+          "title": "PostgreSQL 17+ Documentation: Chapter 13. Concurrency Control (MVCC)",
           "url": "https://www.postgresql.org/docs/current/mvcc-intro.html",
           "version": "PostgreSQL 17/18",
           "type": "official",
           "lastVerified": "2026-11-07"
         },
         {
-          "title": "PostgreSQL 18 Documentation: 14.1. Using EXPLAIN & EXPLAIN ANALYZE",
+          "title": "PostgreSQL 17+ Documentation: 14.1. Using EXPLAIN & EXPLAIN ANALYZE",
           "url": "https://www.postgresql.org/docs/current/using-explain.html",
           "version": "PostgreSQL 17/18",
           "type": "official",
           "lastVerified": "2026-11-07"
         },
         {
-          "title": "PostgreSQL 18 Documentation: 11.2. Index Types (B-Tree, GIN, GiST, BRIN)",
+          "title": "PostgreSQL 17+ Documentation: 11.2. Index Types (B-Tree, GIN, GiST, BRIN)",
           "url": "https://www.postgresql.org/docs/current/indexes-types.html",
           "version": "PostgreSQL 17/18",
           "type": "official",
@@ -2052,16 +2049,16 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
       },
       "references": [
         {
-          "title": "PostgreSQL 18 Documentation: Table Partitioning",
+          "title": "PostgreSQL 17+ Documentation: Table Partitioning",
           "url": "https://www.postgresql.org/docs/current/ddl-partitioning.html",
-          "version": "PostgreSQL 17/18",
+          "version": "PostgreSQL 17+",
           "type": "official",
           "lastVerified": "2026-11-07"
         },
         {
-          "title": "PostgreSQL 18 Documentation: High Availability & Replication",
+          "title": "PostgreSQL 17+ Documentation: High Availability & Replication",
           "url": "https://www.postgresql.org/docs/current/high-availability.html",
-          "version": "PostgreSQL 17/18",
+          "version": "PostgreSQL 17+",
           "type": "official",
           "lastVerified": "2026-11-07"
         }
@@ -2199,9 +2196,9 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
       },
       "references": [
         {
-          "title": "PostgreSQL 18 Documentation: Building Indexes Concurrently",
+          "title": "PostgreSQL 17+ Documentation: Building Indexes Concurrently",
           "url": "https://www.postgresql.org/docs/current/sql-createindex.html#SQL-CREATEINDEX-CONCURRENTLY",
-          "version": "PostgreSQL 17/18",
+          "version": "PostgreSQL 17+",
           "type": "official",
           "lastVerified": "2026-11-07"
         },
@@ -2643,9 +2640,9 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
           "lastVerified": "2026-11-07"
         },
         {
-          "title": "PostgreSQL 18 Documentation: Schemas & Privileges",
+          "title": "PostgreSQL 17+ Documentation: Schemas & Privileges",
           "url": "https://www.postgresql.org/docs/current/ddl-schemas.html",
-          "version": "PostgreSQL 17/18",
+          "version": "PostgreSQL 17+",
           "type": "official",
           "lastVerified": "2026-11-07"
         }
@@ -3042,7 +3039,7 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
         "SELECT * FROM orders WHERE tenant_id = $1 AND status = 'SHIPPED'"
       ],
       "correctIndex": 2,
-      "explanation": "Composite B-Tree indexes are sorted lexicographically by the leading column (`tenant_id`) first. A query that omits `tenant_id` and filters only on `status` cannot jump directly to a contiguous range in the B-Tree."
+      "explanation": "Composite B-Tree indexes are sorted lexicographically by the leading column (`tenant_id`) first. A query that omits `tenant_id` and filters only on `status` cannot jump directly to a contiguous range in the B-Tree (tanpa skip scan)."
     },
     {
       "id": "qz-4",

@@ -16,7 +16,12 @@
     if (typeof SafeStore !== 'undefined') {
       let uid = SafeStore.get('userId', '');
       if (!uid || typeof uid !== 'string' || uid === 'usr_local_default' || !uid.startsWith('usr_')) {
-        const randHex = Math.random().toString(16).slice(2, 10) + Date.now().toString(16).slice(-6);
+        let randHex;
+        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+          randHex = crypto.randomUUID().replace(/-/g, '').slice(0, 32);
+        } else {
+          randHex = Math.random().toString(16).slice(2, 10) + Date.now().toString(16).slice(-6);
+        }
         uid = 'usr_' + randHex;
         SafeStore.set('userId', uid);
       }

@@ -1,5 +1,6 @@
 # Stage 1: Build static Go binary with embedded SQL migrations and seed data
-FROM golang:1.26-alpine AS builder
+FROM golang:alpine AS builder
+ARG TARGETARCH
 WORKDIR /src
 
 RUN apk add --no-cache ca-certificates tzdata
@@ -12,12 +13,12 @@ COPY internal/ ./internal/
 COPY migrations/ ./migrations/
 COPY seed/ ./seed/
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH:-amd64} go build \
     -ldflags="-s -w" \
     -o /out/go-backend-academy ./cmd/server/main.go
 
 # Stage 2: Minimal non-root runtime
-FROM alpine:3.20
+FROM alpine:3.21
 RUN adduser -D -u 10001 appuser && apk add --no-cache ca-certificates tzdata wget
 WORKDIR /app
 

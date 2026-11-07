@@ -1,4 +1,4 @@
-.PHONY: run build test test-race vet migrate-up migrate-down migrate-status seed migrate-sqlite seed-sqlite migrate-postgres seed-postgres docker-up docker-up-cache docker-down docker-clean-volumes clean
+.PHONY: run build test test-race bench vet migrate-up migrate-down migrate-status seed migrate-sqlite seed-sqlite migrate-postgres seed-postgres docker-up docker-up-cache docker-down docker-clean-volumes clean
 
 BINARY_NAME=go-backend-academy
 

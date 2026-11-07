@@ -1098,10 +1098,10 @@ For multi-step writes, call `tx, err := db.BeginTx(ctx, nil)`, immediately sched
 4. Why Preferred: Standard `database/sql` works identically across `modernc.org/sqlite` and `jackc/pgx/v5/stdlib` using `$1` positional placeholders.
 5. When To Use: For all SQL queries, repository methods, and multi-statement atomic transactions (`db.BeginTx`).
 6. When To Avoid: Never build SQL queries with `fmt.Sprintf` or string concatenation `+` on user input, and never call `db.QueryContext` without `defer rows.Close()`.
-7. Advantages: 100% immunity to SQL injection via parameter binding; context-aware timeouts; built-in connection pooling.
+7. Advantages: Parameter binding prevents user values from being interpreted as SQL commands. Table/column names and ORDER BY cannot be parameterized (use allowlists); context-aware timeouts; built-in connection pooling.
 8. Disadvantages: Manual `rows.Scan(&a, &b)` column order must match the `SELECT` list.
 9. Alternatives: `sqlc` (generates type-safe Go from SQL) or `pgx/v5` native interface (compared in Lesson 5.1).
-10. Incorrect Consequences: Forgetting `defer rows.Close()` leaks the checked-out connection forever until `MaxOpenConns` is reached and the entire server freezes.
+10. Incorrect Consequences: Jika rows tidak ditutup dan iterasi berhenti sebelum Next() mengembalikan false (mis. return lebih awal atau break), koneksi database tetap terpakai sampai rows.Close() dipanggil. Selalu defer rows.Close() dan periksa rows.Err() setelah loop.
 11. Real-World Usage: Look at `internal/platform/database/db.go` and `content.go` in this repository—every single query uses `QueryContext`/`QueryRowContext`/`ExecContext` with `$1` parameters and `defer rows.Close()`.
 12. Perf/Sec/Maint/Scale: Security: `$1` parameter placeholders prevent SQL injection. Reliability: `defer tx.Rollback()` before `tx.Commit()` guarantees transactions never stay open on error.', '*sql.DB Pool -> db.QueryRowContext(ctx, "SELECT id FROM users WHERE email = $1", email).Scan(&id) -> errors.Is(err, sql.ErrNoRows)', 'package repo
 

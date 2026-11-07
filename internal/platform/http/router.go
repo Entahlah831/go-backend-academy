@@ -67,6 +67,10 @@ func NewServer(cfg *config.Config, logger *slog.Logger, store *database.Store) *
 	return s
 }
 
+func (s *Server) Store() *database.Store {
+	return s.store
+}
+
 func (s *Server) SetShuttingDown(val bool) {
 	s.shuttingDown.Store(val)
 }

@@ -691,8 +691,13 @@ func getJSON(t *testing.T, url string, dst any) {
 }
 
 
-func TestAll36ExercisesServerSideVerification(t *testing.T) {
-	_, ts := setupTestServer(t)
+func TestAllExercisesServerSideVerification(t *testing.T) {
+	srv, ts := setupTestServer(t)
+
+	var dbExercisesCount int
+	if err := srv.Store().DB().QueryRow("SELECT COUNT(*) FROM exercises").Scan(&dbExercisesCount); err != nil {
+		t.Fatalf("failed querying exercises count from db: %v", err)
+	}
 
 	var curriculum struct {
 		Lessons []struct {
@@ -750,7 +755,7 @@ func TestAll36ExercisesServerSideVerification(t *testing.T) {
 			t.Errorf("exercise %s (%s) failed with canonical solution_code!", detail.Exercise.ID, l.Slug)
 		}
 	}
-	if totalExercises != 41 {
-		t.Errorf("expected 41 exercises across curriculum, got %d", totalExercises)
+	if totalExercises != dbExercisesCount {
+		t.Errorf("expected %d exercises across curriculum matching DB exercises count, got %d", dbExercisesCount, totalExercises)
 	}
 }

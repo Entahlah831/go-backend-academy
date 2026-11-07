@@ -1,6 +1,6 @@
 -- ============================================================================
--- Go Backend Academy — PostgreSQL 17+ Normalized Schema (001_initial_schema.up.sql)
--- Zero SQLite dialect constructs. Enforces strict FK, UNIQUE, and CHECK constraints.
+-- Go Backend Academy — SQLite 3 Normalized Schema (001_initial_schema.up.sql)
+-- Strict SQLite dialect with foreign keys, UNIQUE, and CHECK constraints.
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS schema_migrations (
