@@ -1,0 +1,49 @@
+/* Hallmark · modern-minimal · theme: console (dealt 2/3, seed offline-backend-engineering-academy-301b·cf2c1cb1·2026-11-07·r0) · scope: app · posture: restrained · hero: index · spine: step · job: Developer Learning Environment · nav: sidebar · footer: rule */
+/* Hallmark · dropped https://cdn.tailwindcss.com/3.4.17 · replaced runtime Tailwind CDN script with native Console CSS token stylesheet */
+/* Hallmark · reworded "go backend academy 100% offline • go 1.23+" to "go backend academy" · 63 and 64 name the middle-dot badge inside h1 */
+/* Hallmark · reworded "go backend academy — production engineering platform" to "go backend academy: production engineering platform" · 19 names the dash */
+/* Hallmark · reworded "7 database engines — complete 15-dimension engineering matrix" to "7 database engines: complete 15-dimension engineering matrix" · 19 names the dash */
+html[data-mode="light"], html:not(.dark) {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.2rem; --text-xl: 1.44rem; --text-2xl: 1.728rem; --text-3xl: 2.074rem;
+  --text-display-s: 1.44rem; --text-display: 1.728rem; --text-section: 1.2rem; --text-title: 1rem; --text-lead: 1rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); --ease-in: cubic-bezier(0.7, 0, 0.84, 0); --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms; --dur-short: 220ms; --dur-long: 420ms;
+  --color-error: oklch(46% 0.17 27); --color-success: oklch(42% 0.14 150);
+  --container: 1440px; --gutter: 64px; --gap-columns: 32px; --section-gap-s: 120px; --section-gap: 144px; --section-gap-l: 176px;
+  --z-base: 1; --z-raised: 10; --z-dropdown: 100; --z-sticky: 200; --z-sticky-nav: 300; --z-modal: 400; --z-toast: 500; --z-tooltip: 600;
+  --color-paper: oklch(97% 0.005 250); --color-paper-2: oklch(93.5% 0.006 250); --color-paper-3: oklch(90% 0.008 250);
+  --color-ink: oklch(18% 0.01 250); --color-ink-2: oklch(28% 0.01 250); --color-muted: oklch(40% 0.012 250);
+  --color-rule: oklch(80% 0.009 250); --color-rule-2: oklch(46% 0.012 250);
+  --color-accent: oklch(48% 0.14 75); --color-accent-ink: oklch(98% 0.005 80); --color-accent-soft: oklch(91% 0.04 80); --color-focus: oklch(42% 0.15 245);
+  --color-cool: oklch(40% 0.13 245); --color-cool-soft: oklch(91% 0.035 245);
+  --color-ok: oklch(40% 0.14 150); --color-ok-soft: oklch(91% 0.035 150); --color-bad: oklch(45% 0.17 25); --color-bad-soft: oklch(92% 0.035 25);
+  --font-display: "Host Grotesk", ui-sans-serif, system-ui, sans-serif; --font-body: var(--font-display);
+  --font-outlier: "Atkinson Hyperlegible Mono", ui-monospace, monospace;
+  --radius-card: 10px; --radius-pill: 6px; --rule-hair: 1px;
+  --shadow-card: none;
+  --tracking-display: -0.03em; --display-weight: 500;
+}
+:root {
+  color-scheme: dark;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.2rem; --text-xl: 1.44rem; --text-2xl: 1.728rem; --text-3xl: 2.074rem;
+  --text-display-s: 1.44rem; --text-display: 1.728rem; --text-section: 1.2rem; --text-title: 1rem; --text-lead: 1rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); --ease-in: cubic-bezier(0.7, 0, 0.84, 0); --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms; --dur-short: 220ms; --dur-long: 420ms;
+  --color-error: oklch(72% 0.15 27); --color-success: oklch(76% 0.13 150);
+  --container: 1440px; --gutter: 64px; --gap-columns: 32px; --section-gap-s: 120px; --section-gap: 144px; --section-gap-l: 176px;
+  --z-base: 1; --z-raised: 10; --z-dropdown: 100; --z-sticky: 200; --z-sticky-nav: 300; --z-modal: 400; --z-toast: 500; --z-tooltip: 600;
+  --color-paper: oklch(17% 0.008 250); --color-paper-2: oklch(21% 0.009 250); --color-paper-3: oklch(13.5% 0.007 250);
+  --color-ink: oklch(95% 0.005 250); --color-ink-2: oklch(83% 0.008 250); --color-muted: oklch(71% 0.01 250);
+  --color-rule: oklch(31% 0.01 250); --color-rule-2: oklch(62% 0.012 250);
+  --color-accent: oklch(82% 0.15 80); --color-accent-ink: oklch(18% 0.04 75); --color-accent-soft: oklch(25% 0.045 80); --color-focus: oklch(82% 0.15 80);
+  --color-cool: oklch(78% 0.12 245); --color-cool-soft: oklch(24% 0.04 245);
+  --color-ok: oklch(78% 0.14 150); --color-ok-soft: oklch(23% 0.035 150); --color-bad: oklch(75% 0.15 25); --color-bad-soft: oklch(23% 0.04 25);
+  --font-display: "Host Grotesk", ui-sans-serif, system-ui, sans-serif; --font-body: var(--font-display);
+  --font-outlier: "Atkinson Hyperlegible Mono", ui-monospace, monospace;
+  --radius-card: 10px; --radius-pill: 6px; --rule-hair: 1px;
+  --shadow-card: none;
+  --tracking-display: -0.03em; --display-weight: 500;
+}

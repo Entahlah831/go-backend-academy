@@ -1,0 +1,756 @@
+package tests
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/gobackendacademy/platform/internal/config"
+	"github.com/gobackendacademy/platform/internal/modules/diagnostics"
+	"github.com/gobackendacademy/platform/internal/platform/database"
+	httpplatform "github.com/gobackendacademy/platform/internal/platform/http"
+	"github.com/gobackendacademy/platform/internal/platform/logger"
+)
+
+func setupTestServer(t *testing.T) (*httpplatform.Server, *httptest.Server) {
+	t.Helper()
+	dbFile := filepath.Join(t.TempDir(), "test_academy.db")
+	t.Setenv("DB_DRIVER", "sqlite")
+	t.Setenv("SQLITE_PATH", dbFile)
+	t.Setenv("SQLITE_DSN", "")
+	t.Setenv("WEB_STATIC_DIR", "../web")
+	t.Setenv("RATE_LIMIT_RPS", "10000")
+	t.Setenv("RATE_LIMIT_BURST", "10000")
+
+	cfg, err := config.Load()
+	if err != nil {
+		t.Fatalf("config.Load() failed: %v", err)
+	}
+	log := logger.New(io.Discard, "test")
+	store, err := database.Open(context.Background(), cfg)
+	if err != nil {
+		t.Fatalf("database.Open() failed: %v", err)
+	}
+	t.Cleanup(func() { _ = store.Close() })
+
+	srv := httpplatform.NewServer(cfg, log, store)
+	ts := httptest.NewServer(srv.Handler())
+	t.Cleanup(ts.Close)
+	return srv, ts
+}
+
+func TestLivenessAndReadinessSeparation(t *testing.T) {
+	srv, ts := setupTestServer(t)
+
+	resp, err := http.Get(ts.URL + "/healthz")
+	if err != nil || resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected /healthz 200 OK, got err=%v status=%d", err, resp.StatusCode)
+	}
+	_ = resp.Body.Close()
+
+	srv.SetShuttingDown(true)
+	readyResp, err := http.Get(ts.URL + "/readyz")
+	if err != nil {
+		t.Fatalf("GET /readyz failed: %v", err)
+	}
+	defer readyResp.Body.Close()
+	if readyResp.StatusCode != http.StatusServiceUnavailable {
+		t.Errorf("expected /readyz 503 during shutdown, got %d", readyResp.StatusCode)
+	}
+
+	liveResp, err := http.Get(ts.URL + "/healthz")
+	if err != nil {
+		t.Fatalf("GET /healthz during shutdown failed: %v", err)
+	}
+	defer liveResp.Body.Close()
+	if liveResp.StatusCode != http.StatusOK {
+		t.Errorf("expected /healthz to remain 200 OK during shutdown, got %d", liveResp.StatusCode)
+	}
+}
+
+func TestReadyzFailsWhenDatabaseClosedAndOpenFailsOnUnreachablePostgres(t *testing.T) {
+	dbFile := filepath.Join(t.TempDir(), "readyz.db")
+	t.Setenv("DB_DRIVER", "sqlite")
+	t.Setenv("SQLITE_PATH", dbFile)
+	t.Setenv("SQLITE_DSN", "")
+
+	cfg, err := config.Load()
+	if err != nil {
+		t.Fatalf("config.Load() failed: %v", err)
+	}
+	log := logger.New(io.Discard, "test")
+	store, err := database.Open(context.Background(), cfg)
+	if err != nil {
+		t.Fatalf("database.Open() failed: %v", err)
+	}
+	srv := httpplatform.NewServer(cfg, log, store)
+	ts := httptest.NewServer(srv.Handler())
+	defer ts.Close()
+
+	// Closing the underlying SQL pool must cause /readyz to report 503 Service Unavailable
+	_ = store.Close()
+	readyResp, err := http.Get(ts.URL + "/readyz")
+	if err != nil {
+		t.Fatalf("GET /readyz failed: %v", err)
+	}
+	defer readyResp.Body.Close()
+	if readyResp.StatusCode != http.StatusServiceUnavailable {
+		t.Errorf("expected /readyz 503 when database is closed, got %d", readyResp.StatusCode)
+	}
+
+	// Configuring DB_DRIVER=postgres against an unreachable port must fail fast (no silent memory fallback)
+	t.Setenv("DB_DRIVER", "postgres")
+	t.Setenv("POSTGRES_HOST", "127.0.0.1")
+	t.Setenv("POSTGRES_PORT", "59999")
+	t.Setenv("POSTGRES_USER", "academy")
+	t.Setenv("POSTGRES_PASSWORD", "secret")
+	t.Setenv("POSTGRES_DB", "gobackendacademy")
+	t.Setenv("POSTGRES_DSN", "")
+	t.Setenv("DB_CONNECT_TIMEOUT_SEC", "1")
+
+	pgCfg, err := config.Load()
+	if err != nil {
+		t.Fatalf("config.Load() for postgres failed: %v", err)
+	}
+	if _, err := database.Open(context.Background(), pgCfg); err == nil {
+		t.Fatalf("expected database.Open() to fail fast when PostgreSQL is unreachable, but got nil error")
+	}
+}
+
+func TestDotEnvAndDynamicDatabasePortConfig(t *testing.T) {
+	envPath := filepath.Join(t.TempDir(), ".env.custom")
+	envContent := strings.Join([]string{
+		"PORT=9191",
+		"HOST=127.0.0.1",
+		"DB_DRIVER=postgres",
+		"POSTGRES_HOST=db.internal.local",
+		"POSTGRES_PORT=15432",
+		"POSTGRES_USER=gba_admin",
+		"POSTGRES_PASSWORD=\"p@ss:w/rd\"",
+		"POSTGRES_DB=gba_prod",
+		"POSTGRES_SSLMODE=require",
+	}, "\n")
+	if err := os.WriteFile(envPath, []byte(envContent), 0o600); err != nil {
+		t.Fatalf("writing custom .env failed: %v", err)
+	}
+
+	// Ensure clean env before loading .env file
+	for _, k := range []string{"PORT", "HOST", "DB_DRIVER", "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB", "POSTGRES_SSLMODE", "POSTGRES_DSN"} {
+		t.Setenv(k, "")
+		_ = os.Unsetenv(k)
+	}
+
+	loaded, err := config.LoadDotEnv(envPath)
+	if err != nil || !loaded {
+		t.Fatalf("LoadDotEnv failed: loaded=%v err=%v", loaded, err)
+	}
+
+	cfg, err := config.Load()
+	if err != nil {
+		t.Fatalf("config.Load() after LoadDotEnv failed: %v", err)
+	}
+	if cfg.ListenAddr() != "127.0.0.1:9191" {
+		t.Errorf("expected ListenAddr 127.0.0.1:9191, got %s", cfg.ListenAddr())
+	}
+	if cfg.PostgresPort != 15432 || cfg.PostgresHost != "db.internal.local" {
+		t.Errorf("expected PostgresHost=db.internal.local PostgresPort=15432, got %s:%d", cfg.PostgresHost, cfg.PostgresPort)
+	}
+	if !strings.Contains(cfg.PostgresDSN, "db.internal.local:15432/gba_prod") || !strings.Contains(cfg.PostgresDSN, "sslmode=require") {
+		t.Errorf("unexpected constructed PostgresDSN: %s", cfg.PostgresDSN)
+	}
+	// DBTarget must never leak the password
+	if strings.Contains(cfg.DBTarget(), "p@ss") {
+		t.Errorf("DBTarget leaked password: %s", cfg.DBTarget())
+	}
+
+	// Invalid integer in environment must fail config.Load()
+	t.Setenv("POSTGRES_PORT", "not-a-port")
+	if _, err := config.Load(); err == nil {
+		t.Errorf("expected config.Load() to reject non-integer POSTGRES_PORT")
+	}
+}
+
+func TestPersistenceAcrossServerRestartsAndMigrationsCycle(t *testing.T) {
+	dbPath := filepath.Join(t.TempDir(), "persistent_academy.db")
+	t.Setenv("DB_DRIVER", "sqlite")
+	t.Setenv("SQLITE_PATH", dbPath)
+	t.Setenv("SQLITE_DSN", "")
+
+	cfg, err := config.Load()
+	if err != nil {
+		t.Fatalf("config.Load() failed: %v", err)
+	}
+	log := logger.New(io.Discard, "test")
+
+	// --- Server Instance #1 ---
+	store1, err := database.Open(context.Background(), cfg)
+	if err != nil {
+		t.Fatalf("store1 Open failed: %v", err)
+	}
+	srv1 := httpplatform.NewServer(cfg, log, store1)
+	ts1 := httptest.NewServer(srv1.Handler())
+
+	// 1. Save progress
+	postJSON(t, ts1.URL+"/api/v1/progress", map[string]any{
+		"user_id":   "usr_persist",
+		"lesson_id": "l0-backend-http-lifecycle",
+		"status":    "completed",
+	}, http.StatusOK)
+
+	// 2. Save note
+	postJSON(t, ts1.URL+"/api/v1/notes", map[string]any{
+		"user_id":   "usr_persist",
+		"lesson_id": "l0-backend-http-lifecycle",
+		"content":   "Persisted across SQLite restart!",
+	}, http.StatusOK)
+
+	// 3. Save bookmark
+	postJSON(t, ts1.URL+"/api/v1/bookmarks", map[string]any{
+		"user_id":   "usr_persist",
+		"item_type": "case_study",
+		"item_id":   "cs-01-task-api",
+		"note":      "Reference architecture",
+	}, http.StatusOK)
+
+	// 4. Record exercise attempt
+	postJSON(t, ts1.URL+"/api/v1/exercises/verify", map[string]any{
+		"user_id":         "usr_persist",
+		"exercise_id":     "ex-l0-backend-http-lifecycle",
+		"code":            "package main\nimport \"net/http\"\nfunc ok() { r.Body = http.MaxBytesReader(w, r.Body, 64); dec.DisallowUnknownFields(); _ = &http.Server{ReadHeaderTimeout: 5} }",
+		"required_tokens": []string{},
+	}, http.StatusOK)
+
+	// 5. Record quiz attempt
+	postJSON(t, ts1.URL+"/api/v1/quizzes/qz-1/attempts", map[string]any{
+		"user_id": "usr_persist",
+		"answers": []int{1},
+	}, http.StatusOK)
+
+	// Shut down Server #1 and close database connection completely
+	ts1.Close()
+	if err := store1.Close(); err != nil {
+		t.Fatalf("closing store1: %v", err)
+	}
+
+	// --- Server Instance #2 (fresh process simulation against the same SQLite file) ---
+	store2, err := database.Open(context.Background(), cfg)
+	if err != nil {
+		t.Fatalf("store2 Open failed: %v", err)
+	}
+	defer store2.Close()
+	srv2 := httpplatform.NewServer(cfg, log, store2)
+	ts2 := httptest.NewServer(srv2.Handler())
+	defer ts2.Close()
+
+	// Verify progress survived restart
+	var progResp struct {
+		Progress map[string]string `json:"progress"`
+	}
+	getJSON(t, ts2.URL+"/api/v1/progress?user_id=usr_persist", &progResp)
+	if progResp.Progress["l0-backend-http-lifecycle"] != "completed" {
+		t.Errorf("progress lost across restart: %+v", progResp.Progress)
+	}
+
+	// Verify note survived restart
+	var notesResp struct {
+		Notes map[string]string `json:"notes"`
+	}
+	getJSON(t, ts2.URL+"/api/v1/notes?user_id=usr_persist", &notesResp)
+	if notesResp.Notes["l0-backend-http-lifecycle"] != "Persisted across SQLite restart!" {
+		t.Errorf("notes lost across restart: %+v", notesResp.Notes)
+	}
+
+	// Verify bookmark survived restart
+	var bmResp struct {
+		Bookmarks []struct {
+			ItemID string `json:"item_id"`
+			Note   string `json:"note"`
+		} `json:"bookmarks"`
+	}
+	getJSON(t, ts2.URL+"/api/v1/bookmarks?user_id=usr_persist", &bmResp)
+	if len(bmResp.Bookmarks) != 1 || bmResp.Bookmarks[0].ItemID != "cs-01-task-api" {
+		t.Errorf("bookmarks lost across restart: %+v", bmResp.Bookmarks)
+	}
+
+	// Verify exercise attempt survived restart
+	var exAttResp struct {
+		Attempts []database.ExerciseAttemptRecord `json:"attempts"`
+	}
+	getJSON(t, ts2.URL+"/api/v1/exercises/attempts?user_id=usr_persist", &exAttResp)
+	if len(exAttResp.Attempts) != 1 || !exAttResp.Attempts[0].Passed {
+		t.Errorf("exercise attempts lost across restart: %+v", exAttResp.Attempts)
+	}
+
+	// Verify quiz attempt survived restart
+	var qzAttResp struct {
+		Attempts []struct {
+			QuizID string `json:"quiz_id"`
+			Score  int    `json:"score"`
+		} `json:"attempts"`
+	}
+	getJSON(t, ts2.URL+"/api/v1/quiz-attempts?user_id=usr_persist", &qzAttResp)
+	if len(qzAttResp.Attempts) != 1 || qzAttResp.Attempts[0].Score != 1 {
+		t.Errorf("quiz attempts lost across restart: %+v", qzAttResp.Attempts)
+	}
+
+	// Verify MigrateDown -> MigrateUp -> Seed cycle works cleanly
+	reverted, err := store2.MigrateDown(context.Background(), 1)
+	if err != nil || len(reverted) != 1 {
+		t.Fatalf("MigrateDown failed: reverted=%v err=%v", reverted, err)
+	}
+	applied, err := store2.MigrateUp(context.Background())
+	if err != nil || len(applied) != 1 {
+		t.Fatalf("MigrateUp after Down failed: applied=%v err=%v", applied, err)
+	}
+	seeded, err := store2.Seed(context.Background())
+	if err != nil || len(seeded) == 0 {
+		t.Fatalf("Seed after MigrateUp failed: seeded=%v err=%v", seeded, err)
+	}
+}
+
+func TestUnknownRouteReturns404ProblemJSON(t *testing.T) {
+	_, ts := setupTestServer(t)
+	resp, err := http.Get(ts.URL + "/api/v1/does-not-exist")
+	if err != nil {
+		t.Fatalf("GET unknown route failed: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNotFound {
+		t.Errorf("expected 404 Not Found on unknown route, got %d", resp.StatusCode)
+	}
+}
+
+func TestCurriculumLessonsCaseStudiesAndSQLPlaygroundEndpoints(t *testing.T) {
+	_, ts := setupTestServer(t)
+
+	for _, path := range []string{
+		"/api/v1/curriculum",
+		"/api/v1/modules",
+		"/api/v1/lessons",
+		"/api/v1/lessons/l0-stage-a-what-is-backend",
+		"/api/v1/lessons/l0-backend-http-lifecycle",
+		"/api/v1/quizzes",
+		"/api/v1/quizzes/qz-0-foundations",
+		"/api/v1/quizzes/qz-1",
+		"/api/v1/case-studies",
+		"/api/v1/case-studies/cs-01-task-api",
+		"/api/v1/db-scenarios",
+		"/api/v1/diagnostics/rules",
+		"/curriculum-stages.js",
+		"/app-bridge.js",
+	} {
+		resp, err := http.Get(ts.URL + path)
+		if err != nil {
+			t.Fatalf("GET %s failed: %v", path, err)
+		}
+		_ = resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			t.Errorf("expected 200 OK from %s, got %d", path, resp.StatusCode)
+		}
+	}
+
+	var curData struct {
+		Levels  []any `json:"levels"`
+		Lessons []any `json:"lessons"`
+	}
+	getJSON(t, ts.URL+"/api/v1/curriculum", &curData)
+	if len(curData.Levels) != 11 || len(curData.Lessons) != 41 {
+		t.Errorf("expected 11 levels and 41 Stage A-J lessons in SQL database, got levels=%d lessons=%d", len(curData.Levels), len(curData.Lessons))
+	}
+
+	// Verify SQL Playground Sandbox executes real read-only SELECT + EXPLAIN QUERY PLAN
+	var sqlRes struct {
+		Columns   []string   `json:"columns"`
+		Rows      [][]string `json:"rows"`
+		RowCount  int        `json:"row_count"`
+		QueryPlan []string   `json:"query_plan"`
+	}
+	raw := postJSON(t, ts.URL+"/api/v1/sql-playground/execute", map[string]any{
+		"query":   "SELECT c.full_name, COUNT(o.id) AS orders_count FROM customers c JOIN orders o ON o.customer_id = c.id WHERE o.status = 'paid' GROUP BY c.id ORDER BY orders_count DESC",
+		"explain": true,
+	}, http.StatusOK)
+	if err := json.Unmarshal(raw, &sqlRes); err != nil {
+		t.Fatalf("decoding sql playground response: %v", err)
+	}
+	if sqlRes.RowCount != 2 || len(sqlRes.QueryPlan) == 0 {
+		t.Errorf("expected 2 grouped rows and non-empty query_plan, got rows=%d plan=%v", sqlRes.RowCount, sqlRes.QueryPlan)
+	}
+
+	// Verify SQL Playground rejects mutating queries
+	postJSON(t, ts.URL+"/api/v1/sql-playground/execute", map[string]any{
+		"query": "DROP TABLE orders",
+	}, http.StatusBadRequest)
+}
+
+func TestStrictJSONDecodingRejectsUnknownFieldsAndTrailingData(t *testing.T) {
+	_, ts := setupTestServer(t)
+
+	for _, path := range []string{
+		"/api/v1/progress",
+		"/api/v1/bookmarks",
+		"/api/v1/notes",
+		"/api/v1/exercises/verify",
+		"/api/v1/diagnostics/analyze",
+		"/api/v1/recommendations",
+		"/api/v1/sql-playground/execute",
+	} {
+		// Unknown field must return 400
+		resp, err := http.Post(ts.URL+path, "application/json", strings.NewReader(`{"unexpected_field": 123}`))
+		if err != nil {
+			t.Fatalf("POST %s failed: %v", path, err)
+		}
+		_ = resp.Body.Close()
+		if resp.StatusCode != http.StatusBadRequest {
+			t.Errorf("expected 400 Bad Request for unknown field on %s, got %d", path, resp.StatusCode)
+		}
+	}
+
+	// Trailing JSON token must return 400
+	resp, err := http.Post(ts.URL+"/api/v1/diagnostics/analyze", "application/json", strings.NewReader(`{"code":"package main"}{"code":"extra"}`))
+	if err != nil {
+		t.Fatalf("POST trailing JSON failed: %v", err)
+	}
+	_ = resp.Body.Close()
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("expected 400 Bad Request for trailing JSON tokens, got %d", resp.StatusCode)
+	}
+}
+
+func TestOfflineCodeDiagnosticsLab(t *testing.T) {
+	_, ts := setupTestServer(t)
+
+	payload, _ := json.Marshal(map[string]string{
+		"code": `func Bad(db *sql.DB, r *http.Request) {
+			q := fmt.Sprintf("SELECT * FROM users WHERE id = '%s'", r.URL.Query().Get("id"))
+			rows, err := db.Query(q)
+			if err != nil { panic(err) }
+			go func() { http.Get("http://example.com") }()
+		}`,
+	})
+
+	resp, err := http.Post(ts.URL+"/api/v1/diagnostics/analyze", "application/json", bytes.NewReader(payload))
+	if err != nil {
+		t.Fatalf("POST /api/v1/diagnostics/analyze failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200 OK, got %d", resp.StatusCode)
+	}
+
+	var report diagnostics.AnalysisReport
+	if err := json.NewDecoder(resp.Body).Decode(&report); err != nil {
+		t.Fatalf("decoding report: %v", err)
+	}
+
+	if !report.OfflineMode {
+		t.Errorf("expected OfflineMode=true")
+	}
+	if len(report.Findings) < 4 {
+		t.Errorf("expected at least 4 findings (GO-SEC-001, GO-DB-001, GO-ERR-001, GO-CONC-001), got %d", len(report.Findings))
+	}
+	if report.StaticAnalysisLimitations == "" {
+		t.Errorf("expected non-empty StaticAnalysisLimitations")
+	}
+}
+
+func TestAnalyzerFalsePositiveAndFalseNegativeProbes(t *testing.T) {
+	analyzer := diagnostics.NewAnalyzer(false, 2*time.Second, "none", "", "")
+
+	tests := []struct {
+		name     string
+		code     string
+		wantRule string
+	}{
+		{
+			name:     "FP1 correct pkg-level regexp + func",
+			code:     "package main\nimport \"regexp\"\nvar idRe = regexp.MustCompile(`^[a-z]+$`)\nfunc valid(s string) bool { return idRe.MatchString(s) }",
+			wantRule: "GO-INFO-000",
+		},
+		{
+			name:     "FP2 parameterized query, Sprintf only for log",
+			code:     `func f(db *sql.DB, id int){ rows,_:=db.Query("SELECT * FROM t WHERE id=$1",id); defer rows.Close(); log.Println(fmt.Sprintf("q %d",id)) }`,
+			wantRule: "GO-INFO-000",
+		},
+		{
+			name:     "FN1 SQL injection via + concatenation",
+			code:     `func f(db *sql.DB, id string){ db.Exec("DELETE FROM t WHERE id='"+id+"'") }`,
+			wantRule: "GO-SEC-001",
+		},
+		{
+			name:     "FN2 Query leak masked by unrelated .Close()",
+			code:     `func f(db *sql.DB, f *os.File){ rows,_:=db.Query("select 1"); defer f.Close(); for rows.Next(){} }`,
+			wantRule: "GO-DB-001",
+		},
+		{
+			name:     "FN3 data race with WaitGroup",
+			code:     "var n int\nfunc f(){ var wg sync.WaitGroup; for i:=0;i<10;i++{ wg.Add(1); go func(){ defer wg.Done(); n++ }() }; wg.Wait() }",
+			wantRule: "GO-CONC-002",
+		},
+		{
+			name:     "FN4 goroutine leak, word ctx in a comment",
+			code:     "func f(){ // ctx not used\n ch:=make(chan int); go func(){ ch<-1 }() }",
+			wantRule: "GO-CONC-001",
+		},
+		{
+			name:     "FN5 http.Client{} no timeout",
+			code:     `c:=&http.Client{}; c.Get(u)`,
+			wantRule: "GO-SEC-003",
+		},
+		{
+			name:     "FN6 unchecked error",
+			code:     `func f(){ x,_ := os.Open("a"); _ = x }`,
+			wantRule: "GO-ERR-002",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			rep := analyzer.AnalyzeCode(context.Background(), tc.code)
+			found := false
+			var gotRules []string
+			for _, f := range rep.Findings {
+				gotRules = append(gotRules, f.RuleID)
+				if f.RuleID == tc.wantRule {
+					found = true
+				}
+			}
+			if !found {
+				t.Errorf("%s: expected rule %s, got %s", tc.name, tc.wantRule, strings.Join(gotRules, ", "))
+			}
+		})
+	}
+}
+
+func TestProgressAndBookmarksRoundTripAndValidation(t *testing.T) {
+	_, ts := setupTestServer(t)
+
+	saveBody, _ := json.Marshal(map[string]string{
+		"user_id":   "usr_test",
+		"lesson_id": "l4-acid-isolation-mvcc",
+		"status":    "completed",
+	})
+	postResp, err := http.Post(ts.URL+"/api/v1/progress", "application/json", bytes.NewReader(saveBody))
+	if err != nil || postResp.StatusCode != http.StatusOK {
+		t.Fatalf("POST /api/v1/progress failed: %v", err)
+	}
+	_ = postResp.Body.Close()
+
+	getResp, err := http.Get(ts.URL + "/api/v1/progress?user_id=usr_test")
+	if err != nil || getResp.StatusCode != http.StatusOK {
+		t.Fatalf("GET /api/v1/progress failed: %v", err)
+	}
+	defer getResp.Body.Close()
+
+	var data struct {
+		Progress map[string]string `json:"progress"`
+	}
+	_ = json.NewDecoder(getResp.Body).Decode(&data)
+	if data.Progress["l4-acid-isolation-mvcc"] != "completed" {
+		t.Errorf("expected l4-acid-isolation-mvcc=completed, got %v", data.Progress)
+	}
+
+	// Regression: invalid status='started' must return 400 Bad Request
+	badStatus, _ := json.Marshal(map[string]string{
+		"user_id":   "usr_local_default",
+		"lesson_id": "l0-backend-http-lifecycle",
+		"status":    "started",
+	})
+	badResp, err := http.Post(ts.URL+"/api/v1/progress", "application/json", bytes.NewReader(badStatus))
+	if err != nil {
+		t.Fatalf("POST invalid status failed: %v", err)
+	}
+	_ = badResp.Body.Close()
+	if badResp.StatusCode != http.StatusBadRequest {
+		t.Errorf("expected 400 Bad Request for status='started', got %d", badResp.StatusCode)
+	}
+
+	// Regression: unknown lesson_id must return 400 Bad Request
+	badLesson, _ := json.Marshal(map[string]string{
+		"user_id":   "usr_local_default",
+		"lesson_id": "nope-unknown-lesson",
+		"status":    "completed",
+	})
+	badLessonResp, err := http.Post(ts.URL+"/api/v1/progress", "application/json", bytes.NewReader(badLesson))
+	if err != nil {
+		t.Fatalf("POST unknown lesson failed: %v", err)
+	}
+	_ = badLessonResp.Body.Close()
+	if badLessonResp.StatusCode != http.StatusBadRequest {
+		t.Errorf("expected 400 Bad Request for unknown lesson_id, got %d", badLessonResp.StatusCode)
+	}
+
+	// Regression: invalid bookmark item_type='quiz' must return 400 Bad Request
+	badBookmark, _ := json.Marshal(map[string]string{
+		"user_id":   "usr_local_default",
+		"item_type": "quiz",
+		"item_id":   "qz-1",
+	})
+	bmResp, err := http.Post(ts.URL+"/api/v1/bookmarks", "application/json", bytes.NewReader(badBookmark))
+	if err != nil {
+		t.Fatalf("POST invalid bookmark failed: %v", err)
+	}
+	_ = bmResp.Body.Close()
+	if bmResp.StatusCode != http.StatusBadRequest {
+		t.Errorf("expected 400 Bad Request for bookmark item_type='quiz', got %d", bmResp.StatusCode)
+	}
+}
+
+func TestExerciseVerifyMultipleAttemptsAndCommentStuffingRejection(t *testing.T) {
+	_, ts := setupTestServer(t)
+
+	// 1. Comment-stuffed payload must fail even if all required tokens appear inside a comment
+	stuffedPayload, _ := json.Marshal(map[string]any{
+		"user_id":         "usr_local_default",
+		"exercise_id":     "ex-l0-backend-http-lifecycle",
+		"code":            "/* MaxBytesReader DisallowUnknownFields ReadHeaderTimeout ReadTimeout */\nfunc x() {}",
+		"required_tokens": []string{"MaxBytesReader", "DisallowUnknownFields", "ReadHeaderTimeout", "ReadTimeout"},
+	})
+	resp1, err := http.Post(ts.URL+"/api/v1/exercises/verify", "application/json", bytes.NewReader(stuffedPayload))
+	if err != nil {
+		t.Fatalf("POST /api/v1/exercises/verify #1 failed: %v", err)
+	}
+	defer resp1.Body.Close()
+	if resp1.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200 OK on attempt #1, got %d", resp1.StatusCode)
+	}
+	var res1 struct {
+		AttemptID string `json:"attempt_id"`
+		Passed    bool   `json:"passed"`
+	}
+	_ = json.NewDecoder(resp1.Body).Decode(&res1)
+	if res1.Passed {
+		t.Errorf("expected comment-stuffed submission to fail, but Passed=true")
+	}
+
+	// 2. Second attempt on the exact same exercise must succeed with a distinct AttemptID
+	validPayload, _ := json.Marshal(map[string]any{
+		"user_id":         "usr_local_default",
+		"exercise_id":     "ex-l0-backend-http-lifecycle",
+		"code":            "package httpsec\nimport \"net/http\"\nfunc ok() { r.Body = http.MaxBytesReader(w, r.Body, 64); dec.DisallowUnknownFields(); _ = &http.Server{ReadHeaderTimeout: 5} }",
+		"required_tokens": []string{},
+	})
+	resp2, err := http.Post(ts.URL+"/api/v1/exercises/verify", "application/json", bytes.NewReader(validPayload))
+	if err != nil {
+		t.Fatalf("POST /api/v1/exercises/verify #2 failed: %v", err)
+	}
+	defer resp2.Body.Close()
+	var res2 struct {
+		AttemptID string `json:"attempt_id"`
+		Passed    bool   `json:"passed"`
+	}
+	_ = json.NewDecoder(resp2.Body).Decode(&res2)
+	if !res2.Passed {
+		t.Errorf("expected valid submission to pass")
+	}
+	if res1.AttemptID == "" || res2.AttemptID == "" || res1.AttemptID == res2.AttemptID {
+		t.Errorf("expected distinct non-empty AttemptIDs across attempts, got %q and %q", res1.AttemptID, res2.AttemptID)
+	}
+}
+
+func postJSON(t *testing.T, url string, payload any, wantStatus int) []byte {
+	t.Helper()
+	b, err := json.Marshal(payload)
+	if err != nil {
+		t.Fatalf("marshaling payload: %v", err)
+	}
+	resp, err := http.Post(url, "application/json", bytes.NewReader(b))
+	if err != nil {
+		t.Fatalf("POST %s failed: %v", url, err)
+	}
+	defer resp.Body.Close()
+	raw, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != wantStatus {
+		t.Fatalf("POST %s status=%d want=%d body=%s", url, resp.StatusCode, wantStatus, string(raw))
+	}
+	return raw
+}
+
+func getJSON(t *testing.T, url string, dst any) {
+	t.Helper()
+	resp, err := http.Get(url)
+	if err != nil {
+		t.Fatalf("GET %s failed: %v", url, err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		raw, _ := io.ReadAll(resp.Body)
+		t.Fatalf("GET %s status=%d body=%s", url, resp.StatusCode, string(raw))
+	}
+	if err := json.NewDecoder(resp.Body).Decode(dst); err != nil {
+		t.Fatalf("decoding GET %s: %v", url, err)
+	}
+}
+
+
+func TestAll36ExercisesServerSideVerification(t *testing.T) {
+	_, ts := setupTestServer(t)
+
+	var curriculum struct {
+		Lessons []struct {
+			ID   string `json:"id"`
+			Slug string `json:"slug"`
+		} `json:"lessons"`
+	}
+	getJSON(t, ts.URL+"/api/v1/curriculum", &curriculum)
+
+	totalExercises := 0
+	for _, l := range curriculum.Lessons {
+		var detail struct {
+			ID       string `json:"id"`
+			Slug     string `json:"slug"`
+			Exercise *struct {
+				ID           string `json:"id"`
+				StarterCode  string `json:"starter_code"`
+				SolutionCode string `json:"solution_code"`
+			} `json:"exercise"`
+		}
+		getJSON(t, ts.URL+"/api/v1/lessons/"+l.Slug, &detail)
+		if detail.Exercise == nil || detail.Exercise.ID == "" {
+			t.Fatalf("lesson %s missing exercise", l.Slug)
+		}
+		totalExercises++
+
+		// 1. Starter code with // STEP: removed and empty required_tokens MUST fail via DB required_pattern
+		bypassAttempt := bytes.ReplaceAll([]byte(detail.Exercise.StarterCode), []byte("// STEP:"), []byte("// DONE:"))
+		rawFail := postJSON(t, ts.URL+"/api/v1/exercises/verify", map[string]any{
+			"user_id":         "usr_local_default",
+			"exercise_id":     detail.Exercise.ID,
+			"code":            string(bypassAttempt),
+			"required_tokens": []string{},
+		}, http.StatusOK)
+		var failRes struct {
+			Passed bool `json:"passed"`
+		}
+		_ = json.Unmarshal(rawFail, &failRes)
+		if failRes.Passed {
+			t.Errorf("exercise %s (%s) passed with starter code when required_tokens was empty!", detail.Exercise.ID, l.Slug)
+		}
+
+		// 2. Solution code with empty required_tokens MUST pass via DB required_pattern
+		rawPass := postJSON(t, ts.URL+"/api/v1/exercises/verify", map[string]any{
+			"user_id":         "usr_local_default",
+			"exercise_id":     detail.Exercise.ID,
+			"code":            detail.Exercise.SolutionCode,
+			"required_tokens": []string{},
+		}, http.StatusOK)
+		var passRes struct {
+			Passed bool `json:"passed"`
+		}
+		_ = json.Unmarshal(rawPass, &passRes)
+		if !passRes.Passed {
+			t.Errorf("exercise %s (%s) failed with canonical solution_code!", detail.Exercise.ID, l.Slug)
+		}
+	}
+	if totalExercises != 41 {
+		t.Errorf("expected 41 exercises across curriculum, got %d", totalExercises)
+	}
+}

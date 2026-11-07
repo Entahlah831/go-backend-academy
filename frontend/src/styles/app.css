@@ -1,0 +1,5 @@
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: Console (deal 2/3, seed offline-backend-engineering-academy-301b·cf2c1cb1·2026-11-07·r0) · redesign: full
+ * nav: sidebar · signature: diff-col · states: active, focus-visible, disabled, empty, pass, warn, error
+ * axes: dark/grotesk-sans/warm · posture: restrained · contrast: pass · v2.0.0 */
+@import "../../web/tokens.css";
+@import "../../web/base.css";

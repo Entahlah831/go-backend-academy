@@ -1,0 +1,68 @@
+services:
+  academy-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go-backend-academy
+    ports:
+      - "127.0.0.1:${PORT:-8080}:${PORT:-8080}"
+    env_file:
+      - .env
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - HOST=0.0.0.0
+      - PORT=${PORT:-8080}
+      - DB_DRIVER=${DB_DRIVER:-${COMPOSE_DB_DRIVER:-postgres}}
+      - POSTGRES_HOST=${COMPOSE_POSTGRES_HOST:-postgres}
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-academy}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      - POSTGRES_DB=${POSTGRES_DB:-gobackendacademy}
+      - POSTGRES_SSLMODE=${POSTGRES_SSLMODE:-disable}
+      - DB_AUTO_MIGRATE=${DB_AUTO_MIGRATE:-true}
+      - DB_AUTO_SEED=${DB_AUTO_SEED:-true}
+      - AI_PROVIDER=${AI_PROVIDER:-none}
+    volumes:
+      - ./web:/app/web:ro
+      - appdata:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: academy-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-academy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-gobackendacademy}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-academy} -d $${POSTGRES_DB:-gobackendacademy}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # Optional Redis service: only started when "--profile cache" is explicitly passed
+  redis:
+    image: redis:7.4-alpine
+    container_name: academy-redis
+    profiles: ["cache"]
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  appdata:

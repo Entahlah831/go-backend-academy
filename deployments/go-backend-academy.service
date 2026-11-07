@@ -1,0 +1,25 @@
+# /etc/systemd/system/go-backend-academy.service — Native Binary Systemd Unit (Alternative to Docker)
+[Unit]
+Description=Go Backend Academy Production Server
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=academy
+Group=academy
+WorkingDirectory=/opt/go-backend-academy
+EnvironmentFile=/opt/go-backend-academy/.env
+Environment="GOMEMLIMIT=450MiB"
+ExecStart=/opt/go-backend-academy/bin/go-backend-academy
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=15
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/go-backend-academy
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

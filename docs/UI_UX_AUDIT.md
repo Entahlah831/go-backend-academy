@@ -1,0 +1,100 @@
+# Go Backend Academy — Comprehensive UI/UX & Hallmark Audit (`UI_UX_AUDIT.md`)
+
+**Audit Date:** 2026-11-07  
+**Target Audited:** `web/index.html` & `frontend/src/` (v2.1 Pre-Redesign State)  
+**Design Authority:** Hallmark v2.0.0 (`--genre modern-minimal --scope app --before --render`)  
+**Captured Baseline Screenshots:** `web/.hallmark/before/index-{1280x800,1440x900,1440-full,1920x1080,375}.png`  
+**Baseline Sloplint Score:** **68 FAIL · 38 REFLEX · 26 WARN** (`.hallmark/before.txt`)
+
+---
+
+## 1. Four-Line Hallmark Read (`redesign.md` § Before)
+
+1. **What the application is for**: An interactive, 100% offline Go backend engineering academy for developers to study 24 deep curriculum lessons (Levels 0–10), practice in 5 interactive labs, inspect 14 real-world production case studies, and run deterministic Go static analysis.
+2. **What works and stays**: The deep technical curriculum content, comment-stripping exercise verifier (`runCurrentExerciseTests`), deterministic offline Go code analyzer (`analyzeGoCodeOffline`), disposable SQL playground, HTTP middleware simulator, concurrency worker-pool simulator, `SafeStore` persistence, and all REST API hooks.
+3. **What reads as generated (worst tells)**: 72 distinct stock Tailwind palette utility classes (`cyan`, `emerald`, `amber`, `rose`, `purple`, `indigo`, `sky` scattered across every card), 10 tracked-caps pill eyebrows (`FAIL 54` & `FAIL 67`), 33 monospace costume labels (`REFLEX 64`), arrows glued to buttons (`FAIL 63`), decorative status dots, and nested card-in-card layouts (`FAIL 4`).
+4. **What is broken**: Permanent 3-pane crowding (256px left sidebar + 384px right diagnostics dock permanently stealing 640px of width on every view), horizontal scroll overflow at 320px/375px (`scrollWidth 387 > viewport 320`, `FAIL 34`), 2-line wrapped mobile header controls (`FAIL 49a`), text painted under adjacent containers (`FAIL 73`), low-contrast focus rings (`1.06:1`, `FAIL 26a`) and `slate-500` text (`3.75:1`, `FAIL 40`), 24px-tall cramped sidebar buttons (`REFLEX 39b`), and massive walls of uncollapsed cards in Lessons (12 pillars), DB Lab (7 engines × 15 attributes), and Projects (15 sections).
+
+---
+
+## 2. Screen-by-Screen UI/UX Inspection
+
+| Screen / View | Route / Selector | Key UI/UX Observations |
+| :--- | :--- | :--- |
+| **Global Shell & Header** | `<header>`, `#left-sidebar`, `#right-diag-panel` | Permanent 3-pane layout leaves only ~50% of horizontal width for the center workspace at `1280×800` and `1440×900`. Top header crams mobile menu, logo, subtitle, search input, progress badge, `Code Diagnostics` button, and `☀/☾` emoji button, causing overflow at `320px`–`375px`. |
+| **1. Main Dashboard** | `#view-dashboard` | Hero banner embeds 4 bordered stat cards inside a bordered gradient card (`card-in-card`), followed by an amber-tinted Recommendation Engine card containing 2 inner cards with amber pill eyebrows, plus 4 rainbow-accented quick-launch cards (`emerald`, `cyan`, `purple`, `amber`). |
+| **2. Learning Roadmap** | `#view-roadmap` | Renders 11 level containers, each containing 2–3 bordered lesson cards (`card-in-card`) with truncated summaries and dual status strings joined by middle dots (`✓ Lesson Complete • ○ Lab Pending`). |
+| **3. Curriculum & Lesson Detail** | `#view-curriculum` | Lesson selection relies on a cramped `<select>` dropdown at the top. Renders 5 heavy stacked card containers: Overview + ASCII diagram, 3-Tier Switcher, a **12-card grid of engineering pillars** shown all at once, bright red/green defective vs. corrected code boxes, and the coding exercise box. Missing **Previous / Next Lesson** buttons at the bottom of the lesson. |
+| **4. SQL & Database Lab** | `#view-dblab` | Combines 3 massive tools vertically on a single scrolling page: (a) Disposable SQL Playground, (b) 10-Scenario Comparator with 7 DB engine tabs, and (c) **7 DB Engine cards × 15 attributes = 105 paragraphs** rendered simultaneously at the bottom. |
+| **5. API & HTTP Simulator** | `#view-apilab` | Good interactive request/response split, but uses tracked-caps sky-blue eyebrow badges, middle-dot labels, and low-contrast `1.22:1` border edges on dark textareas. |
+| **6. Go Code Playground** | `#view-playground` | Stacks the Go pattern template sandbox above the 5-library Go DB Ecosystem comparison switcher without workspace sub-tabs or clear visual hierarchy. |
+| **7. Concurrency Lab** | `#view-concurrencylab` | Uses purple accent styling unrelated to the rest of the product, stacks the GMP worker pool simulator above the Concurrency Hazard pattern inspector, and uses cramped 28px number inputs. |
+| **8. Architecture Lab** | `#view-archlab` | Uses amber accent badges and renders green ("When to Use") and red ("When to Avoid") sub-cards inside the parent card (`card-in-card`). |
+| **9. Code Diagnostics** | `#view-diagnostics` | Duplicates the right-hand `#right-diag-panel` dock on `#view-diagnostics` (so when a user opens `Code Review & Diagnostics` at `1440px`, they see **two** identical Go code analyzers side-by-side!). |
+| **10. Real-World Projects** | `#view-projects` | Dumps all **15 engineering sections** of a case study simultaneously into 14 nested cards inside `#project-detail-card`, creating an overwhelming wall of text. |
+| **11. Practice Center** | `#view-practice` | Crowds Flashcards, Personal Notes, Bookmarks, and all 5 Assessment Quizzes into one screen with cyan, amber, and rose pill eyebrows, straight quotes (`"Flip Answer"`), and 24px bookmark buttons. |
+
+---
+
+## 3. Complete Issue Catalog (`AUDIT-01` – `AUDIT-24`)
+
+### 3.1 Information Overload & Cognitive Crowding
+
+| Issue ID | Affected Page / Component | Current Behavior | Why It Is Problematic | User Impact | Severity | Proposed Solution |
+| :--- | :--- | :--- | :--- | :--- | :---: | :--- |
+| **AUDIT-01** | Global Layout (`#right-diag-panel` + `#view-diagnostics`) | A 384px (`xl:w-96`) right-hand `Offline Code Diagnostics` panel is permanently visible on every screen at `≥1280px`, even when viewing `#view-diagnostics` itself. | Steals 27%–30% of horizontal viewport width from lessons, SQL tables, and side-by-side code diffs, and duplicates `#view-diagnostics` when on the Diagnostics screen. | Severe horizontal cramping and split visual attention during reading. | **Critical (P0)** | Convert `#right-diag-panel` into an on-demand slide-over **Quick Inspector Drawer** toggled from the header, giving 100% of the main workspace width to the active view. |
+| **AUDIT-02** | `#view-curriculum` (`#lesson-pillars-grid`) | Renders all 12 Engineering Decision Analysis pillars simultaneously as a 3×4 grid of 12 bordered cards inside a parent card. | Forces learners to scroll past 12 dense cards on every single lesson before reaching the code comparison and coding exercise. | Reading fatigue; learners skip the 12 pillars or struggle to reach the exercise. | **High (P1)** | Group the 12 pillars into 3 scannable category tabs (`Core Mechanics (1–4)`, `Trade-Offs & Scope (5–8)`, `Production Impact (9–12)`) or progressive disclosure while keeping `#lesson-pillars-grid` intact. |
+| **AUDIT-03** | `#view-dblab` (`#dblab-engines-grid`) | Dumps all 7 database engines × 15 attributes (105 paragraphs) in a 2-column grid beneath the SQL Playground and 10 Scenarios. | Mixing an interactive SQL query runner, a 10-scenario comparator, and a 105-paragraph reference encyclopedia on one unsegmented vertical scroll overwhelms the workspace. | Users cannot focus on query execution without scrolling through massive reference walls. | **High (P1)** | Add clean workspace mode tabs within the Database Lab (`1. SQL Query & EXPLAIN Sandbox`, `2. 10 Production Scenarios`, `3. 7-Engine Reference Matrix`) and compact attribute groupings. |
+| **AUDIT-04** | `#view-projects` (`#project-detail-card`) | Displays all 15 case-study sections at once as 14 nested cards inside `#project-detail-card`. | No progressive hierarchy between problem definition, architecture/schema, Go implementation code, and operational checklists. | Difficult to study a case study systematically. | **High (P1)** | Structure `#project-detail-card` into clean specification groups (`Overview & Requirements`, `Architecture & Schema`, `Go Implementation`, `Verification & Operations`) separated by structural hairlines instead of nested cards. |
+| **AUDIT-05** | `#view-dashboard` Hero & Stat Cards | Hero banner embeds 4 static/progress cards (`7 DBs × 10 Scenarios`, `14 × 15 Sections`) inside the hero container alongside marketing slogans. | Mixes static marketing inventory counts with personal learning progress and nests cards inside cards (Hallmark Gate 4). | Learner's actual progress and next lesson are visually diluted. | **Medium (P2)** | Replace the gradient hero box with a focused **Learning Command Header** showing current level, completion progress, and immediate **Continue / Resume Learning** action, parted by hairlines. |
+
+---
+
+### 3.2 Navigation & Information Architecture
+
+| Issue ID | Affected Page / Component | Current Behavior | Why It Is Problematic | User Impact | Severity | Proposed Solution |
+| :--- | :--- | :--- | :--- | :--- | :---: | :--- |
+| **AUDIT-06** | `#left-sidebar` (`#primary-nav`) | Lists 11 numbered flat items (`1. Dashboard` to `11. Practice Center`), each with a right-aligned colored badge (`L0–L10`, `24 Lessons`, `7 DBs • 10 Labs`, etc.). | Exceeds working-memory navigation limits (Hallmark `flow.md` § App screens recommends ≤7 top-level destinations); long labels + badges wrap onto multiple lines (`WARN 49`). | Slow visual scanning; tools and learning modules are jumbled together. | **High (P1)** | Reorganize primary navigation by learner intention into **6 clear groups**: `Home` (`dashboard`), `Learn` (`roadmap`, `curriculum`), `Labs` (`playground`, `dblab`, `apilab`, `concurrencylab`, `archlab`), `Projects` (`projects`), `Practice` (`practice`), and `Diagnostics` (`diagnostics`), preserving all 11 `data-view` buttons. |
+| **AUDIT-07** | `#left-sidebar` (`#sidebar-curriculum-list`) | Embeds a second `max-h-64` scrollable list of all 24 lessons inside the already-scrolling left sidebar (`FAIL 73`). | Creates nested scrollbars in the left sidebar and causes `sloplint` Gate 73 (`text painted under another element`) at `1440px`. | Confusing double-scroll behavior and truncated 22-character lesson titles. | **High (P1)** | Show the contextual lesson index cleanly when in the `Learn` section (or as a dedicated collapsible curriculum drawer/panel) without nested scroll clipping. |
+| **AUDIT-08** | `#view-curriculum` Lesson Navigation | Only provides a top `<select id="lesson-select-dropdown">` to switch lessons; no bottom pagination. | When a learner finishes reading a lesson and passes the exercise at the bottom of the page, there is no button to advance to the next lesson. | Breaks learning momentum at the end of every lesson. | **Medium (P2)** | Add **Previous Lesson** and **Next Lesson** navigation controls at the foot of `#view-curriculum` (alongside the top selector). |
+
+---
+
+### 3.3 Learning Experience & Readability
+
+| Issue ID | Affected Page / Component | Current Behavior | Why It Is Problematic | User Impact | Severity | Proposed Solution |
+| :--- | :--- | :--- | :--- | :--- | :---: | :--- |
+| **AUDIT-09** | Typography Scale Across All Views (`REFLEX 75`) | Almost all body descriptions, explanations, and cards use `text-xs` (`12px`) or `text-[11px]` (`11px`) or `text-[10px]` (`10px`). | Reading 24 deep backend engineering lessons at `11px–12px` causes severe eye strain during long study sessions (Hallmark Gate 75 requires `16px` body prose and `≥12px` functional UI). | Poor long-form readability and high visual fatigue. | **Critical (P0)** | Upgrade lesson prose and explanations to `15px–16px` (`--text-md`) with `1.65` line-height and a `65ch–72ch` measure (`Gate 25`), and raise all UI metadata/labels to `≥12px–13px`. |
+| **AUDIT-10** | `#view-curriculum` Code Comparison Boxes | Uses saturated red (`bg-rose-950/20 text-rose-200`) and saturated green (`bg-emerald-950/20 text-emerald-200`) for entire 40-line Go code blocks. | Coloring entire 40-line code blocks in pink/green text reduces syntax legibility and looks jarring. | Harder to read Go code syntax in comparison blocks. | **Medium (P2)** | Use a consistent high-contrast terminal code surface (`--bg-code` with crisp `--text-primary` code text) and indicate `Defective anti-pattern` vs `Production pattern` via subtle top border/header accents. |
+
+---
+
+### 3.4 Visual Consistency & Hallmark Floor / Reflex Gates
+
+| Issue ID | Affected Page / Component | Current Behavior | Why It Is Problematic | User Impact | Severity | Proposed Solution |
+| :--- | :--- | :--- | :--- | :--- | :---: | :--- |
+| **AUDIT-11** | Untokenized Palette & Font Literals (`FAIL 48`, `WARN 74`) | Uses 72 stock Tailwind palette classes (`slate`, `cyan`, `emerald`, `amber`, `rose`, `purple`, `indigo`, `sky`) and raw `font-family` / `rgba()` literals in `<style>`. | Violates Hallmark Floor Gate 48 ("Every colour and every font goes through a token declared at `:root`") and Gate 74. | Rainbow visual clutter; every lab looks like a different app. | **Critical (P0)** | Define a complete OKLCH/hex CSS custom property token system in `:root` and `[data-mode="dark"]` / `html.dark`, and map Tailwind config aliases to those tokens. |
+| **AUDIT-12** | Tracked-Caps Eyebrows & Labels (`FAIL 54` ×10, `FAIL 67` ×19) | Places `text-[10px] font-mono uppercase tracking-wider` pill eyebrows above almost every `<h2>` and `<h3>`. | Hallmark Floor Gates 54 and 67 strictly forbid eyebrows and tracked uppercase labels ≤15px as the #1 tell of AI-generated UI. | Cluttered headings and machine-generated aesthetic. | **High (P1)** | Remove redundant eyebrows or fold their factual context into the section heading / subtitle in normal sentence case, body face, untracked. |
+| **AUDIT-13** | Monospace Costume on Non-Code UI (`REFLEX 64` ×33) | Applies `font-mono` to 33 UI badges, section labels, and buttons (`Home`, `Offline`, `Quiz/Cards`, `DEFECTIVE`, `Active Recall`). | Violates Hallmark Gate 64 ("Mono as costume: monospace on labels, captions, meta rows... when the content is not code, a figure or a measurement"). | Dilutes the visual distinction between actual Go/SQL code/metrics and ordinary UI labels. | **High (P1)** | Restrict `var(--font-mono)` strictly to Go/SQL code blocks, HTTP paths/methods, rule IDs (`GO-SEC-001`), and numeric counters (`tabular-nums`). Use `var(--font-sans)` for all UI labels. |
+| **AUDIT-14** | Template Punctuation & Emoji Icons (`FAIL 19`, `FAIL 30a`, `FAIL 63`, `WARN F1`) | Uses em-dashes (`—`) in titles, `☀/☾` text/emoji as theme icon, arrows glued to button labels (`Start Learning Curriculum →`), middle-dot meta strings (`A • B • C`), and straight quotes in prose. | Violates Hallmark Floor Gates 19, 30a, 63, and Finish F1. | Looks like an unpolished LLM template. | **Medium (P2)** | Replace `☀/☾` with a clean accessible inline SVG icon (`aria-hidden="true"`), remove glued arrows and middle-dot chains, replace em-dashes with colons/commas, and use typographic quotes. |
+| **AUDIT-15** | Missing Stamp & Meta Description (`FAIL 20`, `WARN F21`, `WARN F23`, `WARN F19`) | Missing Hallmark CSS stamp at line 1 of `<style>`, missing `<meta name="description">`, skips heading level `h2` → `h4` in recommendations, and loads 4 font weights (`400, 500, 600, 700`). | Violates Hallmark Floor Gate 20 and Finish checks F19, F21, F23. | Degrades document semantics and typographic discipline. | **Medium (P2)** | Add the Hallmark v2.0.0 stamp, `<meta name="description">`, sequential `h2` → `h3` headings, and restrict running font weights to at most 3 (`400, 600, 700`). |
+
+---
+
+### 3.5 Responsive Design Defects
+
+| Issue ID | Affected Page / Component | Current Behavior | Why It Is Problematic | User Impact | Severity | Proposed Solution |
+| :--- | :--- | :--- | :--- | :--- | :---: | :--- |
+| **AUDIT-16** | Mobile Viewport Overflow (`FAIL 34` ×3, `FAIL 49a` ×2) | Missing `overflow-x: clip` on `html, body`; at `320px` and `375px`, `scrollWidth` is `387px` because the header crams logo, search bar, `Code Diagnostics` (wraps to 2 lines), and `☀/☾` (wraps to 2 lines). | Violates Hallmark Floor Gates 34 and 49a; causes horizontal page wobble on mobile phones. | Broken mobile header layout at `360×800` and `390×844`. | **Critical (P0)** | Set `overflow-x: clip` on `html, body`, make header controls compact with `white-space: nowrap`, move mobile search into a clean expandable row/bar, and ensure zero horizontal overflow from `320px` to `1920px`. |
+| **AUDIT-17** | Mobile Hidden Content (`WARN F25`) | `#right-diag-panel` is hidden on mobile, hiding 228 words (`Deterministic Rules...`) that were visible at `1440px`. | Violates Finish check F25 when a desktop sidebar is permanently open at `1440px` but hidden at `375px`. | Inconsistent desktop vs. mobile initial screen state. | **Medium (P2)** | Making the Quick Diagnostics Inspector an on-demand drawer across all viewports fixes both desktop crowding (`AUDIT-01`) and the `1440px` vs `375px` hidden-word discrepancy (`F25`). |
+| **AUDIT-18** | Undersized Touch & Control Targets (`REFLEX 39b`, `REFLEX 72`) | Sidebar lesson buttons and bookmark buttons render at `24px` height, and badge boxes have only `2px` top/bottom padding (`REFLEX 72`). | Violates Hallmark Gate 39b (app controls must be `32px–40px` with comfortable hit targets) and Gate 72 (minimum `4px`/`8px` box padding). | Difficult to tap accurately on mobile and tablet screens. | **High (P1)** | Standardize all interactive app buttons and nav items to `34px–38px` height (`min-height: 2.25rem`) with generous inline padding (`≥8px–12px`). |
+
+---
+
+### 3.6 Accessibility Defects
+
+| Issue ID | Affected Page / Component | Current Behavior | Why It Is Problematic | User Impact | Severity | Proposed Solution |
+| :--- | :--- | :--- | :--- | :--- | :---: | :--- |
+| **AUDIT-19** | Invisible / Low-Contrast Focus Rings (`FAIL 26a` ×15, `REFLEX 26b` ×2) | Buttons and nav items have no explicit `:focus-visible` rule, resulting in a `1.06:1`–`1.07:1` browser default outline against dark slate surfaces, and no `:active` or `:disabled` states. | Violates Hallmark Floor Gate 26a (requires instant `:focus-visible` ring at `≥3:1` contrast) and Gate 26b (`:active` and `:disabled` states). | Keyboard users cannot see which navigation item or control is focused. | **Critical (P0)** | Implement instant `:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }` with `>4.5:1` contrast, plus explicit `:active` (`transform: translateY(1px)`) and `:disabled` (`opacity: 0.55; cursor: not-allowed`) states. |
+| **AUDIT-20** | Text & Field Border Contrast Failures (`FAIL 40` ×7) | `text-slate-500` on `bg-slate-900` yields `3.75:1` contrast (`< 4.5:1`), `bg-emerald-600` button with white text yields `3.77:1`, and input/textarea borders (`border-slate-800`) yield `1.22:1`–`1.72:1` (`< 3:1`). | Violates WCAG AA and Hallmark Floor Gate 40 (`≥4.5:1` for text, `≥3:1` for input/textarea field edges). | Low-vision users and users on dim displays struggle to read muted text or see editor boundaries. | **Critical (P0)** | Calibrate `--color-ink-2` / `--color-muted` to `≥5.2:1` contrast on both dark and light surfaces, calibrate `--color-accent` / `--color-accent-ink` to `≥7:1`, and set form/editor border tokens (`--color-field-edge`) to `≥3.2:1` contrast. |
+| **AUDIT-21** | Unlabelled SVG & Missing Reduced-Motion Rule (`FAIL 33`, `FAIL 27`) | Search icon `<svg>` at line 57 lacks `aria-hidden="true"`, and CSS lacks a `@media (prefers-reduced-motion: reduce)` rule. | Violates Hallmark Floor Gates 27 and 33. | Screen readers announce unlabelled SVGs; motion-sensitive users lack reduced-motion overrides. | **Medium (P2)** | Add `aria-hidden="true"` to all decorative SVGs and include the complete Hallmark `@media (prefers-reduced-motion: reduce)` reset in `<style>`. |

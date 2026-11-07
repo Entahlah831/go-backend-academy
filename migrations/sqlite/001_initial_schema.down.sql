@@ -1,0 +1,21 @@
+DROP TABLE IF EXISTS diagnostic_results;
+DROP TABLE IF EXISTS diagnostic_rules;
+DROP TABLE IF EXISTS database_scenarios;
+DROP TABLE IF EXISTS case_study_steps;
+DROP TABLE IF EXISTS case_studies;
+DROP TABLE IF EXISTS user_notes;
+DROP TABLE IF EXISTS user_bookmarks;
+DROP TABLE IF EXISTS user_progress;
+DROP TABLE IF EXISTS quiz_attempts;
+DROP TABLE IF EXISTS quiz_questions;
+DROP TABLE IF EXISTS quizzes;
+DROP TABLE IF EXISTS exercise_attempts;
+DROP TABLE IF EXISTS exercise_test_cases;
+DROP TABLE IF EXISTS exercises;
+DROP TABLE IF EXISTS lesson_references;
+DROP TABLE IF EXISTS lesson_sections;
+DROP TABLE IF EXISTS lessons;
+DROP TABLE IF EXISTS modules;
+DROP TABLE IF EXISTS curriculum_levels;
+DROP TABLE IF EXISTS users;
+-- schema_migrations is owned by the Go migrator and is intentionally not dropped here.
