@@ -422,6 +422,12 @@ func (s *Server) handleStaticFrontend(w http.ResponseWriter, r *http.Request) {
 	rootAbs, err := filepath.Abs(s.cfg.WebStaticDir)
 	if err == nil {
 		cleanRel := filepath.Clean(strings.TrimPrefix(r.URL.Path, "/"))
+		for _, seg := range strings.Split(filepath.ToSlash(cleanRel), "/") {
+			if strings.HasPrefix(seg, ".") {
+				WriteProblem(w, r, http.StatusNotFound, "NOT_FOUND", "Resource Not Found", "The requested resource does not exist.")
+				return
+			}
+		}
 		if cleanRel != "." && cleanRel != "" && !strings.HasPrefix(cleanRel, "..") {
 			candidate := filepath.Join(rootAbs, cleanRel)
 			if strings.HasPrefix(candidate, rootAbs+string(filepath.Separator)) {
