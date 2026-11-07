@@ -72,7 +72,7 @@ func (s *Server) SetShuttingDown(val bool) {
 }
 
 func (s *Server) Handler() http.Handler {
-	limiter := NewRateLimiter(s.cfg.RateLimitRPS, s.cfg.RateLimitBurst)
+	limiter := NewRateLimiterWithTrusted(s.cfg.RateLimitRPS, s.cfg.RateLimitBurst, s.cfg.TrustedProxyCIDRs)
 	var h http.Handler = s.mux
 	h = limiter.Middleware(h)
 	h = CORSMiddleware(s.cfg.CORSAllowedOrigins)(h)

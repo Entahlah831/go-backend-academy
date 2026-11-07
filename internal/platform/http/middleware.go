@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
@@ -89,26 +90,95 @@ type tokenBucket struct {
 }
 
 type RateLimiter struct {
-	mu      sync.Mutex
-	buckets map[string]*tokenBucket
-	rate    float64
-	burst   float64
+	mu             sync.Mutex
+	buckets        map[string]*tokenBucket
+	rate           float64
+	burst          float64
+	trustedProxies []*net.IPNet
+	stopCh         chan struct{}
+}
+
+func inNets(ip net.IP, nets []*net.IPNet) bool {
+	for _, n := range nets {
+		if n != nil && n.Contains(ip) {
+			return true
+		}
+	}
+	return false
+}
+
+// ClientIP resolves the actual client IP, respecting X-Forwarded-For ONLY when connecting
+// via a configured trusted proxy (scanning from right to left to skip intermediate trusted proxies).
+func ClientIP(r *http.Request, trusted []*net.IPNet) string {
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		host = r.RemoteAddr
+	}
+	ip := net.ParseIP(host)
+	if ip == nil || !inNets(ip, trusted) {
+		return host // direct connection or untrusted proxy: do NOT trust X-Forwarded-For!
+	}
+	xff := r.Header.Get("X-Forwarded-For")
+	if xff == "" {
+		return host
+	}
+	parts := strings.Split(xff, ",")
+	for i := len(parts) - 1; i >= 0; i-- {
+		candStr := strings.TrimSpace(parts[i])
+		candIP := net.ParseIP(candStr)
+		if candIP != nil && !inNets(candIP, trusted) {
+			return candIP.String()
+		}
+	}
+	return host
 }
 
 func NewRateLimiter(rate, burst float64) *RateLimiter {
-	return &RateLimiter{
-		buckets: make(map[string]*tokenBucket),
-		rate:    rate,
-		burst:   burst,
+	return NewRateLimiterWithTrusted(rate, burst, nil)
+}
+
+func NewRateLimiterWithTrusted(rate, burst float64, trusted []*net.IPNet) *RateLimiter {
+	rl := &RateLimiter{
+		buckets:        make(map[string]*tokenBucket),
+		rate:           rate,
+		burst:          burst,
+		trustedProxies: trusted,
+		stopCh:         make(chan struct{}),
+	}
+	go rl.cleanupLoop()
+	return rl
+}
+
+func (rl *RateLimiter) Stop() {
+	select {
+	case <-rl.stopCh:
+	default:
+		close(rl.stopCh)
+	}
+}
+
+func (rl *RateLimiter) cleanupLoop() {
+	ticker := time.NewTicker(2 * time.Minute)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-rl.stopCh:
+			return
+		case now := <-ticker.C:
+			rl.mu.Lock()
+			for k, v := range rl.buckets {
+				if now.Sub(v.lastRefill) > 5*time.Minute {
+					delete(rl.buckets, k)
+				}
+			}
+			rl.mu.Unlock()
+		}
 	}
 }
 
 func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		host, _, err := net.SplitHostPort(r.RemoteAddr)
-		if err != nil || host == "" {
-			host = r.RemoteAddr
-		}
+		host := ClientIP(r, rl.trustedProxies)
 
 		rl.mu.Lock()
 		now := time.Now()

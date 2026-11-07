@@ -52,6 +52,7 @@ type Config struct {
 	CORSAllowedOrigins   map[string]bool
 	RateLimitRPS         float64
 	RateLimitBurst       float64
+	TrustedProxyCIDRs    []*net.IPNet
 	MaxRequestBodyBytes  int64
 	EnableLocalToolchain bool
 	SandboxTimeout       time.Duration
@@ -75,6 +76,27 @@ func Load() (*Config, error) {
 	for _, o := range strings.Split(originsRaw, ",") {
 		if trimmed := strings.TrimSpace(o); trimmed != "" {
 			allowedOrigins[trimmed] = true
+		}
+	}
+
+	trustedCIDRSRaw := getEnv("TRUSTED_PROXY_CIDRS", "127.0.0.1/32,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16")
+	var trustedNets []*net.IPNet
+	for _, cidr := range strings.Split(trustedCIDRSRaw, ",") {
+		if trimmed := strings.TrimSpace(cidr); trimmed != "" {
+			_, ipNet, err := net.ParseCIDR(trimmed)
+			if err != nil {
+				if ip := net.ParseIP(trimmed); ip != nil {
+					mask := 32
+					if ip.To4() == nil {
+						mask = 128
+					}
+					ipNet = &net.IPNet{IP: ip, Mask: net.CIDRMask(mask, mask)}
+				} else {
+					p.errs = append(p.errs, fmt.Errorf("invalid TRUSTED_PROXY_CIDRS entry %q: %w", trimmed, err))
+					continue
+				}
+			}
+			trustedNets = append(trustedNets, ipNet)
 		}
 	}
 
@@ -111,6 +133,7 @@ func Load() (*Config, error) {
 		CORSAllowedOrigins:   allowedOrigins,
 		RateLimitRPS:         float64(p.int("RATE_LIMIT_RPS", 20)),
 		RateLimitBurst:       float64(p.int("RATE_LIMIT_BURST", 40)),
+		TrustedProxyCIDRs:    trustedNets,
 		MaxRequestBodyBytes:  int64(p.int("MAX_REQUEST_BODY_BYTES", 1048576)),
 		EnableLocalToolchain: p.bool("ENABLE_LOCAL_GO_TOOLCHAIN", true),
 		SandboxTimeout:       time.Duration(p.int("SANDBOX_TIMEOUT_MS", 3000)) * time.Millisecond,
