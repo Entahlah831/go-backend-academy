@@ -10,8 +10,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
+	"unicode"
 
 	_ "modernc.org/sqlite"
 )
@@ -50,34 +52,92 @@ func NewSandbox(timeout time.Duration) *Sandbox {
 	return &Sandbox{timeout: timeout}
 }
 
+func stripSQLLiteralsAndComments(q string) string {
+	var sb strings.Builder
+	runes := []rune(q)
+	n := len(runes)
+	i := 0
+	for i < n {
+		// Single-line comment --
+		if i+1 < n && runes[i] == '-' && runes[i+1] == '-' {
+			i += 2
+			for i < n && runes[i] != '\n' && runes[i] != '\r' {
+				i++
+			}
+			sb.WriteRune(' ')
+			continue
+		}
+		// Multi-line comment /* */
+		if i+1 < n && runes[i] == '/' && runes[i+1] == '*' {
+			i += 2
+			for i+1 < n && !(runes[i] == '*' && runes[i+1] == '/') {
+				i++
+			}
+			if i+1 < n {
+				i += 2
+			}
+			sb.WriteRune(' ')
+			continue
+		}
+		// String literal '...'
+		if runes[i] == '\'' {
+			i++
+			for i < n {
+				if runes[i] == '\'' {
+					if i+1 < n && runes[i+1] == '\'' {
+						i += 2
+						continue
+					}
+					i++
+					break
+				}
+				i++
+			}
+			sb.WriteString("''")
+			continue
+		}
+		sb.WriteRune(runes[i])
+		i++
+	}
+	return sb.String()
+}
+
+func firstKeyword(q string) string {
+	f := strings.FieldsFunc(strings.TrimSpace(q), func(r rune) bool {
+		return unicode.IsSpace(r) || r == '(' || r == ';'
+	})
+	if len(f) == 0 {
+		return ""
+	}
+	return strings.ToUpper(f[0])
+}
+
+var forbiddenSQLRe = regexp.MustCompile(`(?i)\b(ATTACH|DETACH|PRAGMA|LOAD_EXTENSION|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|REPLACE|VACUUM)\b`)
+
 func isReadOnlyStatement(q string) bool {
-	trimmed := strings.TrimSpace(q)
-	// Strip leading SQL line comments
-	for strings.HasPrefix(trimmed, "--") {
-		if nl := strings.IndexByte(trimmed, '\n'); nl >= 0 {
-			trimmed = strings.TrimSpace(trimmed[nl+1:])
-		} else {
-			return false
-		}
-	}
-	if trimmed == "" {
+	stripped := stripSQLLiteralsAndComments(q)
+	clean := strings.TrimSpace(stripped)
+	if clean == "" {
 		return false
 	}
-	// Reject multiple statements separated by semicolons
-	withoutTrailingSemi := strings.TrimSpace(strings.TrimSuffix(trimmed, ";"))
-	if strings.Contains(withoutTrailingSemi, ";") {
+
+	// Reject multiple statements (any semicolon not at the very end of statement)
+	cleanWithoutTrailingSemi := strings.TrimSpace(strings.TrimSuffix(clean, ";"))
+	if strings.Contains(cleanWithoutTrailingSemi, ";") {
 		return false
 	}
-	upper := strings.ToUpper(withoutTrailingSemi)
-	if !(strings.HasPrefix(upper, "SELECT ") || strings.HasPrefix(upper, "WITH ") || strings.HasPrefix(upper, "EXPLAIN ")) {
+
+	// Check first keyword
+	kw := firstKeyword(cleanWithoutTrailingSemi)
+	if kw != "SELECT" && kw != "WITH" && kw != "EXPLAIN" {
 		return false
 	}
-	forbidden := []string{"INSERT ", "UPDATE ", "DELETE ", "DROP ", "ALTER ", "CREATE ", "ATTACH ", "DETACH ", "PRAGMA ", "VACUUM ", "REPLACE "}
-	for _, kw := range forbidden {
-		if strings.Contains(upper, kw) {
-			return false
-		}
+
+	// Reject forbidden/mutation tokens anywhere in stripped SQL
+	if forbiddenSQLRe.MatchString(cleanWithoutTrailingSemi) {
+		return false
 	}
+
 	return true
 }
 
@@ -107,6 +167,9 @@ func (s *Sandbox) Execute(parentCtx context.Context, req QueryRequest) (QueryRes
 		if _, err := db.ExecContext(ctx, `DROP INDEX IF EXISTS idx_orders_customer_status_created; DROP INDEX IF EXISTS idx_order_items_order;`); err != nil {
 			return QueryResponse{}, fmt.Errorf("dropping sandbox indexes: %w", err)
 		}
+	}
+	if _, err := db.ExecContext(ctx, `PRAGMA query_only = ON`); err != nil {
+		return QueryResponse{}, fmt.Errorf("locking sandbox read-only: %w", err)
 	}
 
 	start := time.Now()
