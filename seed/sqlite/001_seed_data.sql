@@ -118,9 +118,9 @@ func NewHardenedServer(addr string) *http.Server {
 		Handler: mux,
 		// STEP: Set ReadHeaderTimeout (5s), ReadTimeout (10s), WriteTimeout (15s), IdleTimeout (60s)
 	}
-}', 'PASS: TestHardenedServerTimeouts (0.01s)
-PASS: TestEchoMaxBytesLimit (0.01s)
-PASS: TestEchoRejectsUnknownFields (0.01s)
+}', 'Invarian: Hardened Server Timeouts
+Invarian: Echo Max Bytes Limit
+Invarian: Echo Rejects Unknown Fields
 Status: 200 OK | Content-Type: application/json', 'package main
 
 import (
@@ -226,10 +226,10 @@ func CanAccessDocument(actorUserID, actorRole, docOwnerID string) bool {
 	// STEP: Return false if actorUserID or docOwnerID is empty
 	// STEP: Return true if actorUserID == docOwnerID or actorRole == "admin"
 	return false
-}', 'PASS: TestOwnerCanAccess (0.00s)
-PASS: TestNonOwnerRejected (0.00s)
-PASS: TestAdminCanAccess (0.00s)
-PASS: TestEmptyIDsRejected (0.00s)', 'package security
+}', 'Invarian: Owner Can Access
+Invarian: Non Owner Rejected
+Invarian: Admin Can Access
+Invarian: Empty I Ds Rejected', 'package security
 
 func CanAccessDocument(actorUserID, actorRole, docOwnerID string) bool {
 	if actorUserID == "" || docOwnerID == "" {
@@ -280,8 +280,8 @@ func MergeSettings(currentMaxConns int, currentTLS bool, patchMaxConns *int, pat
 	// STEP: Only update currentMaxConns if patchMaxConns != nil
 	// STEP: Only update currentTLS if patchTLS != nil
 	return currentMaxConns, currentTLS
-}', 'PASS: TestMergeSettingsPreservesOmittedFields (0.00s)
-PASS: TestMergeSettingsAppliesExplicitFalse (0.00s)', 'package api
+}', 'Invarian: Merge Settings Preserves Omitted Fields
+Invarian: Merge Settings Applies Explicit False', 'package api
 
 func MergeSettings(currentMaxConns int, currentTLS bool, patchMaxConns *int, patchTLS *bool) (int, bool) {
 	if patchMaxConns != nil {
@@ -338,7 +338,7 @@ import (
 func IsExportedIdentifier(name string) bool {
 	// STEP: Decode first rune with utf8.DecodeRuneInString and check unicode.IsUpper
 	return false
-}', 'PASS: TestIsExportedIdentifier (0.00s)', 'package goast
+}', 'Invarian: Is Exported Identifier', 'package goast
 
 import (
 	"unicode"
@@ -408,8 +408,8 @@ func SafePrefix(src []int, n int) []int {
 	// STEP: Bounds check n against len(src)
 	// STEP: Allocate a detached slice of length n and copy elements
 	return nil
-}', 'PASS: TestSafePrefixDetachesBackingArray (0.00s)
-PASS: TestSafePrefixAppendDoesNotOverwriteOriginal (0.00s)
+}', 'Invarian: Safe Prefix Detaches Backing Array
+Invarian: Safe Prefix Append Does Not Overwrite Original
 Allocations: 1 allocs/op', 'package memory
 
 func SafePrefix(src []int, n int) []int {
@@ -506,9 +506,9 @@ func ClassifyRepositoryError(err error) int {
 	// STEP: Use errors.Is for ErrRecordNotFound -> 404
 	// STEP: Use errors.As for *QuotaExceededError -> 429
 	return 500
-}', 'PASS: TestWrappedNotFoundReturns404 (0.00s)
-PASS: TestWrappedQuotaExceededReturns429 (0.00s)
-PASS: TestNilErrorReturns200 (0.00s)', 'package domain
+}', 'Invarian: Wrapped Not Found Returns404
+Invarian: Wrapped Quota Exceeded Returns429
+Invarian: Nil Error Returns200', 'package domain
 
 import "errors"
 
@@ -601,9 +601,9 @@ func RunBoundedPool(ctx context.Context, maxWorkers int, jobs []int, fn func(con
 	// STEP: Spawn maxWorkers goroutines tracked by sync.WaitGroup
 	// STEP: Respect ctx.Done() so workers don''t leak on cancellation
 	return nil
-}', 'PASS: TestBoundedPoolRespectsMaxWorkers (0.02s)
-PASS: TestBoundedPoolCancelsOnError (0.01s)
-PASS: TestZeroGoroutineLeaks (0.01s)', 'package concurrency
+}', 'Invarian: Bounded Pool Respects Max Workers
+Invarian: Bounded Pool Cancels On Error
+Invarian: Zero Goroutine Leaks', 'package concurrency
 
 import (
 	"context"
@@ -713,7 +713,7 @@ INSERT INTO exercises (id, lesson_id, title, task_description, starter_code, exp
 func ShouldReturnBufferToPool(bufCap, maxPooledCap int) bool {
 	// STEP: Return true only if bufCap > 0 and bufCap <= maxPooledCap
 	return false
-}', 'PASS: TestShouldReturnBufferToPool (0.00s)', 'package poolutil
+}', 'Invarian: Should Return Buffer To Pool', 'package poolutil
 
 func ShouldReturnBufferToPool(bufCap, maxPooledCap int) bool {
 	return bufCap > 0 && bufCap <= maxPooledCap
@@ -812,8 +812,8 @@ func WithRecoveryAndRequestID(next http.Handler) http.Handler {
 		// STEP: Defer recover() and return 500 JSON if next.ServeHTTP panics
 		next.ServeHTTP(w, r)
 	})
-}', 'PASS: TestMiddlewarePreservesRequestID (0.00s)
-PASS: TestMiddlewareRecoversPanicWith500 (0.00s)', 'package middleware
+}', 'Invarian: Middleware Preserves Request I D
+Invarian: Middleware Recovers Panic With500', 'package middleware
 
 import "net/http"
 
@@ -887,7 +887,7 @@ func ComputeAvailableTokens(currentTokens, ratePerSec, burstMax, elapsedSec floa
 	// STEP: If elapsedSec > 0, add elapsedSec * ratePerSec to currentTokens
 	// STEP: Clamp result so it never exceeds burstMax
 	return currentTokens
-}', 'PASS: TestComputeAvailableTokens (0.00s)', 'package ratelimit
+}', 'Invarian: Compute Available Tokens', 'package ratelimit
 
 func ComputeAvailableTokens(currentTokens, ratePerSec, burstMax, elapsedSec float64) float64 {
 	if elapsedSec > 0 {
@@ -986,7 +986,7 @@ INSERT INTO exercises (id, lesson_id, title, task_description, starter_code, exp
 func LockOrder(fromAccountID, toAccountID string) (string, string) {
 	// STEP: Return the two account IDs in ascending lexicographical order
 	return fromAccountID, toAccountID
-}', 'PASS: TestLockOrderPreventsAB_BA_Deadlock (0.00s)
+}', 'Invarian: Lock Order Prevents A B  B A  Deadlock
 Lock Order for (''acc_99'', ''acc_01'') -> (''acc_01'', ''acc_99'')', 'package ledger
 
 func LockOrder(fromAccountID, toAccountID string) (string, string) {
@@ -1035,7 +1035,7 @@ INSERT INTO exercises (id, lesson_id, title, task_description, starter_code, exp
 func ChoosePool(isMutation bool, msSinceLastUserWrite int, maxReplicaLagMs int) string {
 	// STEP: Return "primary" if isMutation is true or msSinceLastUserWrite <= maxReplicaLagMs
 	return "replica"
-}', 'PASS: TestChoosePoolCausalConsistency (0.00s)', 'package routing
+}', 'Invarian: Choose Pool Causal Consistency', 'package routing
 
 func ChoosePool(isMutation bool, msSinceLastUserWrite int, maxReplicaLagMs int) string {
 	if isMutation || (msSinceLastUserWrite >= 0 && msSinceLastUserWrite <= maxReplicaLagMs) {
@@ -1138,7 +1138,7 @@ func ComputePoolLimits(pgMaxConns, reservedSuperuserConns, replicaCount int) (ma
 	// STEP: Divide evenly across replicaCount (guarding replicaCount <= 0)
 	// STEP: Set maxIdle to maxOpen / 2 (minimum 1)
 	return 0, 0
-}', 'PASS: TestComputePoolLimits (0.00s)
+}', 'Invarian: Compute Pool Limits
 Postgres max_connections=200, reserved=20, replicas=6 -> MaxOpenConns=30, MaxIdleConns=15', 'package dbpool
 
 func ComputePoolLimits(pgMaxConns, reservedSuperuserConns, replicaCount int) (maxOpen, maxIdle int) {
@@ -1225,7 +1225,7 @@ func IsSafeProductionDDL(sqlStmt string) bool {
 	// STEP: If upper contains "CREATE INDEX" and not "CONCURRENTLY", return false
 	// STEP: If upper contains "ALTER TABLE" and not "LOCK_TIMEOUT", return false
 	return true
-}', 'PASS: TestIsSafeProductionDDL (0.00s)', 'package migrator
+}', 'Invarian: Is Safe Production D D L', 'package migrator
 
 import "strings"
 
@@ -1330,10 +1330,10 @@ func ValidateWebhookIP(ip string) error {
 func VerifyAPIKey(provided, expected string) bool {
 	// STEP: Reject empty keys and compare in constant time using subtle.ConstantTimeCompare
 	return false
-}', 'PASS: TestBlocksCloudMetadataIP_169_254_169_254 (0.00s)
-PASS: TestBlocksLoopbackAndRFC1918 (0.00s)
-PASS: TestAllowsPublicIP (0.00s)
-PASS: TestConstantTimeAPIKey (0.00s)', 'package secguard
+}', 'Invarian: Blocks Cloud Metadata I P 169 254 169 254
+Invarian: Blocks Loopback And R F C1918
+Invarian: Allows Public I P
+Invarian: Constant Time A P I Key', 'package secguard
 
 import (
 	"crypto/subtle"
@@ -1412,7 +1412,7 @@ func HasRBACPermission(role string, requiredPerm string, roleMatrix map[string][
 	// STEP: Look up permissions slice for role in roleMatrix
 	// STEP: Return true if requiredPerm is in the slice, false otherwise
 	return false
-}', 'PASS: TestHasRBACPermission (0.00s)', 'package rbac
+}', 'Invarian: Has R B A C Permission', 'package rbac
 
 func HasRBACPermission(role string, requiredPerm string, roleMatrix map[string][]string) bool {
 	if role == "" || requiredPerm == "" || roleMatrix == nil {
@@ -1518,7 +1518,7 @@ func SafeTruncateRunes(s string, maxRunes int) string {
 	// STEP: If maxRunes <= 0, return ""
 	// STEP: Convert or iterate runes safely so multi-byte UTF-8 characters are never split mid-byte
 	return s
-}', 'PASS: TestSafeTruncateRunes_UTF8 (0.00s)
+}', 'Invarian: Safe Truncate Runes  U T F8
 PASS: FuzzSafeTruncateRunes (10,000 inputs tested, 0 panics, valid UTF-8 preserved)', 'package textutil
 
 func SafeTruncateRunes(s string, maxRunes int) string {
@@ -1594,7 +1594,7 @@ func PutAndGetFake(items map[string]int, key string, val int) (int, bool) {
 	// STEP: If items == nil or key == "", return 0, false
 	// STEP: Store items[key] = val and return val, true
 	return 0, false
-}', 'PASS: TestPutAndGetFake (0.00s)', 'package testfake
+}', 'Invarian: Put And Get Fake', 'package testfake
 
 func PutAndGetFake(items map[string]int, key string, val int) (int, bool) {
 	if items == nil || key == "" {
@@ -1696,7 +1696,7 @@ func ComputeFinalInvoiceCents(subtotalCents, couponBasisPoints, taxBasisPoints i
 	// STEP: Compute discounted = subtotalCents - (subtotalCents * couponBasisPoints) / 10000
 	// STEP: Compute final = discounted + (discounted * taxBasisPoints) / 10000
 	return 0, nil
-}', 'PASS: TestComputeFinalInvoiceCents_ExactIntegerMath (0.00s)
+}', 'Invarian: Compute Final Invoice Cents  Exact Integer Math
 Subtotal $100.00 (10000c), 15% coupon (1500 bps), 10% tax (1000 bps) -> 9350 cents ($93.50)', 'package billing
 
 import "errors"
@@ -1754,7 +1754,7 @@ import "strings"
 func ViolatesModuleTableBoundary(moduleName string, referencedTable string) bool {
 	// STEP: Return true if referencedTable does not have prefix moduleName + "_"
 	return false
-}', 'PASS: TestViolatesModuleTableBoundary (0.00s)', 'package archlint
+}', 'Invarian: Violates Module Table Boundary', 'package archlint
 
 import "strings"
 
@@ -1847,8 +1847,8 @@ func ShouldTripBreaker(consecutiveFailures, threshold int, currentState string) 
 	// STEP: If currentState == "HALF_OPEN" and consecutiveFailures >= 1, return "OPEN"
 	// STEP: If consecutiveFailures >= threshold, return "OPEN"
 	return currentState
-}', 'PASS: TestCircuitBreakerTripsAtThreshold (0.00s)
-PASS: TestHalfOpenTripsOnSingleFailure (0.00s)', 'package resilience
+}', 'Invarian: Circuit Breaker Trips At Threshold
+Invarian: Half Open Trips On Single Failure', 'package resilience
 
 func ShouldTripBreaker(consecutiveFailures, threshold int, currentState string) string {
 	if threshold <= 0 {
@@ -1907,7 +1907,7 @@ func IsValidW3CTraceparent(header string) bool {
 	// STEP: Verify len(parts) == 4, parts[0] == "00", len(parts[1]) == 32, len(parts[2]) == 16, len(parts[3]) == 2
 	// STEP: Reject all-zero traceID ("00000000000000000000000000000000")
 	return false
-}', 'PASS: TestIsValidW3CTraceparent (0.00s)', 'package tracing
+}', 'Invarian: Is Valid W3 C Traceparent', 'package tracing
 
 import "strings"
 
@@ -2002,8 +2002,8 @@ func RecommendGoMemLimitMiB(containerLimitMiB int) int {
 func EvaluateReadiness(isShuttingDown, dbHealthy bool) int {
 	// STEP: Return 200 OK or 503 Service Unavailable
 	return 503
-}', 'PASS: TestRecommendGoMemLimitMiB (0.00s) -> 1024 MiB container => GOMEMLIMIT=870MiB
-PASS: TestEvaluateReadiness (0.00s)', 'package ops
+}', 'Invarian: Recommend Go Mem Limit Mi B -> 1024 MiB container => GOMEMLIMIT=870MiB
+Invarian: Evaluate Readiness', 'package ops
 
 func RecommendGoMemLimitMiB(containerLimitMiB int) int {
 	limit := (containerLimitMiB * 85) / 100
@@ -2072,8 +2072,8 @@ func ResolveClientIP(remoteIP, xff string, isTrustedPeer bool) string {
 	// STEP: If !isTrustedPeer or strings.TrimSpace(xff) == "", return remoteIP
 	// STEP: Split xff by "," and return strings.TrimSpace of the last (rightmost) element
 	return remoteIP
-}', 'PASS: TestResolveClientIPBlocksSpoofedLeftmost (0.00s)
-PASS: TestUntrustedPeerIgnoresXFF (0.00s)', 'package proxy
+}', 'Invarian: Resolve Client I P Blocks Spoofed Leftmost
+Invarian: Untrusted Peer Ignores X F F', 'package proxy
 
 import "strings"
 

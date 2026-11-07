@@ -201,7 +201,7 @@ func (s *Service) VerifySubmission(ctx context.Context, req SubmissionRequest) (
 		Code:        req.Code,
 		Passed:      passed,
 		Diagnostics: diag,
-		ExecutionMs: 12,
+		ExecutionMs: 0,
 		CreatedAt:   time.Now().UTC(),
 	}); err != nil {
 		return SubmissionResult{}, err

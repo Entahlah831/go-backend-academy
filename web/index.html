@@ -699,7 +699,7 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-ac
                 <button type="button" id="btn-exercise-hint">Show Hint</button>
                 <button type="button" id="btn-exercise-solution">Compare Solution</button>
                 <button type="button" id="btn-exercise-reset">Reset</button>
-                <button type="button" id="btn-exercise-run" class="btn-primary">Run Verification Suite</button>
+                <button type="button" id="btn-exercise-run" class="btn-primary">Cek Pola Kode</button>
               </div>
             </div>
 
@@ -710,7 +710,7 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-ac
             <div class="grid-2">
               <textarea id="exercise-code-editor" rows="13" class="code-editor" aria-label="Lesson Exercise Go Code Editor" spellcheck="false"></textarea>
               <div class="view-stack">
-                <pre id="exercise-console-output" class="console-pass">Click "Run Verification Suite" to verify test assertions...</pre>
+                <pre id="exercise-console-output" class="console-pass">Klik "Cek Pola Kode" untuk memverifikasi pola struktural kode (jalankan go test di laptop untuk bukti nyata)...</pre>
                 <div class="surface-recessed">
                   <p><strong>Additional Challenge:</strong> <span id="exercise-extra-challenge"></span></p>
                 </div>
@@ -5335,23 +5335,33 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
         outEl.className = 'console-pass';
         outEl.textContent = [
-          '=== RUN   VerifyLessonExercise',
-          ...checks.map(c => '  [PASS] ' + c[0]),
-          '--- EXPECTED OUTPUT ---',
-          lesson.exercise.expectedOutput,
-          'PASS: Exercise verified!'
+          '=== Cek pola kode (bukan go test) ===',
+          'Pemeriksaan pola struktural & invarian kode.',
+          '',
+          ...checks.map(c => '  [PASS] Kode harus memuat: ' + c[0]),
+          '',
+          '[LULUS] Seluruh pola kode yang diwajibkan terpenuhi!',
+          'Catatan: Ini pengecekan pola struktural, bukan eksekusi binary.',
+          'Untuk verifikasi penuh dengan Go compiler, jalankan di laptopmu:',
+          '  $ go test -v -race ./...'
         ].join('\n');
-        showToast('Exercise verified and saved!');
+        showToast('Pola latihan terverifikasi!');
       } else {
         AppState.failedExercises[lesson.id] = (AppState.failedExercises[lesson.id] || 0) + 1;
         SafeStore.set('failedExercises', AppState.failedExercises);
 
         outEl.className = 'console-warn';
         outEl.textContent = [
-          '=== RUN   VerifyLessonExercise',
-          ...checks.map(c => (c[1] ? '  [PASS] ' : '  [FAIL] ') + c[0]),
-          hasUnfinishedStep ? '  [INFO] Replace the // STEP: comment with your implementation' : '',
-          '--- TEST ASSERTIONS ---',
+          '=== Cek pola kode (bukan go test) ===',
+          'Pemeriksaan pola struktural & invarian kode.',
+          '',
+          ...checks.map(c => (c[1] ? '  [PASS] ' : '  [FAIL] ') + 'Kode harus memuat: ' + c[0]),
+          hasUnfinishedStep ? '  [INFO] Ganti komentar // STEP: dengan implementasi Anda' : '',
+          '',
+          '--- DESKRIPSI HASIL YANG DIHARAPKAN ---',
+          lesson.exercise.expectedOutput || 'Implementasi harus memenuhi seluruh invarian di atas.',
+          '',
+          '--- DAFTAR INVARIAN / UJI COBA ---',
           ...lesson.exercise.testCases.map(tc => '  • ' + tc)
         ].filter(Boolean).join('\n');
       }

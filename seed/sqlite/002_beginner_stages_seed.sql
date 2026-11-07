@@ -62,8 +62,8 @@ func SumSquaresSafe(nums []int) int {
 	sum := 0
 	// STEP: Loop over nums with range, accumulate n * n into sum, and return sum
 	return 0
-}', 'PASS: TestSumSquaresSafeEmpty (0.00s)
-PASS: TestSumSquaresSafeValues (0.00s)', 'package conc
+}', 'Invarian: Sum Squares Safe Empty
+Invarian: Sum Squares Safe Values', 'package conc
 
 func SumSquaresSafe(nums []int) int {
 	sum := 0
@@ -135,8 +135,8 @@ func ExtractBearerToken(authHeader string) (string, bool) {
 	const prefix = "Bearer "
 	// STEP: Check strings.HasPrefix(authHeader, prefix), trim prefix and spaces, and reject empty tokens
 	return "", false
-}', 'PASS: TestExtractBearerTokenValid (0.00s)
-PASS: TestExtractBearerTokenRejectsMalformed (0.00s)', 'package auth
+}', 'Invarian: Extract Bearer Token Valid
+Invarian: Extract Bearer Token Rejects Malformed', 'package auth
 
 import "strings"
 
@@ -286,8 +286,8 @@ type Money struct {
 func AddMoney(a, b *Money) (Money, error) {
 	// STEP: Guard a == nil || b == nil and a.Currency != b.Currency, then return combined Money
 	return Money{}, nil
-}', 'PASS: TestAddMoneySameCurrency (0.00s)
-PASS: TestAddMoneyRejectsMismatchAndNil (0.00s)', 'package money
+}', 'Invarian: Add Money Same Currency
+Invarian: Add Money Rejects Mismatch And Nil', 'package money
 
 import "errors"
 
@@ -362,8 +362,8 @@ INSERT INTO exercises (id, lesson_id, title, task_description, starter_code, exp
 func ComputeBackoffMs(baseMs int64, maxMs int64, attempt int) int64 {
 	// STEP: Clamp attempt < 1 to 1, compute delay := baseMs << (attempt - 1), and cap delay > maxMs at maxMs
 	return 0
-}', 'PASS: TestComputeBackoffMsProgression (0.00s)
-PASS: TestComputeBackoffMsCappedAtMax (0.00s)', 'package retry
+}', 'Invarian: Compute Backoff Ms Progression
+Invarian: Compute Backoff Ms Capped At Max', 'package retry
 
 func ComputeBackoffMs(baseMs int64, maxMs int64, attempt int) int64 {
 	if attempt < 1 {
@@ -425,8 +425,8 @@ import "os"
 func ResolvePort(defaultPort string) string {
 	// STEP: Read os.Getenv("PORT") and return it if non-empty, else return defaultPort
 	return ""
-}', 'PASS: TestResolvePortFromEnv (0.00s)
-PASS: TestResolvePortFallback (0.00s)', 'package main
+}', 'Invarian: Resolve Port From Env
+Invarian: Resolve Port Fallback', 'package main
 
 import "os"
 
@@ -486,8 +486,8 @@ import "fmt"
 func Greeting(name string) string {
 	// STEP: Default empty name to "Backend Engineer" and format with fmt.Sprintf("Hello, %s!", name)
 	return ""
-}', 'PASS: TestGreetingDefault (0.00s)
-PASS: TestGreetingCustomName (0.00s)', 'package main
+}', 'Invarian: Greeting Default
+Invarian: Greeting Custom Name', 'package main
 
 import "fmt"
 
@@ -545,8 +545,8 @@ INSERT INTO exercises (id, lesson_id, title, task_description, starter_code, exp
 func ComputeInvoiceCents(unitPriceCents int64, quantity int64, discountCents int64) int64 {
 	// STEP: Guard <= 0 inputs, compute subtotal := unitPriceCents * quantity, and subtract discountCents safely
 	return 0
-}', 'PASS: TestComputeInvoiceCents (0.00s)
-PASS: TestComputeInvoiceZeroAndClamp (0.00s)', 'package billing
+}', 'Invarian: Compute Invoice Cents
+Invarian: Compute Invoice Zero And Clamp', 'package billing
 
 func ComputeInvoiceCents(unitPriceCents int64, quantity int64, discountCents int64) int64 {
 	if unitPriceCents <= 0 || quantity <= 0 {
@@ -614,8 +614,8 @@ import "errors"
 func ValidateAccountAge(age int) (bool, error) {
 	// STEP: Return error if age < 0 || age > 130, (false, nil) if age < 18, else (true, nil)
 	return false, nil
-}', 'PASS: TestValidateAccountAgeBounds (0.00s)
-PASS: TestValidateAccountAgeAdult (0.00s)', 'package auth
+}', 'Invarian: Validate Account Age Bounds
+Invarian: Validate Account Age Adult', 'package auth
 
 import "errors"
 
@@ -678,8 +678,8 @@ INSERT INTO exercises (id, lesson_id, title, task_description, starter_code, exp
 func CountStatuses(items []string) map[string]int {
 	// STEP: Initialize map with make(map[string]int), loop with range, skip "", increment counts[s]++
 	return nil
-}', 'PASS: TestCountStatusesNonNilMap (0.00s)
-PASS: TestCountStatusesSkipsEmpty (0.00s)', 'package stats
+}', 'Invarian: Count Statuses Non Nil Map
+Invarian: Count Statuses Skips Empty', 'package stats
 
 func CountStatuses(items []string) map[string]int {
 	counts := make(map[string]int, len(items))
@@ -752,8 +752,8 @@ type Wallet struct {
 func (w *Wallet) Deposit(amountCents int64) error {
 	// STEP: Guard w == nil and amountCents <= 0, then add to w.BalanceCents
 	return nil
-}', 'PASS: TestWalletDepositMutatesBalance (0.00s)
-PASS: TestWalletDepositNilAndNegativeGuards (0.00s)', 'package wallet
+}', 'Invarian: Wallet Deposit Mutates Balance
+Invarian: Wallet Deposit Nil And Negative Guards', 'package wallet
 
 import "errors"
 
@@ -833,8 +833,8 @@ var ErrEmptyOrderID = errors.New("empty order id")
 func ValidateAndWrapOrder(orderID string, cause error) error {
 	// STEP: Return ErrEmptyOrderID if orderID == "", and wrap non-nil cause with %w
 	return nil
-}', 'PASS: TestValidateAndWrapOrderSentinel (0.00s)
-PASS: TestValidateAndWrapOrderUnwrap (0.00s)', 'package service
+}', 'Invarian: Validate And Wrap Order Sentinel
+Invarian: Validate And Wrap Order Unwrap', 'package service
 
 import (
 	"errors"
@@ -920,8 +920,8 @@ type CreateTaskInput struct {
 func ParseTaskJSON(raw []byte) (CreateTaskInput, error) {
 	// STEP: Unmarshal raw into CreateTaskInput and verify in.Title != ""
 	return CreateTaskInput{}, nil
-}', 'PASS: TestParseTaskJSONValid (0.00s)
-PASS: TestParseTaskJSONMissingTitle (0.00s)', 'package dto
+}', 'Invarian: Parse Task J S O N Valid
+Invarian: Parse Task J S O N Missing Title', 'package dto
 
 import (
 	"encoding/json"
@@ -1002,7 +1002,7 @@ import (
 
 func WriteJSONResponse(w http.ResponseWriter, status int, payload any) {
 	// STEP: Set Content-Type header, call w.WriteHeader(status), and encode payload as JSON
-}', 'PASS: TestWriteJSONResponseHeaderAndStatusOrder (0.00s)', 'package api
+}', 'Invarian: Write J S O N Response Header And Status Order', 'package api
 
 import (
 	"encoding/json"
@@ -1064,7 +1064,7 @@ INSERT INTO exercises (id, lesson_id, title, task_description, starter_code, exp
 func ClampPageLimit(limit, offset int) (int, int) {
 	// STEP: Default non-positive limit to 20, cap limit above 100 at 100, and clamp negative offset to 0
 	return 0, 0
-}', 'PASS: TestClampPageLimitDefaultsAndBounds (0.00s)', 'package sqlutil
+}', 'Invarian: Clamp Page Limit Defaults And Bounds', 'package sqlutil
 
 func ClampPageLimit(limit, offset int) (int, int) {
 	if limit <= 0 {
@@ -1153,8 +1153,8 @@ var ErrUserNotFound = errors.New("user not found")
 func FindUserIDByEmail(ctx context.Context, db *sql.DB, email string) (string, error) {
 	// STEP: Call db.QueryRowContext with $1, Scan(&id), and check errors.Is(err, sql.ErrNoRows)
 	return "", nil
-}', 'PASS: TestFindUserIDByEmailParameterized (0.00s)
-PASS: TestFindUserIDByEmailNoRows (0.00s)', 'package repo
+}', 'Invarian: Find User I D By Email Parameterized
+Invarian: Find User I D By Email No Rows', 'package repo
 
 import (
 	"context"
@@ -1246,8 +1246,8 @@ type ReadinessGate struct {
 func EvaluateCapstoneReadiness(g ReadinessGate) (int, error) {
 	// STEP: Return 503 if ShuttingDown, !DBConnected, or !MigrationsUp; otherwise return 200, nil
 	return 0, nil
-}', 'PASS: TestEvaluateCapstoneReadiness200 (0.00s)
-PASS: TestEvaluateCapstoneReadiness503OnShutdownOrDBDown (0.00s)', 'package capstone
+}', 'Invarian: Evaluate Capstone Readiness200
+Invarian: Evaluate Capstone Readiness503 On Shutdown Or D B Down', 'package capstone
 
 import "errors"
 

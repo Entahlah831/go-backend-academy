@@ -270,21 +270,29 @@
           checks.unshift(['Remove // STEP: placeholder and implement solution', false]);
         }
         const failed = checks.filter(function (c) { return !c[1]; });
-        const lines = ['$ go test -v -race ./...'];
+        const lines = [
+          '=== Cek pola kode (bukan go test) ===',
+          'Pemeriksaan pola struktural & invarian kode.',
+          ''
+        ];
         checks.forEach(function (c) {
-          lines.push((c[1] ? '  [PASS] ' : '  [FAIL] ') + c[0]);
+          lines.push((c[1] ? '  [PASS] ' : '  [FAIL] ') + 'Kode harus memuat: ' + c[0]);
         });
 
         if (failed.length === 0) {
-          lines.push('\n' + lesson.exercise.expectedOutput + '\nok  \tgobackendacademy/exercise\t0.008s');
+          lines.push('\n[LULUS] Seluruh pola kode yang diwajibkan terpenuhi!');
+          lines.push('Catatan: Ini pengecekan pola struktural, bukan eksekusi binary.');
+          lines.push('Untuk verifikasi penuh dengan Go compiler, jalankan di terminal laptop Anda:');
+          lines.push('  go test -v -race ./...');
           outEl.className = 'console-pass';
           outEl.textContent = lines.join('\n');
           AppState.passedExercises[lesson.id] = true;
           SafeStore.set('passedExercises', AppState.passedExercises);
           updateProgressMetrics();
-          showToast('All exercise assertions passed!');
+          showToast('Pola latihan terverifikasi!');
         } else {
-          lines.push('\nFAIL\tgobackendacademy/exercise [assertion check failed]');
+          lines.push('\n[BELUM LENGKAP] Beberapa pola kode yang diwajibkan belum ditemukan.');
+          lines.push('Periksa kembali petunjuk dan pastikan kode mengimplementasikan seluruh invarian.');
           outEl.className = 'console-fail';
           outEl.textContent = lines.join('\n');
           AppState.failedExercises[lesson.id] = (AppState.failedExercises[lesson.id] || 0) + 1;
@@ -311,7 +319,8 @@
           .then(function (r) { return r.ok ? r.json() : null; })
           .then(function (data) {
             if (data && data.attempt_id) {
-              outEl.textContent += '\n[Server Verification Recorded: attempt=' + data.attempt_id + ', passed=' + data.passed + ' (' + data.execution_ms + 'ms)]';
+              const execTimeStr = (data.execution_ms && data.execution_ms > 0) ? ' (' + data.execution_ms + 'ms)' : '';
+              outEl.textContent += '\n[Server Verification Recorded: attempt=' + data.attempt_id + ', passed=' + data.passed + execTimeStr + ']';
             }
           })
           .catch(function () {});
