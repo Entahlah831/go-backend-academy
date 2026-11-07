@@ -12,7 +12,8 @@ services:
       - APP_ENV=${APP_ENV:-production}
       - HOST=0.0.0.0
       - PORT=${PORT:-8080}
-      - DB_DRIVER=${DB_DRIVER:-${COMPOSE_DB_DRIVER:-postgres}}
+      - DB_DRIVER=postgres
+      - SQLITE_PATH=/app/data/academy.db
       - POSTGRES_HOST=${COMPOSE_POSTGRES_HOST:-postgres}
       - POSTGRES_PORT=5432
       - POSTGRES_USER=${POSTGRES_USER:-academy}

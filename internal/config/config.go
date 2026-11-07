@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/url"
 	"os"
@@ -151,6 +152,13 @@ func Load() (*Config, error) {
 			cfg.SQLiteDSN = BuildSQLiteDSN(cfg.SQLitePath)
 		}
 	case "postgres":
+		if cfg.AppEnv == "production" {
+			check(strings.TrimSpace(cfg.PostgresPassword) != "" && !strings.Contains(strings.ToLower(cfg.PostgresPassword), "change_this"),
+				"production error: POSTGRES_PASSWORD must not be empty or contain default placeholder 'change_this'")
+			if cfg.PostgresSSLMode == "disable" {
+				slog.Default().Warn("production security warning: POSTGRES_SSLMODE is set to 'disable'; transport encryption should be enabled in production")
+			}
+		}
 		if cfg.PostgresDSN == "" {
 			check(cfg.PostgresPort >= 1 && cfg.PostgresPort <= 65535, "invalid POSTGRES_PORT %d: must be between 1 and 65535", cfg.PostgresPort)
 			check(strings.TrimSpace(cfg.PostgresHost) != "", "POSTGRES_HOST must not be empty when DB_DRIVER=postgres")

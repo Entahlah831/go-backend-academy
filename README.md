@@ -59,6 +59,8 @@ go-backend-academy/
 
 ## 3. Quick Start & Verification Commands
 
+> **Catatan Database:** Untuk jalur SQLite lokal pakai `make run`; untuk Docker gunakan Postgres (`docker compose up` / `make docker-up`).
+
 ### Local Development (SQLite WAL or In-Memory Mode)
 
 ```bash
