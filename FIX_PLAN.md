@@ -409,13 +409,13 @@ Buat `internal/modules/diagnostics/testdata/*.go.txt` + `*.expected.json`: 12 sa
 - [ ] T0.2 Bersihkan repo: `.gitignore`, `.dockerignore`, pindahkan `.agents/`, `web/.hallmark/`, `tests/academy.db`; gabung/hapus dokumen duplikat (`IMPROVEMENT_ROADMAP.md`, `REMEDIATION_REPORT.md` di root); satukan audit ke maksimal 5 dokumen.
 
 ### Fase 1 — kejujuran & keamanan dasar (1–2 hari)
-- [ ] T1.1 §1.3 hapus output `go test` palsu & `execution_ms` palsu. *Selesai bila* tidak ada string `$ go test` atau `ok  \tgobackendacademy` di `app-bridge.js`.
-- [ ] T1.2 §1.1 blokir dotfile + `.dockerignore`. *Selesai bila* `curl /.hallmark/compare.html` → 404.
-- [ ] T1.3 §1.2 compose memakai Postgres; guard produksi di config.
-- [ ] T1.4 §2.1 trusted proxy + test.
-- [ ] T1.5 §2.2 runner `go vet` aman; `ENABLE_LOCAL_GO_TOOLCHAIN=false` default.
-- [ ] T1.6 §2.3 sandbox `query_only` + perbaikan prefix; 3 test.
-- [ ] T1.7 Pernyataan klaim: perbaiki §5.3, versi, "14×15", font offline.
+- [x] T1.1 §1.3 hapus output `go test` palsu & `execution_ms` palsu. *Selesai bila* tidak ada string `$ go test` atau `ok  \tgobackendacademy` di `app-bridge.js`.
+- [x] T1.2 §1.1 blokir dotfile + `.dockerignore`. *Selesai bila* `curl /.hallmark/compare.html` → 404.
+- [x] T1.3 §1.2 compose memakai Postgres; guard produksi di config.
+- [x] T1.4 §2.1 trusted proxy + test.
+- [x] T1.5 §2.2 runner `go vet` aman; `ENABLE_LOCAL_GO_TOOLCHAIN=false` default.
+- [x] T1.6 §2.3 sandbox `query_only` + perbaikan prefix; 3 test.
+- [x] T1.7 Pernyataan klaim: perbaiki §5.3, versi, "14×15", font offline.
 
 ### Fase 2 — pemula (2–4 hari)
 - [ ] T2.1 §5.1 poin 1–7 (rekomendasi, 0.0A, mode Pemula, penomoran, hero, badge, i18n awal).
