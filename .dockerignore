@@ -1,0 +1,7 @@
+.git
+.agents
+.hallmark
+web/.hallmark
+tests/academy.db
+docs
+*.md

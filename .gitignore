@@ -1,0 +1,10 @@
+.env
+*.db
+*.db-wal
+*.db-shm
+bin/
+coverage.out
+node_modules/
+.agents/
+.hallmark/
+web/.hallmark/
