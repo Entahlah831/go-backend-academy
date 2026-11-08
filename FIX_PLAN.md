@@ -423,10 +423,10 @@ Buat `internal/modules/diagnostics/testdata/*.go.txt` + `*.expected.json`: 12 sa
 - [x] T2.3 Kuis server-side + ≥3 soal per lesson jembatan (§2.6).
 
 ### Fase 3 — verifikasi & diagnostik (1–2 minggu)
-- [ ] T3.1 Tier B AST verifier untuk 41 latihan (tabel `exercise_rules`).
-- [ ] T3.2 Tier C: tabel `exercise_tests`, CLI `academy fetch`, uji lokal. Opsional worker kontainer.
-- [ ] T3.3 §4.1–4.5 satu mesin diagnostik, AST rule, golden test, klasifikasi jujur.
-- [ ] T3.4 Selesaikan atau hapus stub AI (§4.4).
+- [x] T3.1 Tier B AST verifier untuk 41 latihan (tabel `exercise_rules`).
+- [x] T3.2 Tier C: tabel `exercise_tests`, CLI `academy fetch`, uji lokal. Opsional worker kontainer.
+- [x] T3.3 §4.1–4.5 satu mesin diagnostik, AST rule, golden test, klasifikasi jujur.
+- [x] T3.4 Selesaikan atau hapus stub AI (§4.4).
 
 ### Fase 4 — konten & arsitektur (berjalan)
 - [ ] T4.1 §2.4 seed upsert + hash; hapus/perbaiki seed 003; unique `order_index`.
