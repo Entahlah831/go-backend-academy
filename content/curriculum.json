@@ -709,6 +709,50 @@
       "title": "0.3 REST Idempotency, JSON Marshaling Internals \u0026 Backward-Compatible API Contracts"
     },
     {
+      "body_text": "Git adalah buku catatan revisi arsitek di mana setiap perubahan tercatat rapi dan bisa dibatalkan jika terjadi kesalahan. File go.mod adalah daftar bahan resmi yang menjamin siapa pun yang membangun proyek ini akan mendapatkan versi dependensi yang sama persis.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l0-stage-a-git-go-workspace-sec-analogy",
+      "lesson_id": "l0-stage-a-git-go-workspace",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Buku Catatan Arsitek \u0026 Cetak Biru"
+    },
+    {
+      "body_text": "Go tidak menggunakan algoritma pemecah dependensi yang kompleks seperti npm atau pip. Go menggunakan Minimal Version Selection (MVS): versi tertua yang masih memenuhi syarat minimum yang diminta adalah yang dipilih. Ini menjamin build yang 100% dapat direproduksi (reproducible builds) tanpa kejutan pembaruan liar. Jika modul A membutuhkan v1.2 dan modul B membutuhkan v1.3, Go akan memilih tepat v1.3 tanpa menebak-nebak versi terbaru v1.9.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l0-stage-a-git-go-workspace-sec-deep_dive",
+      "lesson_id": "l0-stage-a-git-go-workspace",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Minimal Version Selection (MVS) pada Go Modules"
+    },
+    {
+      "body_text": "Implementasikan fungsi InitWorkspace(name string) string yang memvalidasi nama modul dan mengembalikan pesan status inisialisasi.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l0-stage-a-git-go-workspace-sec-exercise",
+      "lesson_id": "l0-stage-a-git-go-workspace",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Latihan Praktik"
+    },
+    {
+      "body_text": "Menguasai workflow pengembangan modern: inisialisasi module Go (go mod init), manajemen package, kompilasi cepat (go build, go run), linter statis (go vet), dan version control dengan Git.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l0-stage-a-git-go-workspace-sec-goal",
+      "lesson_id": "l0-stage-a-git-go-workspace",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan Pembelajaran: Git \u0026 Toolchain Go"
+    },
+    {
       "body_text": "[Beginner Overview]\nThe Terminal is a text-based way to talk to your computer: `pwd` shows your current folder, `cd` changes folders, and `mkdir` creates a new folder. `git init` starts a time-machine history for your code. `go mod init` creates a `go.mod` ID card for your Go project, and `func main()` inside `package main` is the front door where your program starts running.\n\n[Intermediate Technical]\nA Go workspace is anchored by `go.mod`. Executable commands declare `package main` and `func main()`, while reusable libraries declare package names matching their directory names. Separating pure functions from `main()` enables unit testing via `go test`.\n\n[Advanced Internals]\nGo compiles directly to native ELF/PE/Mach-O machine code without a virtual machine. `CGO_ENABLED=0 go build -ldflags=\"-s -w\"` produces a statically linked binary that can run inside a 2MB distroless container.\n\n[12 Engineering Decision Pillars]\n1. What Is It: The essential developer workflow combining the command-line terminal, Git version control, and the Go toolchain (go mod init, go run, go build, go test).\n2. Internal Mechanics: When you run \"go run .\", the Go toolchain parses go.mod to resolve your module root, compiles all .go files in package main into a temporary native machine-code binary, and executes func main().\n3. Why Needed: Backend engineers build, test, and deploy services through the CLI and automated CI pipelines rather than GUI buttons.\n4. Why Preferred: Go includes a complete, zero-configuration toolchain (compiler, formatter gofmt, linter go vet, and test runner go test) out of the box.\n5. When To Use: At the start of every new Go repository or microservice.\n6. When To Avoid: Never write Go code outside a Go module (always initialize go.mod first).\n7. Advantages: Fast compilation; reproducible dependency tracking in go.mod/go.sum; safe version history with Git.\n8. Disadvantages: Requires familiarity with basic shell commands (cd, ls, mkdir).\n9. Alternatives: Makefile or task runners wrapping the underlying go commands.\n10. Incorrect Consequences: Using a package name other than \"package main\" for your entry file causes \"go run\" to fail because there is no executable entry point.\n11. Real-World Usage: Every production Go repository contains a go.mod at its root and entry points under cmd/\u003cservice\u003e/main.go.\n12. Perf/Sec/Maint/Scale: Maintainability: Keeping main() thin and moving logic into testable functions lets you verify behavior with go test.",
       "code_corrected": "package main\n\nimport \"fmt\"\n\nfunc Greeting(name string) string {\n\tif name == \"\" {\n\t\tname = \"Backend Engineer\"\n\t}\n\treturn fmt.Sprintf(\"Hello, %s!\", name)\n}\n\nfunc main() {\n\tfmt.Println(Greeting(\"Go Learner\"))\n}",
       "code_incorrect": "package app // BUG: Cannot build executable binary from package app\n\nfunc main() {\n\tprintln(\"Hello Backend\")\n}",
@@ -720,6 +764,72 @@
       "title": "0.0B Installing Go, Terminal Commands, Git Basics \u0026 Your First main.go"
     },
     {
+      "body_text": "1. Melakukan commit file binary hasil kompilasi (misal main atau server.exe) ke dalam Git. Selalu tambahkan bin/ ke .gitignore.\n2. Mengabaikan peringatan go vet. go vet menangkap kesalahan umum seperti format string yang salah atau unreachable code sebelum runtime.\n3. Menyimpan token/rahasia (.env) di dalam Git. Gunakan .env.example untuk template dan simpan .env asli di .gitignore.\n4. Mengubah file go.sum secara manual: file go.sum adalah cryptographic checksum yang diverifikasi otomatis oleh compiler Go; jangan pernah mengeditnya dengan tangan!",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l0-stage-a-git-go-workspace-sec-pitfalls",
+      "lesson_id": "l0-stage-a-git-go-workspace",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan Umum Pemula"
+    },
+    {
+      "body_text": "Langkah demi langkah di terminal laptop:\n\n```bash\n# 1. Buat folder proyek dan inisialisasi modul\n$ mkdir my-backend \u0026\u0026 cd my-backend\n$ go mod init github.com/user/my-backend\ngo: creating new go.mod: module github.com/user/my-backend\n\n# 2. Buat file main.go\n$ cat \u003c\u003c 'EOF' \u003e main.go\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n    fmt.Println(\"Halo Backend Go!\")\n}\nEOF\n\n# 3. Jalankan dan uji kompilasi\n$ go run main.go\nHalo Backend Go!\n\n$ go vet ./...\n# 0 warning!\n\n# 4. Inisialisasi Git dan ignore file biner\n$ git init\n$ echo \"bin/\" \u003e\u003e .gitignore\n$ echo \"*.db\" \u003e\u003e .gitignore\n$ git add .\n$ git commit -m \"feat: initial go workspace\"\n```\n\n**Panduan Perintah Esensial Go CLI:**\n- `go run main.go`: Kompilasi ke memori sementara dan langsung eksekusi. Bagus untuk siklus iterasi lokal cepat.\n- `go build -o bin/server main.go`: Menghasilkan satu file biner mandiri yang siap dideploy ke server VPS atau container.\n- `go vet ./...`: Menjalankan penganalisis statis resmi Go untuk mendeteksi kesalahan sintaksis, format string yang keliru, atau pemanggilan fungsi yang berisiko.\n- `go test -v ./...`: Menjalankan seluruh test suite otomatis dalam proyek.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l0-stage-a-git-go-workspace-sec-walkthrough",
+      "lesson_id": "l0-stage-a-git-go-workspace",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Langkah Praktis: Membuat Modul Go \u0026 Commit Pertama"
+    },
+    {
+      "body_text": "Bayangkan sebuah restoran: Menu di meja makan adalah Frontend (apa yang dilihat pelanggan). Dapur tempat memasak adalah Backend (tempat pesanan dicek dan diolah). Gudang bahan baku yang terkunci adalah Database. Pelanggan tidak boleh masuk ke gudang bahan makanan; mereka memberikan pesanan ke loket bernomor (Port jaringan seperti :8080), dan koki di dapur memprosesnya secara teratur.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l0-stage-a-what-is-backend-sec-analogy",
+      "lesson_id": "l0-stage-a-what-is-backend",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Analogi Dapur Restoran"
+    },
+    {
+      "body_text": "Ketika proses backend memanggil net.Listen(\"tcp\", \":8080\"), kernel OS mengalokasikan file descriptor socket, mengikatnya ke port 8080 pada tabel TCP host, dan menyiapkan antrean koneksi (SYN backlog queue). Go netpoller mendaftarkan descriptor ini ke epoll (Linux) atau IOCP (Windows) sehingga ratusan ribu koneksi dapat ditangani tanpa memblokir thread OS.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l0-stage-a-what-is-backend-sec-deep_dive",
+      "lesson_id": "l0-stage-a-what-is-backend",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Mekanisme Internal Sistem Operasi \u0026 Port"
+    },
+    {
+      "body_text": "Buat fungsi DefaultPort() string yang mengembalikan string \":8080\" secara deterministik tanpa dependensi eksternal, mempersiapkan pemahaman tentang konfigurasi port.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l0-stage-a-what-is-backend-sec-exercise",
+      "lesson_id": "l0-stage-a-what-is-backend",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Latihan Praktik: DefaultPort()"
+    },
+    {
+      "body_text": "Memahami apa yang sebenarnya dilakukan server backend di balik layar: bagaimana proses sistem operasi membuka socket jaringan, menerima request dari client, berinteraksi dengan database yang aman, dan mengapa client tidak boleh mengakses database secara langsung.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l0-stage-a-what-is-backend-sec-goal",
+      "lesson_id": "l0-stage-a-what-is-backend",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan \u0026 Konteks Backend"
+    },
+    {
       "body_text": "[Beginner Overview]\nThink of a restaurant: the dining room menu is the Frontend (what the customer sees), the kitchen is the Backend (where orders are checked and cooked), and the locked vault/pantry is the Database. Customers never walk into the vault—they give their order to the kitchen via a numbered counter window (a Port like 8080).\n\n[Intermediate Technical]\nAt the OS level, a backend is a long-running user-space process. It reads runtime settings from environment variables via os.Getenv, opens a listening TCP socket on HOST:PORT, and multiplexes incoming client connections across lightweight goroutines.\n\n[Advanced Internals]\nUnder Linux/Windows, listening on a TCP port allocates a socket file descriptor in the kernel table. Twelve-Factor App architecture mandates strict separation of config from code via environment variables so immutable container images can be promoted from staging to prod.\n\n[12 Engineering Decision Pillars]\n1. What Is It: A backend is a program running on a computer (server) that waits for network requests on a specific Port, enforces security and business rules, reads or writes a database, and sends back a structured response.\n2. Internal Mechanics: When you start a compiled Go binary, the Operating System creates a Process with a Process ID (PID), virtual memory space, file descriptors, and an environment variable table (os.Getenv). When the process binds to a TCP port (e.g. :8080), the OS kernel routes packets arriving for that port to your process.\n3. Why Needed: If a web page or mobile app connected directly to your database, any user could inspect the app, extract the database password, and delete or steal every customer record.\n4. Why Preferred: Centralizing rules in a compiled Go server gives you one authoritative boundary for validation, authentication, rate limiting, and database transactions.\n5. When To Use: Every web app, mobile app, payment webhook, or multi-user system where data must be shared, validated, and protected.\n6. When To Avoid: Purely offline client-side calculators or static brochure pages with no shared state or secrets.\n7. Advantages: Protects database credentials; enforces business invariants; compiles to a single fast native binary in Go.\n8. Disadvantages: Requires running and monitoring a server process and managing network/database configuration.\n9. Alternatives: Static files on a CDN (no dynamic state) or Serverless functions (FaaS, higher cold-start latency).\n10. Incorrect Consequences: Hardcoding ports or database passwords inside source code makes the binary impossible to reconfigure across environments and leaks secrets into Git.\n11. Real-World Usage: Go Backend Academy itself reads PORT, DB_DRIVER, POSTGRES_PORT, and SQLITE_PATH from .env / environment variables at startup.\n12. Perf/Sec/Maint/Scale: Security: Secrets stay in environment variables, never in Git. Maintainability: One binary runs anywhere by changing .env.",
       "code_corrected": "package main\n\nimport \"os\"\n\nfunc ResolvePort(defaultPort string) string {\n\tif v := os.Getenv(\"PORT\"); v != \"\" {\n\t\treturn v\n\t}\n\treturn defaultPort\n}",
       "code_incorrect": "package main\n\n// BUG: Changing port requires recompiling; password is leaked in Git!\nconst ServerPort = \"8080\"\nconst DatabasePassword = \"prod-secret-password\"",
@@ -729,6 +839,28 @@
       "reasoning": "os.Getenv(\"PORT\") allows .env, systemd, Docker, or Kubernetes to inject any port at runtime while falling back to defaultPort in local dev.",
       "section_type": "core",
       "title": "0.0A What is a Backend? Servers, Terminal, Files, Processes \u0026 Ports"
+    },
+    {
+      "body_text": "1. Port Hardcoded: Menulis http.ListenAndServe(\":8080\", nil) tanpa membaca environment variable PORT membuat aplikasi tidak bisa dideploy di Docker/K8s/Heroku/VPS yang membutuhkan port dinamis.\n2. DefaultServeMux: Menggunakan http.HandleFunc() global tanpa membuat mux := http.NewServeMux() baru menyebabkan rute mudah tertimpa oleh pustaka pihak ketiga.\n3. Mengabaikan Nil Return: ListenAndServe selalu mengembalikan error jika berhenti; periksa error tersebut!",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l0-stage-a-what-is-backend-sec-pitfalls",
+      "lesson_id": "l0-stage-a-what-is-backend",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan Umum Pemula (Anti-Pattern vs Idiomatic)"
+    },
+    {
+      "body_text": "Program Go berikut membuat server web minimal menggunakan pustaka standar net/http:\n\n```go\npackage main\n\nimport (\n\t\"fmt\"\n\t\"log/slog\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \":8080\"\n\t} else if port[0] != ':' {\n\t\tport = \":\" + port\n\t}\n\n\tmux := http.NewServeMux()\n\tmux.HandleFunc(\"GET /healthz\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusOK)\n\t\t_, _ = w.Write([]byte(`{\"status\":\"ok\",\"service\":\"auth-backend\"}`))\n\t})\n\n\tslog.Info(\"server listening\", \"port\", port)\n\tif err := http.ListenAndServe(port, mux); err != nil {\n\t\tslog.Error(\"server halted\", \"error\", err)\n\t\tos.Exit(1)\n\t}\n}\n```\n\nJalankan di terminal laptopmu:\n```bash\n$ go run main.go\n2026/11/08 10:00:00 INFO server listening port=:8080\n```\n\nBuka terminal kedua dan kirim request via curl:\n```bash\n$ curl -i http://localhost:8080/healthz\nHTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 42\n\n{\"status\":\"ok\",\"service\":\"auth-backend\"}\n```",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l0-stage-a-what-is-backend-sec-walkthrough",
+      "lesson_id": "l0-stage-a-what-is-backend",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Program Pertama: Server HTTP Sederhana"
     },
     {
       "body_text": "{\"beginner\": \"Authentication (AuthN) answers 'Who are you?' (logging in with password or OAuth). Authorization (AuthZ) answers 'What are you allowed to do?' (can User A delete User B's invoice?). A stateless backend doesn't rely on one specific server remembering you in its RAM\\u2014any server in the cluster can handle your request.\", \"intermediate\": \"When scaling horizontally behind an L7 load balancer, storing session state in a process-local Go map breaks as soon as multiple instances run. Externalizing session state to Redis or verifying cryptographic tokens makes compute nodes cattle, not pets. Similarly, a Modular Monolith enforces strict Go package boundaries (using internal/ packages) inside one binary, avoiding RPC serialization taxes until independent scaling is proven necessary.\", \"advanced\": \"Distributed microservices trade in-process function calls (~2ns) and local ACID transactions for gRPC/HTTP calls (~1\\u20135ms), partial failures, clock skew, and Saga/Outbox coordination. Start with a Modular Monolith where domain modules communicate via narrow Go interfaces; if one domain later requires 10x CPU scaling, swap the interface implementation from an in-process call to a gRPC client without rewriting domain logic.\"}",
@@ -764,6 +896,50 @@
       "title": "1.1 Slices, Maps, Pointers, Stack vs Heap \u0026 Escape Analysis"
     },
     {
+      "body_text": "If/switch adalah petugas pemeriksa kualitas di pabrik: jika barang rusak, langsung alihkan ke jalur reject (return err). Closure adalah pekerja yang membawa tas ransel berisi catatan dari meja sebelumnya (variabel tertangkap).",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-control-flow-loops-functions-sec-analogy",
+      "lesson_id": "l1-stage-b-control-flow-loops-functions",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Inspektur Jalur Perakitan \u0026 Kantong Data"
+    },
+    {
+      "body_text": "Kompiler Go memeriksa apakah variabel yang ditangkap oleh closure keluar dari scope fungsi pembuatnya (escape to heap). Jika closure dikembalikan sebagai return value, variabel tertangkap dialokasikan di heap melalui GC agar tetap valid saat dipanggil kemudian. Anda dapat memeriksa keputusan escape compiler dengan menjalankan go build -gcflags=\"-m\".",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-control-flow-loops-functions-sec-deep_dive",
+      "lesson_id": "l1-stage-b-control-flow-loops-functions",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Escape Analysis pada Closure"
+    },
+    {
+      "body_text": "Implementasikan fungsi yang menerima slice integer dan mengembalikan slice baru hanya berisi angka positif (\u003e 0).",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-control-flow-loops-functions-sec-exercise",
+      "lesson_id": "l1-stage-b-control-flow-loops-functions",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Tantangan: FilterPositiveNumbers(nums []int) []int"
+    },
+    {
+      "body_text": "Menguasai struktur kendali if-else, switch, perulangan for (satu-satunya keyword perulangan di Go), fungsi dengan multiple return values, serta semantik closure dan penangkapan variabel loop [Celah 2].",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-control-flow-loops-functions-sec-goal",
+      "lesson_id": "l1-stage-b-control-flow-loops-functions",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan: Alur Kendali, For Loops, Closure \u0026 Variable Capture"
+    },
+    {
       "body_text": "[Beginner Overview]\nIn Go, `if` makes decisions, `switch` picks between multiple options (and stops automatically without needing `break`), and `for` is the only loop word you ever need. Best of all, a Go function can return two things at once: the answer AND an `error` (which is `nil` when everything succeeded).\n\n[Intermediate Technical]\nGo `if` statements support a scoped initialization statement (`if v, err := parse(x); err != nil { return err }`) so temporary variables do not leak into the rest of the function body. Guard clauses validate preconditions first, leaving the main business logic unindented.\n\n[Advanced Internals]\nUnder Go register-based calling convention (Go 1.17+), multiple return values `(bool, error)` are passed back in CPU registers rather than spilling to the stack, making explicit error returns zero-allocation and faster than stack-unwinding exceptions.\n\n[12 Engineering Decision Pillars]\n1. What Is It: Go control structures (`if`, `switch`, `for`) and multi-value function signatures (`(T, error)`).\n2. Internal Mechanics: Go has no `while` or `do-while` keywords—`for` handles counter loops (`for i := 0; i \u003c n; i++`), condition loops (`for cond`), and infinite loops (`for {}`). Functions return multiple values directly on the call stack or CPU registers.\n3. Why Needed: Every backend handler must validate inputs, branch on business rules, loop over records, and report errors clearly to its caller.\n4. Why Preferred: Returning `(result, error)` forces callers to acknowledge failure paths at the call site instead of letting hidden exceptions crash the process.\n5. When To Use: Use early-return guard clauses at the top of functions and `(T, error)` for any operation that can fail.\n6. When To Avoid: Avoid deeply nested `if/else` pyramids; return early on invalid conditions.\n7. Advantages: No accidental switch fallthrough; no hidden control-flow jumps from exceptions; crystal-clear error paths.\n8. Disadvantages: Requires explicit `if err != nil` checks.\n9. Alternatives: Table-driven lookup maps when branching across dozens of static keys.\n10. Incorrect Consequences: Ignoring a returned error or conflating invalid input with a normal `false` result hides bugs.\n11. Real-World Usage: Every repository and validator function in Go Backend Academy returns `(T, error)` and uses guard clauses.\n12. Perf/Sec/Maint/Scale: Maintainability: Guard clauses keep cyclomatic complexity low and make security checks obvious during code review.",
       "code_corrected": "package auth\n\nimport \"errors\"\n\nfunc ValidateAccountAge(age int) (bool, error) {\n\tif age \u003c 0 || age \u003e 130 {\n\t\treturn false, errors.New(\"age out of realistic bounds\")\n\t}\n\tif age \u003c 18 {\n\t\treturn false, nil\n\t}\n\treturn true, nil\n}",
       "code_incorrect": "package auth\n\nfunc CheckAgeBad(age int) bool {\n\tif age \u003e= 0 {\n\t\tif age \u003c= 130 {\n\t\t\tif age \u003e= 18 {\n\t\t\t\treturn true\n\t\t\t}\n\t\t}\n\t}\n\treturn false // BUG: Caller cannot tell if age was 16 or corrupt (-999)\n}",
@@ -773,6 +949,72 @@
       "reasoning": "The first guard clause rejects impossible inputs with an explicit error; the second handles valid under-18 users; the final line returns adult approval.",
       "section_type": "core",
       "title": "1.0B Conditionals (if/switch), For Loops, Functions \u0026 Multiple Return Values"
+    },
+    {
+      "body_text": "1. Variable Shadowing: Menggunakan if v, err := fn(); err != nil di mana err menimpa err di luar scope, menyebabkan variabel di luar tidak terupdate.\n2. Di Go versi sebelum 1.22, variabel loop dibagi di seluruh iterasi sehingga goroutine/closure menangkap nilai terakhir jika tidak di-pass sebagai parameter.\n3. Switch tanpa break: Berbeda dengan C atau Java, switch di Go otomatis break di akhir setiap case; Anda tidak perlu menulis break di tiap baris. Jika ingin melanjutkan ke case berikutnya, gunakan kata kunci fallthrough secara eksplisit.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-control-flow-loops-functions-sec-pitfalls",
+      "lesson_id": "l1-stage-b-control-flow-loops-functions",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan: Variable Shadowing \u0026 Pre-1.22 Capture"
+    },
+    {
+      "body_text": "Program berikut menunjukkan penggunaan closure dan perulangan:\n\n```go\npackage main\n\nimport \"fmt\"\n\nfunc makeMultiplier(factor int) func(int) int {\n\t// Variabel factor tertangkap oleh closure\n\treturn func(x int) int {\n\t\treturn x * factor\n\t}\n}\n\nfunc main() {\n\tdouble := makeMultiplier(2)\n\tfmt.Printf(\"2 x 5 = %d\\n\", double(5))\n\n\titems := []string{\"auth\", \"payments\", \"orders\"}\n\tvar printFns []func()\n\n\t// Di Go 1.22+, variabel loop dibuat baru pada setiap iterasi\n\tfor _, item := range items {\n\t\tprintFns = append(printFns, func() {\n\t\t\tfmt.Printf(\"Processing service: %s\\n\", item)\n\t\t})\n\t}\n\n\tfor _, fn := range printFns {\n\t\tfn()\n\t}\n}\n```\n\nKeluaran terminal:\n```bash\n$ go run main.go\n2 x 5 = 10\nProcessing service: auth\nProcessing service: payments\nProcessing service: orders\n```\n\n**Aturan Penting Multiple Return Values:**\nDi Go, fungsi lazimnya mengembalikan nilai hasil dan error berdampingan: `func Calculate(a, b int) (int, error)`. Pola idiomatik Go adalah memeriksa error terlebih dahulu (`if err != nil { return nil, err }`) lalu membiarkan aliran kode utama tetap berada pada indentasi kiri (happy path unindented).",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-control-flow-loops-functions-sec-walkthrough",
+      "lesson_id": "l1-stage-b-control-flow-loops-functions",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Kode Contoh: Perulangan, Closure, dan Go 1.22+ Semantics"
+    },
+    {
+      "body_text": "Interface di Go tidak butuh kata kunci implements; jika bebek bisa berenang dan bersuara kwek-kwek, maka ia adalah bebek. Membungkus error (%w) ibarat memasukkan surat asli ke dalam amplop berstempel \"gagal di modul X\", sehingga rantai penyebab tetap utuh hingga ke akar masalah.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-interfaces-errors-fundamentals-sec-analogy",
+      "lesson_id": "l1-stage-b-interfaces-errors-fundamentals",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Sertifikat Standar \u0026 Amplop Surat Berantai"
+    },
+    {
+      "body_text": "Interface di runtime diwakili oleh struct iface (dua pointer: tab *itab yang menyimpan tipe dan tabel method, serta data unsafe.Pointer). Ketika panic terjadi, Go mencetak stack trace: baris pertama menunjukkan pesan panic, diikuti oleh goroutine ID, nama fungsi, file path, dan nomor baris pemanggil dari dalam ke luar.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-interfaces-errors-fundamentals-sec-deep_dive",
+      "lesson_id": "l1-stage-b-interfaces-errors-fundamentals",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Anatomi Interface \u0026 Cara Membaca Stack Trace"
+    },
+    {
+      "body_text": "Buat fungsi pembungkus yang menyertakan ErrNotFound dengan format yang dapat dideteksi oleh errors.Is.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-interfaces-errors-fundamentals-sec-exercise",
+      "lesson_id": "l1-stage-b-interfaces-errors-fundamentals",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Tantangan: WrapNotFoundError(item string) error"
+    },
+    {
+      "body_text": "Menguasai filosofi Go: \"Errors are values\". Memahami deklarasi interface implisit, teknik membungkus error dengan fmt.Errorf(\"%w\"), pelacakan akar masalah dengan errors.Is dan errors.As, serta cara membaca stack trace panic [Celah 1].",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-interfaces-errors-fundamentals-sec-goal",
+      "lesson_id": "l1-stage-b-interfaces-errors-fundamentals",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan: Interface, Error Wrapping \u0026 Membaca Stack Trace"
     },
     {
       "body_text": "[Beginner Overview]\nAn **Interface** is a job description: \"anything with a `Read(p []byte) (int, error)` method is an `io.Reader`.\" You do not have to write `implements`—if your struct has the method, it gets the job! The most famous interface in Go is `error`. When an error happens, wrap it with `fmt.Errorf(\"context: %w\", err)` so callers can still check the original cause with `errors.Is`.\n\n[Intermediate Technical]\nSentinel errors (`var ErrNotFound = errors.New(\"not found\")`) represent expected domain conditions. Wrapping them with `%w` constructs an error chain that `errors.Is(err, ErrNotFound)` traverses automatically. Use `defer f.Close()` right after checking `f, err := os.Open(...)` so the file descriptor never leaks.\n\n[Advanced Internals]\nIn Go 1.20+, `errors.Join(errs...)` combines multiple validation errors into a single error whose `Unwrap() []error` method works seamlessly with `errors.Is` and `errors.As` (used in `config.Load()`).\n\n[12 Engineering Decision Pillars]\n1. What Is It: Implicit behavioral contracts (`interface`), structured error chains (`error`, `%w`, `errors.Is`), and scoped resource cleanup (`defer`).\n2. Internal Mechanics: Any type that defines the methods listed in an interface satisfies it automatically at compile time. `error` is a built-in interface with one method: `Error() string`. `defer` pushes a cleanup call onto the current goroutine frame so it runs even if the function returns early.\n3. Why Needed: Interfaces let your HTTP handlers and services depend on small contracts (like `curriculum.Repository`) instead of hard-wiring a concrete database driver, and `%w` error wrapping preserves root causes across layers.\n4. Why Preferred: Consumer-defined interfaces keep packages decoupled without heavyweight Java/C# inheritance hierarchies.\n5. When To Use: Define small 1-to-4 method interfaces in the consumer package, wrap lower-level errors with `fmt.Errorf(\"doing X: %w\", err)`, and `defer rows.Close()` immediately after opening a resource.\n6. When To Avoid: Do not create huge 20-method interfaces before you have a real consumer or test fake.\n7. Advantages: Effortless unit testing with in-memory fakes; preserved error chains; leak-free resource cleanup with `defer`.\n8. Disadvantages: Returning a typed `nil` pointer as an `error` interface creates a non-nil interface value (covered in depth in Lesson 1.2).\n9. Alternatives: Concrete struct dependencies for purely internal helper utilities.\n10. Incorrect Consequences: Formatting errors with `%v` or `%s` instead of `%w` breaks `errors.Is(err, sql.ErrNoRows)`, turning 404 Not Found responses into 500 Internal Server Errors.\n11. Real-World Usage: `internal/modules/curriculum/service.go`, `lessons/service.go`, and `assessments/service.go` all define small consumer `Repository` interfaces satisfied by `*database.Store`.\n12. Perf/Sec/Maint/Scale: Maintainability: Adding context at each boundary (`\"querying user %s: %w\"`) produces self-explanatory logs without noisy stack traces.",
@@ -786,6 +1028,72 @@
       "title": "1.0E Interfaces, Explicit Error Handling, Custom Errors \u0026 Defer"
     },
     {
+      "body_text": "1. Jangan gunakan panic() untuk alur kendali normal atau kesalahan bisnis (seperti user tidak ditemukan). Gunakan return error.\n2. Interface Nil Trap: Variabel interface bernilai nil HANYA jika tipe dan nilainya bernilai nil. Jika pointer bertipe konkret nil dimasukkan ke interface error, interface tersebut TIDAK nil (if err != nil akan bernilai true)!\n3. Gunakan errors.Is(err, target) alih-alih err == target saat error dibungkus dengan %w.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-interfaces-errors-fundamentals-sec-pitfalls",
+      "lesson_id": "l1-stage-b-interfaces-errors-fundamentals",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan: Panic vs Error \u0026 Interface Nil Trap"
+    },
+    {
+      "body_text": "```go\npackage main\n\nimport (\n\t\"errors\"\n\t\"fmt\"\n)\n\nvar ErrNotFound = errors.New(\"resource not found\")\n\ntype DatabaseError struct {\n\tQuery string\n\tErr   error\n}\n\nfunc (e *DatabaseError) Error() string {\n\treturn fmt.Sprintf(\"db error on query %q: %v\", e.Query, e.Err)\n}\n\nfunc (e *DatabaseError) Unwrap() error {\n\treturn e.Err\n}\n\nfunc findUser(id string) error {\n\t// Menambahkan konteks ke error dasar\n\treturn \u0026DatabaseError{\n\t\tQuery: \"SELECT * FROM users WHERE id = $1\",\n\t\tErr:   fmt.Errorf(\"user %s: %w\", id, ErrNotFound),\n\t}\n}\n\nfunc main() {\n\terr := findUser(\"usr_404\")\n\tif err != nil {\n\t\tfmt.Printf(\"Log error: %v\\n\", err)\n\t\tif errors.Is(err, ErrNotFound) {\n\t\t\tfmt.Println(\"Aksi: Kembalikan HTTP 404 ke client!\")\n\t\t}\n\t}\n}\n```\n\nKeluaran terminal:\n```bash\n$ go run main.go\nLog error: db error on query \"SELECT * FROM users WHERE id = $1\": user usr_404: resource not found\nAksi: Kembalikan HTTP 404 ke client!\n```",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-interfaces-errors-fundamentals-sec-walkthrough",
+      "lesson_id": "l1-stage-b-interfaces-errors-fundamentals",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Kode Contoh: Custom Error \u0026 Wrapping"
+    },
+    {
+      "body_text": "Membaca file atau request HTTP dengan io.ReadAll ibarat menuangkan seluruh isi bendungan ke dalam ember di RAM laptop; jika ukurannya 2 GB, server akan mati (OOM). Abstraksi io.Reader mengalirkan data setetes demi setetes melalui pipa dengan batas aman.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-json-files-unit-testing-sec-analogy",
+      "lesson_id": "l1-stage-b-json-files-unit-testing",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Pipa Air vs Wadah Ember Raksasa"
+    },
+    {
+      "body_text": "type Reader interface { Read(p []byte) (n int, err error) }. Aturan ketat Go: jika Read membaca n \u003e 0 byte sebelum menemukan akhir stream, ia boleh mengembalikan err == io.EOF atau err == nil pada pemanggilan saat itu. Pengecekan data n \u003e 0 harus selalu diproses sebelum memeriksa err. Pembuatan pipeline pemrosesan data (misal gzip.NewReader membungkus io.LimitReader membungkus net.Conn) adalah inti kekuatan I/O modular di Go.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-json-files-unit-testing-sec-deep_dive",
+      "lesson_id": "l1-stage-b-json-files-unit-testing",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Kontrak io.Reader dan io.Writer di Standar Go"
+    },
+    {
+      "body_text": "Implementasikan fungsi parser yang memvalidasi bahwa payload JSON memiliki field email non-kosong.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-json-files-unit-testing-sec-exercise",
+      "lesson_id": "l1-stage-b-json-files-unit-testing",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Tantangan: ParseUserJSON(r io.Reader) (*User, error)"
+    },
+    {
+      "body_text": "Menguasai serialisasi DTO dengan JSON struct tags, abstraksi streaming io.Reader dan io.Writer untuk efisiensi memori [Celah 3], membaca environment variable, dan menulis unit test otomatis dengan testing.T.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-json-files-unit-testing-sec-goal",
+      "lesson_id": "l1-stage-b-json-files-unit-testing",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan: JSON Tags, io.Reader/Writer \u0026 Unit Testing"
+    },
+    {
       "body_text": "[Beginner Overview]\nWhen a browser sends JSON like `{\"title\":\"Learn Go\",\"done\":false}`, Go uses `json.Unmarshal` to fill a struct. Two golden rules: (1) Field names inside the struct MUST start with a Capital letter (`Title`, `Done`) so `encoding/json` is allowed to see them, and (2) always pass a pointer (`\u0026in`) to `json.Unmarshal` so it can fill your struct!\n\n[Intermediate Technical]\nStruct tags like `` `json:\"title\"` `` map snake_case or lowercase JSON keys to PascalCase Go fields, and `` `json:\"missing,omitempty\"` `` omits empty fields from responses. Unit tests live alongside code in `*_test.go` and fail via `t.Errorf` or `t.Fatalf`.\n\n[Advanced Internals]\nTo prevent silent contract drift on incoming HTTP requests, wrap the stream in `http.MaxBytesReader` and use `dec := json.NewDecoder(r.Body); dec.DisallowUnknownFields()` followed by a second EOF check (`internal/platform/http/router.go:decodeJSON`).\n\n[12 Engineering Decision Pillars]\n1. What Is It: Translating between JSON payloads and Go structs using `encoding/json`, reading configuration/files via `os`, and verifying code with `testing.T`.\n2. Internal Mechanics: `encoding/json` uses reflection to map JSON object keys to exported (Capitalized) struct fields decorated with `` `json:\"field_name\"` `` tags. `go test` compiles files ending in `_test.go` and runs every `func TestXxx(t *testing.T)`.\n3. Why Needed: REST APIs communicate in JSON, and no backend function is trustworthy until an automated unit test proves both its happy path and error cases.\n4. Why Preferred: Go standard `encoding/json` and `testing` packages require zero third-party assertion or serialization dependencies.\n5. When To Use: On every API request/response DTO and every package in your repository.\n6. When To Avoid: Never use lowercase (unexported) struct fields on JSON DTOs—`encoding/json` will silently ignore them.\n7. Advantages: Zero external dependencies; built-in `go test -v -race` execution; clear struct tag mapping.\n8. Disadvantages: Reflection-based JSON decoding is slower than streaming decoders if huge payloads are not bounded.\n9. Alternatives: Streaming `json.NewDecoder(r.Body)` with `DisallowUnknownFields()` for HTTP request bodies.\n10. Incorrect Consequences: Lowercase struct fields result in empty/zero values after `json.Unmarshal` with no error returned, causing silent data loss.\n11. Real-World Usage: Used in `tests/server_integration_test.go` and all DTOs in `internal/shared/`.\n12. Perf/Sec/Maint/Scale: Quality: Running `go test -v ./...` catches regressions in sub-second time.",
       "code_corrected": "package dto\n\nimport (\n\t\"encoding/json\"\n\t\"errors\"\n)\n\ntype CreateTaskInput struct {\n\tTitle string `json:\"title\"`\n\tDone  bool   `json:\"done\"`\n}\n\nfunc ParseTaskJSON(raw []byte) (CreateTaskInput, error) {\n\tvar in CreateTaskInput\n\tif err := json.Unmarshal(raw, \u0026in); err != nil {\n\t\treturn CreateTaskInput{}, err\n\t}\n\tif in.Title == \"\" {\n\t\treturn CreateTaskInput{}, errors.New(\"title is required\")\n\t}\n\treturn in, nil\n}",
       "code_incorrect": "package dto\n\n// BUG: title and done are lowercase (unexported), so json.Unmarshal ignores them!\ntype CreateTaskInput struct {\n\ttitle string `json:\"title\"`\n\tdone  bool   `json:\"done\"`\n}",
@@ -795,6 +1103,72 @@
       "reasoning": "Exported `Title` and `Done` fields are populated by `json.Unmarshal(raw, \u0026in)`, and `in.Title == \"\"` rejects blank titles immediately.",
       "section_type": "core",
       "title": "1.0F JSON Struct Tags, File I/O, Environment Variables \u0026 Your First Go Test"
+    },
+    {
+      "body_text": "1. Struct field yang dimulai dengan huruf kecil (unexported) TIDAK AKAN diserialisasi oleh package encoding/json. Selalu gunakan huruf kapital diawal nama field (misal Port, bukan port).\n2. Memakai io.ReadAll pada r.Body tanpa pembatasan ukuran membuka celah Denial-of-Service OOM.\n3. Membaca file baris demi baris: Jangan membaca seluruh file log ke dalam slice memori; gunakan bufio.NewScanner(file) untuk iterasi streaming yang hemat RAM.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-json-files-unit-testing-sec-pitfalls",
+      "lesson_id": "l1-stage-b-json-files-unit-testing",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan: Unbounded io.ReadAll \u0026 Huruf Kapital Struct Field"
+    },
+    {
+      "body_text": "```go\npackage main\n\nimport (\n\t\"encoding/json\"\n\t\"io\"\n\t\"strings\"\n\t\"testing\"\n)\n\ntype Config struct {\n\tAppName string `json:\"app_name\"`\n\tPort    int    `json:\"port\"`\n}\n\nfunc ParseConfig(r io.Reader) (*Config, error) {\n\t// Batasi pembacaan maksimal 10 KB untuk mencegah serangan kehabisan memori\n\tlimited := io.LimitReader(r, 10\u003c\u003c10)\n\tvar cfg Config\n\tdec := json.NewDecoder(limited)\n\tdec.DisallowUnknownFields() // Tolak field asing\n\tif err := dec.Decode(\u0026cfg); err != nil {\n\t\treturn nil, err\n\t}\n\treturn \u0026cfg, nil\n}\n\nfunc TestParseConfig(t *testing.T) {\n\tinput := `{\"app_name\":\"backend\",\"port\":8080}`\n\tcfg, err := ParseConfig(strings.NewReader(input))\n\tif err != nil {\n\t\tt.Fatalf(\"unexpected error: %v\", err)\n\t}\n\tif cfg.Port != 8080 {\n\t\tt.Errorf(\"expected port 8080, got %d\", cfg.Port)\n\t}\n}\n```\n\nJalankan test di terminal:\n```bash\n$ go test -v ./...\n=== RUN   TestParseConfig\n--- PASS: TestParseConfig (0.00s)\nPASS\nok  \tmy-backend\t0.012s\n```\n\n**Panduan Opsi Tag JSON Go:**\n- `json:\"name,omitempty\"`: Jangan menyertakan field jika nilainya adalah zero value (seperti 0, false, atau \"\").\n- `json:\"-\"`: Jangan pernah menyerialisasi field ini (sangat krusial untuk field sensitif seperti PasswordHash).\n- `json:\",string\"`: Mengubah angka menjadi string JSON (misal `100` menjadi `\"100\"`), bermanfaat untuk kompatibilitas JavaScript int64 precision limit.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-json-files-unit-testing-sec-walkthrough",
+      "lesson_id": "l1-stage-b-json-files-unit-testing",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Kode Contoh: json.Decoder dengan io.LimitReader \u0026 Test"
+    },
+    {
+      "body_text": "Array di Go memiliki ukuran tetap. Slice adalah \"jendela pandang\" fleksibel di atas array. Map adalah lemari arsip dengan label nama kunci, di mana dokumen dapat dicari dalam waktu O(1).",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-slices-maps-iteration-sec-analogy",
+      "lesson_id": "l1-stage-b-slices-maps-iteration",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Jendela Geser \u0026 Lemari Arsip Berindeks"
+    },
+    {
+      "body_text": "Slice header adalah struct 3 kata: ptr *T, len int, cap int (24 byte). Map di Go adalah pointer ke struct runtime.hmap yang mengelola bucket (masing-masing 8 pasangan key-value). Jika load factor melebihi ambang batas (~6.5), map dialokasikan ulang ke jumlah bucket dua kali lipat secara incremental. Mulai Go 1.21+, tersedia fungsi built-in clear(s) dan clear(m) untuk menghapus semua elemen atau menyetel kembali ke zero value tanpa melepaskan kapasitas memori yang telah dialokasikan.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-slices-maps-iteration-sec-deep_dive",
+      "lesson_id": "l1-stage-b-slices-maps-iteration",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Struktur Internal Slice \u0026 Map di Runtime Go"
+    },
+    {
+      "body_text": "Buat fungsi untuk menghitung frekuensi kemunculan tiap kata dalam slice string.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-slices-maps-iteration-sec-exercise",
+      "lesson_id": "l1-stage-b-slices-maps-iteration",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Tantangan: CountWordFrequencies(words []string) map[string]int"
+    },
+    {
+      "body_text": "Memahami bagaimana slice dan map bekerja di memori: pointer, length, capacity, pertumbuhan dinamis dengan append(), alokasi bucket pada map, dan pencegahan fatal error concurrent map writes.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-slices-maps-iteration-sec-goal",
+      "lesson_id": "l1-stage-b-slices-maps-iteration",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan: Koleksi Data — Slices \u0026 Maps"
     },
     {
       "body_text": "[Beginner Overview]\nA **Slice** (`[]string{\"paid\", \"pending\"}`) is a numbered list that can grow with `append()`. A **Map** (`map[string]int`) is a dictionary that connects a Key (like `\"paid\"`) to a Value (like `3`). Important rule: before putting items into a map, you must create it with `make(map[string]int)` or `map[string]int{}`!\n\n[Intermediate Technical]\nWhen iterating a slice or map with `for k, v := range col`, `v` is a copy of the element. For maps, reading a missing key returns the value type zero value without panicking; use `v, ok := m[k]` when you need to know whether the key was actually present.\n\n[Advanced Internals]\nPre-allocating `make(map[string]int, hint)` computes the required bucket logarithm `B` up front in `runtime.makemap`, eliminating incremental evacuation pauses during bulk inserts.\n\n[12 Engineering Decision Pillars]\n1. What Is It: Go two primary collection types: Slices (`[]T`) for ordered sequences and Maps (`map[K]V`) for key-value lookups.\n2. Internal Mechanics: A slice is a 24-byte header (`ptr`, `len`, `cap`) pointing to a contiguous backing array. A map is a pointer to a runtime hash table (`runtime.hmap`) organized into buckets of 8 key/value slots.\n3. Why Needed: Almost every API endpoint returns a list of items (a slice) or aggregates/looks up records by ID or status (a map).\n4. Why Preferred: Slices offer cache-friendly contiguous memory, while built-in maps provide O(1) average lookup with randomized hash seeds to prevent hash-flooding DoS.\n5. When To Use: Use `[]T` for ordered collections and JSON arrays; use `map[K]V` for deduplication, frequency counting, and O(1) key lookups.\n6. When To Avoid: Never write to an uninitialized (`nil`) map, and never share a map across concurrent goroutines without a `sync.RWMutex`.\n7. Advantages: Ergonomic `append()`, `len()`, `for i, v := range`, and `val, ok := m[key]` syntax.\n8. Disadvantages: Map iteration order is intentionally randomized by the Go runtime.\n9. Alternatives: Sorted slices with `slices.BinarySearch` for small read-heavy lookup tables.\n10. Incorrect Consequences: Declaring `var m map[string]int` and writing `m[\"k\"] = 1` crashes the goroutine with `panic: assignment to entry in nil map`.\n11. Real-World Usage: Used in `config.Load()` for `CORSAllowedOrigins map[string]bool` and in `Store.GetUserProgress` for lesson status maps.\n12. Perf/Sec/Maint/Scale: Performance: Pre-sizing with `make([]T, 0, n)` or `make(map[K]V, n)` avoids repeated reallocations.",
@@ -808,6 +1182,72 @@
       "title": "1.0C Working with Collections: Arrays, Slices, Maps \u0026 Range Loops"
     },
     {
+      "body_text": "1. Membaca map tanpa idiom \"comma-ok\" (val, ok := m[key]). Jika key tidak ada, Go mengembalikan zero value yang bisa salah diartikan sebagai data asli.\n2. Mengubah slice yang diturunkan dari slice lain (sub-slicing a[1:3]) bisa memodifikasi array dasar yang sama secara tidak sengaja.\n3. Map tidak aman untuk akses bersamaan dari banyak goroutine (bukan thread-safe); gunakan sync.RWMutex atau sync.Map.\n4. Menghapus elemen map dengan aman: gunakan fungsi bawaan delete(m, key). Jika key tidak ada, delete() tidak menimbulkan panic.\n5. Menahan Memori dengan Sub-slice: Mengambil irisan kecil dari slice raksasa (misal s := hugeSlice[:2]) tetap mengunci seluruh underlying array di RAM. Gunakan copy(dst, src) untuk membebaskan sisa memori ke Garbage Collector.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-slices-maps-iteration-sec-pitfalls",
+      "lesson_id": "l1-stage-b-slices-maps-iteration",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan Umum"
+    },
+    {
+      "body_text": "```go\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n\t// Pre-alokasi kapasitas mencegah alokasi ulang berulang\n\tusers := make([]string, 0, 4)\n\tusers = append(users, \"Alice\", \"Bob\", \"Charlie\")\n\tfmt.Printf(\"Slice len=%d cap=%d items=%v\\n\", len(users), cap(users), users)\n\n\t// Inisialisasi Map\n\troles := map[string]string{\n\t\t\"usr_1\": \"admin\",\n\t\t\"usr_2\": \"member\",\n\t}\n\n\trole, exists := roles[\"usr_1\"]\n\tfmt.Printf(\"usr_1 role=%s (exists=%t)\\n\", role, exists)\n\n\tmissing, exists := roles[\"usr_99\"]\n\tfmt.Printf(\"usr_99 role=%q (exists=%t)\\n\", missing, exists)\n}\n```\n\nKeluaran terminal:\n```bash\n$ go run main.go\nSlice len=3 cap=4 items=[Alice Bob Charlie]\nusr_1 role=admin (exists=true)\nusr_99 role=\"\" (exists=false)\n```\n\n**Prinsip Kerja Perulangan Range:**\nKetika menggunakan `for key, value := range collection`, Go menyalin setiap elemen ke dalam variabel iterasi. Jika Anda mengubah `value`, elemen asli di dalam slice/map tidak akan berubah! Untuk mengubah elemen slice asli, akses lewat indeksnya: `users[i] = \"NewValue\"`.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-slices-maps-iteration-sec-walkthrough",
+      "lesson_id": "l1-stage-b-slices-maps-iteration",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Kode Contoh: Slice Pre-Alokasi \u0026 Range Map"
+    },
+    {
+      "body_text": "Ketika Anda memanggil method dengan Value Receiver (func (u User)), Go membuat fotokopi formulir; perubahan pada salinan tidak mengubah yang asli. Dengan Pointer Receiver (func (u *User)), Anda membagikan alamat formulir asli sehingga perubahan langsung tersimpan.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-structs-methods-pointers-sec-analogy",
+      "lesson_id": "l1-stage-b-structs-methods-pointers",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Formulir Asli vs Salinan Fotokopi"
+    },
+    {
+      "body_text": "Urutan field dalam struct mempengaruhi ukuran total di RAM karena padding byte untuk alignment 8-byte CPU. Mengurutkan field dari yang berukuran terbesar (int64, string, pointer) ke yang terkecil (bool, byte) dapat menghemat memori hingga 30% pada jutaan instance struct. Gunakan tool \"fieldalignment\" dari golang.org/x/tools/go/analysis/passes/fieldalignment untuk mendeteksi struct yang boros memori secara otomatis.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-structs-methods-pointers-sec-deep_dive",
+      "lesson_id": "l1-stage-b-structs-methods-pointers",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Memory Alignment \u0026 Padding pada Struct"
+    },
+    {
+      "body_text": "Implementasikan constructor NewAccount dengan validasi saldo awal non-negatif.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-structs-methods-pointers-sec-exercise",
+      "lesson_id": "l1-stage-b-structs-methods-pointers",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Tantangan: NewAccount(id string, initial int64) *Account"
+    },
+    {
+      "body_text": "Menguasai perancangan tipe data buatan (struct), penambahan method, perbedaan mendasar antara Value Receiver vs Pointer Receiver, dan pencegahan nil pointer dereference panic.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-structs-methods-pointers-sec-goal",
+      "lesson_id": "l1-stage-b-structs-methods-pointers",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan: Struct, Method, Pointer \u0026 Nil Safety"
+    },
+    {
       "body_text": "[Beginner Overview]\nA **Struct** is a custom blueprint that groups fields together (like a `Wallet` having a `BalanceCents` field). By default, Go hands functions a *photocopy* of a struct. If you want a method to update the *original* `Wallet` instead of a photocopy, you use a **Pointer** (`*Wallet`), which points to the original box in memory.\n\n[Intermediate Technical]\nThe `\u0026` operator takes the address of a variable (`w := \u0026Wallet{}`), producing a `*Wallet` pointer. For struct pointers, Go automatically dereferences field access (`w.BalanceCents` is shorthand for `(*w).BalanceCents`). Keep receiver types consistent across all methods of a type.\n\n[Advanced Internals]\nCalling a method on a `nil` struct pointer does not panic at the call site—it enters the method with receiver `w == nil`, allowing the method itself to check `if w == nil` and return a graceful error (exactly how `(*Store).Ping` works).\n\n[12 Engineering Decision Pillars]\n1. What Is It: Composite data modeling with `struct` types, methods, and explicit memory pointers (`*T` and `\u0026x`).\n2. Internal Mechanics: Go passes every function argument and method receiver by value (copying it). When a method declares a pointer receiver `(w *Wallet)`, Go copies the 8-byte memory address so `w.BalanceCents += amt` updates the original struct in place.\n3. Why Needed: Backend services model domain entities (`Server`, `Store`, `Order`, `Config`) as structs with methods that encapsulate state transitions.\n4. Why Preferred: Explicit pointers (`*T`) vs values (`T`) let you see at the type signature whether a function can mutate your struct or be `nil`.\n5. When To Use: Use pointer receivers (`*T`) when a method mutates the receiver or when the struct is large or contains a `sync.Mutex`.\n6. When To Avoid: Do not use pointers for small immutable value types like `time.Time` or 2-field coordinate structs.\n7. Advantages: Zero hidden boxing; contiguous struct field memory layout; explicit mutability.\n8. Disadvantages: Dereferencing a `nil` pointer causes a runtime panic if not guarded.\n9. Alternatives: Returning a new updated struct value `(Wallet, error)` in purely functional domain models.\n10. Incorrect Consequences: Using a value receiver `(w Wallet)` on a mutating method modifies a temporary copy that is immediately discarded when the method returns.\n11. Real-World Usage: `*database.Store` and `*httpplatform.Server` use pointer receivers across all methods.\n12. Perf/Sec/Maint/Scale: Reliability: Guarding `if w == nil` at API boundaries prevents nil-dereference crashes.",
       "code_corrected": "package wallet\n\nimport \"errors\"\n\ntype Wallet struct {\n\tBalanceCents int64\n}\n\nfunc (w *Wallet) Deposit(amountCents int64) error {\n\tif w == nil {\n\t\treturn errors.New(\"wallet pointer is nil\")\n\t}\n\tif amountCents \u003c= 0 {\n\t\treturn errors.New(\"deposit amount must be positive\")\n\t}\n\tw.BalanceCents += amountCents\n\treturn nil\n}",
       "code_incorrect": "package wallet\n\ntype Wallet struct{ BalanceCents int64 }\n\n// BUG: Mutates a temporary copy; caller Wallet balance stays 0!\nfunc (w Wallet) Deposit(amountCents int64) {\n\tw.BalanceCents += amountCents\n}",
@@ -819,6 +1259,72 @@
       "title": "1.0D Structs, Methods, Value vs Pointer Receivers \u0026 Safe Nil Checks"
     },
     {
+      "body_text": "1. Nil Pointer Dereference: Memanggil field dari pointer nil (misal var a *Account; a.Balance) akan menyebabkan runtime panic. Selalu cek if a == nil.\n2. Jangan mencampur value dan pointer receiver pada tipe yang sama secara acak. Jika satu method butuh pointer receiver untuk mutasi, buat semua method bertipe pointer receiver.\n3. Struct embedding bukan inheritance: struct yang di-embed meneruskan method (composition), tetapi tipenya tetap independen dan tidak bisa di-cast sembarangan.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-structs-methods-pointers-sec-pitfalls",
+      "lesson_id": "l1-stage-b-structs-methods-pointers",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan: Nil Pointer Dereference \u0026 Konsistensi Receiver"
+    },
+    {
+      "body_text": "```go\npackage main\n\nimport \"fmt\"\n\ntype Account struct {\n\tID      string\n\tBalance int64\n}\n\n// Pointer Receiver: memodifikasi state asli\nfunc (a *Account) Deposit(amount int64) {\n\tif a == nil {\n\t\treturn // Nil safety guard!\n\t}\n\ta.Balance += amount\n}\n\n// Value Receiver: hanya membaca tanpa mutasi\nfunc (a Account) Summary() string {\n\treturn fmt.Sprintf(\"Account %s: $%d\", a.ID, a.Balance)\n}\n\nfunc main() {\n\tacc := \u0026Account{ID: \"acc_001\", Balance: 100}\n\tacc.Deposit(50)\n\tfmt.Println(acc.Summary())\n}\n```\n\nKeluaran terminal:\n```bash\n$ go run main.go\nAccount acc_001: $150\n```\n\n**Kapan Memilih Pointer vs Value?**\n1. Jika method perlu memodifikasi isi struct: SELALU gunakan Pointer Receiver.\n2. Jika struct berukuran besar (misal \u003e 64 byte): Gunakan Pointer Receiver untuk menghindari penyalinan memori yang lambat pada setiap panggilan method.\n3. Jika struct berukuran kecil dan immutable (seperti time.Time atau koordinat Point{X, Y}): Gunakan Value Receiver.\n4. Idiom Konstruktor: Gunakan fungsi fabrikasi NewAccount(id string, bal int64) (*Account, error) untuk memvalidasi invariant bisnis sebelum mengembalikan pointer struct yang siap pakai.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-structs-methods-pointers-sec-walkthrough",
+      "lesson_id": "l1-stage-b-structs-methods-pointers",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Kode Contoh: Pointer vs Value Receiver"
+    },
+    {
+      "body_text": "Di bahasa seperti C, mendeklarasikan variabel baru tanpa inisialisasi mengambil memori acak sisa program lain. Di Go, setiap wadah baru otomatis dibersihkan dan disegel dengan nilai nol: angka menjadi 0, boolean menjadi false, string menjadi \"\" (string kosong), dan pointer/slice menjadi nil.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-variables-types-zerovalues-sec-analogy",
+      "lesson_id": "l1-stage-b-variables-types-zerovalues",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Wadah Bersegel Bersih di Gudang"
+    },
+    {
+      "body_text": "String di Go diwakili oleh struct internal 16 byte (pada arsitektur 64-bit): pointer ke byte array dasar (*byte) dan panjang (int len). Karena sifatnya immutable, operasi pemotongan string (slice s[0:4]) tidak mengalokasikan memori baru di heap, melainkan hanya membuat string header baru yang menunjuk ke array yang sama. Operasi penggabungan string dalam loop besar sebaiknya menggunakan strings.Builder untuk menghindari alokasi memori berlebih.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-variables-types-zerovalues-sec-deep_dive",
+      "lesson_id": "l1-stage-b-variables-types-zerovalues",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Representasi Memori String di Go"
+    },
+    {
+      "body_text": "Buat fungsi FormatStatus yang mengembalikan representasi string berformat \"Name: [name] | Active: [active]\".",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-variables-types-zerovalues-sec-exercise",
+      "lesson_id": "l1-stage-b-variables-types-zerovalues",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Tantangan: FormatStatus(name string, active bool) string"
+    },
+    {
+      "body_text": "Memahami sistem tipe statis Go: integer (int, int64), floating-point (float64), boolean, string, dan aturan penting \"Zero Value\" di mana variabel tidak pernah berisi memori sampah.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-variables-types-zerovalues-sec-goal",
+      "lesson_id": "l1-stage-b-variables-types-zerovalues",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan: Tipe Primitif \u0026 Zero Values"
+    },
+    {
       "body_text": "[Beginner Overview]\nA variable is a labeled box in memory that holds a specific kind of data (its Type): whole numbers (`int`, `int64`), decimals (`float64`), true/false (`bool`), or text (`string`). Inside a function, `count := 10` creates and fills the box in one step. If you create an empty box with `var count int`, Go automatically puts `0` inside—never random garbage.\n\n[Intermediate Technical]\nGo enforces strict nominal and structural typing with zero implicit numeric coercion: adding an `int` and an `int64` is a compile error unless converted (`int64(a) + b`). Strings are immutable UTF-8 byte views; indexing `s[i]` yields a `byte` (`uint8`), while iterating with `range` decodes `rune` (`int32`) Unicode code points.\n\n[Advanced Internals]\nThe Go Language Specification (\"The zero value\") guarantees zero-initialization for all allocated storage. The compiler optimizes stack allocations using CPU register assignments (SSA form) and zeroes heap blocks in bulk via `runtime.mallocgc`.\n\n[12 Engineering Decision Pillars]\n1. What Is It: Go static type system and variable initialization rules that guarantee every variable in memory starts with a known, deterministic value.\n2. Internal Mechanics: When memory is allocated on the stack or heap in Go, it is zeroed before your code sees it: numeric types are 0, booleans are false, strings are \"\" (len 0), and pointers/slices/maps/interfaces are nil.\n3. Why Needed: Uninitialized variables in C/C++ contain random leftover bytes that cause unpredictable bugs and security leaks. Go eliminates uninitialized memory by language specification.\n4. Why Preferred: Explicit integer widths (`int64`, `uint32`) and zero-value guarantees make financial, network protocol, and database code predictable.\n5. When To Use: Use `var x T` when starting from the zero value, and `x := expr` when initializing from an expression inside a function.\n6. When To Avoid: Never use `float64` to store or calculate currency/money—use `int64` minor units (cents/rupiah) to prevent binary rounding errors.\n7. Advantages: Compile-time type safety; zero uninitialized memory bugs; clear distinction between `byte` (uint8) and `rune` (int32 Unicode code point).\n8. Disadvantages: Go forbids implicit numeric conversions (you must write `int64(x)` explicitly).\n9. Alternatives: Arbitrary-precision decimal libraries (`shopspring/decimal`) for multi-currency FX rates.\n10. Incorrect Consequences: Using `float64` for money causes `0.1 + 0.2` to equal `0.30000000000000004`, breaking ledger reconciliation.\n11. Real-World Usage: All order totals in Go Backend Academy (`orders.total_cents`) use `int64` cents.\n12. Perf/Sec/Maint/Scale: Performance: `int64` arithmetic executes in a single CPU clock cycle with zero heap allocation.",
       "code_corrected": "package billing\n\nfunc ComputeInvoiceCents(unitPriceCents int64, quantity int64, discountCents int64) int64 {\n\tif unitPriceCents \u003c= 0 || quantity \u003c= 0 {\n\t\treturn 0\n\t}\n\tsubtotal := unitPriceCents * quantity\n\tif discountCents \u003e subtotal {\n\t\treturn 0\n\t}\n\treturn subtotal - discountCents\n}",
       "code_incorrect": "package billing\n\n// BUG: float64 binary rounding drift corrupts financial balances\nfunc ComputeTotalBad(price float64, qty int) float64 {\n\treturn price * float64(qty)\n}",
@@ -828,6 +1334,28 @@
       "reasoning": "Storing and multiplying integer cents in `int64` is exact up to 92 quadrillion dollars and prevents negative totals via explicit guards.",
       "section_type": "core",
       "title": "1.0A Go Variables, Primitive Types, Zero Values \u0026 Formatting (fmt)"
+    },
+    {
+      "body_text": "1. Tidak ada konversi tipe implisit di Go. int32 tidak bisa langsung dijumlahkan dengan int64 tanpa konversi eksplisit int64(v).\n2. Variabel lokal yang dideklarasikan tetapi tidak dipakai akan memicu compile error. Gunakan _ (blank identifier) jika sengaja tidak memakai nilai.\n3. String di Go bersifat immutable (tidak bisa diubah sebagian lewat s[0] = 'X').\n4. Konversi int ke string dengan string(65) mengembalikan 'A' (karakter ASCII), bukan \"65\"! Gunakan strconv.Itoa(65) untuk mengubah angka menjadi representasi teks.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-variables-types-zerovalues-sec-pitfalls",
+      "lesson_id": "l1-stage-b-variables-types-zerovalues",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan \u0026 Aturan Konversi Tipe"
+    },
+    {
+      "body_text": "Pelajari kode berikut dan perhatikan perilakunya:\n\n```go\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n\tvar count int          // Zero value: 0\n\tvar active bool        // Zero value: false\n\tvar title string       // Zero value: \"\"\n\tvar balance float64    // Zero value: 0.0\n\n\t// Deklarasi pendek dengan inferensi tipe\n\tuserID := \"usr_9981\"\n\tmultiplier := 2.5\n\n\tsummary := fmt.Sprintf(\"User: %s | Count: %d | Active: %t | Total: %.2f\",\n\t\tuserID, count, active, float64(count)*multiplier)\n\n\tfmt.Println(summary)\n}\n```\n\nKeluaran terminal:\n```bash\n$ go run main.go\nUser: usr_9981 | Count: 0 | Active: false | Total: 0.00\n```\n\n**Rincian Verifikasi Tipe Primitif:**\n- `int` vs `int64`: `int` bergantung pada arsitektur mesin (32-bit atau 64-bit). Untuk data yang disimpan ke database seperti ID atau mata uang rupiah, selalu gunakan tipe eksplisit `int64`.\n- `byte` adalah alias untuk `uint8`, digunakan untuk data mentah biner dan stream jaringan.\n- `rune` adalah alias untuk `int32`, merepresentasikan satu karakter Unicode UTF-8 secara tepat.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l1-stage-b-variables-types-zerovalues-sec-walkthrough",
+      "lesson_id": "l1-stage-b-variables-types-zerovalues",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Kode Contoh: Deklarasi \u0026 Format String"
     },
     {
       "body_text": "{\"beginner\": \"In Go, any function, struct, or variable starting with a **Capital Letter** (`User`, `GetByID`) is public (exported) to other packages, while **lowercase** (`parseToken`) is private to its package. Furthermore, any code placed inside an `internal/` folder cannot be imported by outside projects!\", \"intermediate\": \"Go Modules (`go.mod` + `go.sum`) use Minimal Version Selection (MVS): if Module A requires `lib v1.2.0` and Module B requires `lib v1.4.0`, Go always picks `v1.4.0`\\u2014the oldest version that satisfies all requirements\\u2014without guessing or auto-upgrading to `v1.9.0` behind your back.\", \"advanced\": \"Runtime Memory Detail: On 64-bit architectures, an `int64` or pointer (`*T`) must be aligned on an 8-byte boundary. Placing `bool` (1 byte) before `int64` (8 bytes) and another `bool` (1 byte) forces the compiler to insert 14 bytes of invisible padding, turning a 10-byte payload into a 24-byte struct. Sorting fields from 8-byte down to 1-byte types packs the struct into 16 bytes.\"}",
@@ -863,6 +1391,50 @@
       "title": "10.2 Caddy \u0026 Nginx Reverse Proxies, Trusted X-Forwarded-For, Canary Rollbacks \u0026 Disaster Recovery"
     },
     {
+      "body_text": "Dari pondasi cakar ayam (sintaks Go dasar) dan instalasi pipa air (HTTP \u0026 SQL) hingga sistem alarm darurat, genset cadangan, dan evakuasi aman (Graceful Shutdown) saat listrik padam.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l10-stage-j-capstone-production-blueprint-sec-analogy",
+      "lesson_id": "l10-stage-j-capstone-production-blueprint",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Pembangunan Gedung Pencakar Langit"
+    },
+    {
+      "body_text": "Stage 1 (Builder): Menggunakan golang:1.24-alpine untuk kompilasi CGO_ENABLED=0 go build -ldflags=\"-s -w\". Stage 2 (Runner): Menyalin binary tunggal ke gcr.io/distroless/static-debian12. Hasil akhir adalah container tanpa shell, tanpa package manager, dan permukaan serangan keamanan (attack surface) mendekati nol.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l10-stage-j-capstone-production-blueprint-sec-deep_dive",
+      "lesson_id": "l10-stage-j-capstone-production-blueprint",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Multi-Stage Dockerfile \u0026 Distroless Go Binary"
+    },
+    {
+      "body_text": "Konfigurasikan endpoint /readyz yang memverifikasi koneksi database aktif sebelum mengembalikan status 200 OK.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l10-stage-j-capstone-production-blueprint-sec-exercise",
+      "lesson_id": "l10-stage-j-capstone-production-blueprint",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Tantangan: Verifikasi Readiness Probe"
+    },
+    {
+      "body_text": "Menghubungkan seluruh kurikulum (Level 0 hingga Level 10) ke dalam satu blueprint layanan Go siap produksi: struktur folder terstandar, multi-stage Docker build, liveness/readiness probes, dan graceful shutdown.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l10-stage-j-capstone-production-blueprint-sec-goal",
+      "lesson_id": "l10-stage-j-capstone-production-blueprint",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan: Cetak Biru Layanan Produksi Go"
+    },
+    {
       "body_text": "[Beginner Overview]\nHere is how everything you have learned fits together into **8 Progressive Capstone Milestones**:\n1. **Stage B Capstone**: CLI Task Tracker with JSON File Persistence \u0026 Unit Tests\n2. **Stage D Capstone**: Hardened `net/http` REST API with Timeouts \u0026 Strict JSON Validation\n3. **Stage E Capstone**: SQLite/PostgreSQL Repository with Versioned Up/Down Migrations\n4. **Stage G Capstone**: Argon2id Authentication, Session/JWT Middleware \u0026 BOLA Ownership Guards\n5. **Stage F Capstone**: Bounded Worker Pool \u0026 Token-Bucket Rate Limiter with Context Cancellation\n6. **Stage H Capstone**: Redis Cache-Aside + Singleflight Stampede Protection\n7. **Stage H Capstone**: Double-Entry Ledger \u0026 Transactional Outbox Relay\n8. **Stage I Capstone**: Distroless Docker + `/healthz` vs `/readyz` + Graceful Shutdown\n\n[Intermediate Technical]\nAt each capstone milestone, verify three things: (1) Happy-path contract tests, (2) Negative/invalid payload rejection (`400`/`401`/`404`/`413`), and (3) Infrastructure failure behavior (DB down -\u003e `/readyz` returns `503`; process restart -\u003e data persists in SQLite/PostgreSQL).\n\n[Advanced Internals]\nDuring a rolling deployment, Kubernetes sends `SIGTERM` to the old pod while simultaneously polling `/readyz`. Marking `ShuttingDown = true` immediately causes `/readyz` to return `503`, removing the pod from `EndpointSlice` before `httpServer.Shutdown(ctx)` finishes draining active requests.\n\n[12 Engineering Decision Pillars]\n1. What Is It: The 8-milestone Capstone Synthesis program that guides you from a simple command-line tool to a production-hardened Go backend service.\n2. Internal Mechanics: Each milestone layers one new architectural boundary onto the previous one: CLI -\u003e HTTP -\u003e SQL Persistence \u0026 Migrations -\u003e Security -\u003e Concurrency -\u003e Caching -\u003e Distributed Reliability -\u003e Container \u0026 Kubernetes Readiness.\n3. Why Needed: Reading lessons in isolation is not enough; engineers build confidence by assembling complete services and verifying how they behave under failure.\n4. Why Preferred: Incremental milestones prevent overwhelm while ensuring every layer (config, DB, HTTP, auth, observability) is genuinely wired and tested.\n5. When To Use: As your portfolio capstone progression after completing each curriculum stage.\n6. When To Avoid: Do not jump to Milestone 7 (Outbox/Saga) before completing Milestones 1–3 (CLI, HTTP CRUD, SQL Migrations).\n7. Advantages: Clear, verifiable deliverables; aligns directly with the 14 production Case Studies in this platform.\n8. Disadvantages: Requires writing real tests (`go test -v -race ./...`) at every milestone.\n9. Alternatives: Building a single throwaway toy CRUD app with no migrations, timeouts, or readiness checks.\n10. Incorrect Consequences: Reporting `200 OK` on `/readyz` when the database is unreachable or migrations have not run causes load balancers to route live traffic into a broken instance.\n11. Real-World Usage: Go Backend Academy itself implements Milestone 8: `.env`-driven config, fail-fast DB startup, embedded versioned migrations, strict JSON decoding, and real `/readyz` pings.\n12. Perf/Sec/Maint/Scale: Production Readiness: Fail fast on startup misconfiguration; drain in-flight requests on `SIGTERM` before closing the DB pool.",
       "code_corrected": "package capstone\n\nimport \"errors\"\n\ntype ReadinessGate struct {\n\tDBConnected  bool\n\tMigrationsUp bool\n\tShuttingDown bool\n}\n\nfunc EvaluateCapstoneReadiness(g ReadinessGate) (int, error) {\n\tif g.ShuttingDown {\n\t\treturn 503, errors.New(\"server is draining connections\")\n\t}\n\tif !g.DBConnected || !g.MigrationsUp {\n\t\treturn 503, errors.New(\"database or migrations not ready\")\n\t}\n\treturn 200, nil\n}",
       "code_incorrect": "package capstone\n\nfunc HandleReadyzBad() int {\n\t// BUG: Always returns 200 OK even when DB is down or server is shutting down!\n\treturn 200\n}",
@@ -872,6 +1444,28 @@
       "reasoning": "Returning `503` whenever `ShuttingDown`, `!DBConnected`, or `!MigrationsUp` ensures only healthy, migrated instances receive traffic.",
       "section_type": "core",
       "title": "10.3 Progressive Capstone Roadmap: From CLI \u0026 CRUD API to Production Distributed Service"
+    },
+    {
+      "body_text": "1. Ketika Kubernetes atau Docker menghentikan container, ia mengirim SIGTERM. Jika aplikasi tidak menangani SIGTERM dan langsung keluar dengan os.Exit(0), request in-flight yang sedang diproses pengguna akan diputus secara mendadak (502 Bad Gateway).\n2. Memasukkan seluruh compiler toolchain Go ke dalam image Docker produksi (ukuran \u003e 1 GB alih-alih \u003c 25 MB dengan scratch/distroless).",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l10-stage-j-capstone-production-blueprint-sec-pitfalls",
+      "lesson_id": "l10-stage-j-capstone-production-blueprint",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan: Mengabaikan Sinyal SIGTERM pada Container"
+    },
+    {
+      "body_text": "```go\npackage main\n\nimport (\n\t\"context\"\n\t\"errors\"\n\t\"log/slog\"\n\t\"net/http\"\n\t\"os\"\n\t\"os/signal\"\n\t\"syscall\"\n\t\"time\"\n)\n\nfunc main() {\n\tmux := http.NewServeMux()\n\tmux.HandleFunc(\"GET /healthz\", func(w http.ResponseWriter, r *http.Request) {\n\t\tw.WriteHeader(http.StatusOK)\n\t\t_, _ = w.Write([]byte(\"ready\"))\n\t})\n\n\tsrv := \u0026http.Server{\n\t\tAddr:    \":8080\",\n\t\tHandler: mux,\n\t}\n\n\tctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)\n\tdefer stop()\n\n\tgo func() {\n\t\tslog.Info(\"server starting on :8080\")\n\t\tif err := srv.ListenAndServe(); err != nil \u0026\u0026 !errors.Is(err, http.ErrServerClosed) {\n\t\t\tslog.Error(\"server failure\", \"error\", err)\n\t\t\tos.Exit(1)\n\t\t}\n\t}()\n\n\t\u003c-ctx.Done() // Tunggu sinyal SIGINT / SIGTERM dari OS atau Docker\n\tslog.Info(\"shutting down gracefully...\")\n\n\tshutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)\n\tdefer cancel()\n\n\tif err := srv.Shutdown(shutdownCtx); err != nil {\n\t\tslog.Error(\"forced shutdown\", \"error\", err)\n\t}\n\tslog.Info(\"server stopped cleanly\")\n}\n```\n\nKeluaran terminal:\n```bash\n$ go run main.go\n2026/11/08 10:00:00 INFO server starting on :8080\n^C\n2026/11/08 10:00:05 INFO shutting down gracefully...\n2026/11/08 10:00:05 INFO server stopped cleanly\n```",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l10-stage-j-capstone-production-blueprint-sec-walkthrough",
+      "lesson_id": "l10-stage-j-capstone-production-blueprint",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Kode Contoh: Graceful Shutdown dengan Signal OS"
     },
     {
       "body_text": "{\"beginner\": \"A Goroutine (`go fn()`) is an ultra-lightweight background worker managed by Go\\u2014you can run 50,000 of them on a laptop. Channels (`chan T`) are typed pipes that let goroutines hand data to each other safely, while `context.Context` is a cancel button that tells all child workers to stop immediately if the user disconnects or times out.\", \"intermediate\": \"An unbuffered channel (`make(chan T)`) requires sender and receiver to rendezvous simultaneously; a buffered channel (`make(chan T, N)`) only blocks the sender when the buffer is full. Always use a `select` statement checking `case \u003c-ctx.Done():` alongside channel sends/receives so goroutines exit cleanly when a request is canceled.\", \"advanced\": \"Channel operations acquire an internal `hchan.lock` mutex and copy values (unless passing pointers). For simple state protection (like a local cache or counter), `sync.Mutex`, `sync.RWMutex`, or `atomic.Int64` avoids `hchan` scheduling overhead. Furthermore, whenever spawning a child goroutine that writes a single result back to a parent waiting on a `select` with `\u003c-ctx.Done()`, always allocate a buffered channel of size 1 (`make(chan result, 1)`) so the child can deposit its result and exit even if the parent already timed out.\"}",
@@ -896,6 +1490,50 @@
       "title": "2.2 CPU \u0026 Heap Profiling (pprof), sync.Pool, Contention Profiling \u0026 Execution Tracer"
     },
     {
+      "body_text": "Menyiapkan sarapan secara sekuensial: memanggang roti (2 menit), menunggu selesai, baru merebus air (3 menit) = 5 menit total. Konkurensi berarti memasukkan roti ke pemanggang (go toast()), langsung menyalakan pemanas air (go boilWater()), lalu menunggu di meja (wg.Wait()) sampai keduanya berbunyi = cukup 3 menit!",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l2-stage-c-goroutines-channels-waitgroup-sec-analogy",
+      "lesson_id": "l2-stage-c-goroutines-channels-waitgroup",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Koki Memasak Sarapan"
+    },
+    {
+      "body_text": "sync.WaitGroup mengemas penghitung tugas (task counter) 32-bit dan penghitung waiter 32-bit ke dalam satu kata atomic.Uint64 64-bit. Hal ini memungkinkan operasi Add dan Done dieksekusi tanpa lock kernel, hanya memanfaatkan runtime_Semacquire dan runtime_Semrelease saat counter mencapai 0.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l2-stage-c-goroutines-channels-waitgroup-sec-deep_dive",
+      "lesson_id": "l2-stage-c-goroutines-channels-waitgroup",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Mekanisme Internal sync.WaitGroup"
+    },
+    {
+      "body_text": "Implementasikan kalkulasi jumlah kuadrat yang aman dan bebas dari race condition.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l2-stage-c-goroutines-channels-waitgroup-sec-exercise",
+      "lesson_id": "l2-stage-c-goroutines-channels-waitgroup",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Tantangan: SumSquaresSafe(nums []int) int"
+    },
+    {
+      "body_text": "Mempelajari dasar konkurensi di Go: meluncurkan goroutine ringan (~2 KB), menyinkronkan penyelesaian tugas dengan sync.WaitGroup, mengirim data antar thread secara aman menggunakan channel, dan membedakan konkurensi dari paralelisme [Celah 5].",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l2-stage-c-goroutines-channels-waitgroup-sec-goal",
+      "lesson_id": "l2-stage-c-goroutines-channels-waitgroup",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan: Konkurensi 101 — Goroutine, Channel \u0026 sync.WaitGroup"
+    },
+    {
       "body_text": "[Beginner Overview]\nImagine cooking breakfast: doing it **sequentially** means toasting bread (2 mins), waiting until it finishes, and only then boiling water (3 mins) = 5 mins total. **Concurrency** means starting the toaster (`go toastBread()`), immediately starting the kettle (`go boilWater()`), and waiting at the counter (`wg.Wait()`) until both are ready!\n\n**Line-by-Line Syntax Walkthrough:**\n1. `var wg sync.WaitGroup` — Creates a counter to track running goroutines.\n2. `wg.Add(1)` — Increments the counter *before* launching the goroutine.\n3. `go func(val int) { defer wg.Done(); ... }(n)` — Starts a concurrent goroutine that guarantees `wg.Done()` runs when finished.\n4. `for _, n := range nums { sum += n * n }` — Iterates through each number `n` in `nums` and adds its square (`n * n`) to `sum`.\n\n[Intermediate Technical]\nNever call `wg.Add(1)` *inside* the `go func()` body—if `wg.Wait()` executes before the child goroutine starts, `Wait()` returns prematurely! Always call `wg.Add(1)` in the parent goroutine before `go func()`, and pass loop variables as arguments (or rely on Go 1.22+ per-iteration loop variable semantics).\n\n[Advanced Internals]\nUnder the hood, `sync.WaitGroup` packs the 32-bit waiter count and 32-bit task counter into a single 64-bit `atomic.Uint64` word, using `runtime_Semacquire` and `runtime_Semrelease` only when the counter transitions to zero with active waiters.\n\n[12 Engineering Decision Pillars]\n1. What Is It: Your step-by-step introduction to Go concurrency (`go` keyword, `sync.WaitGroup`, and channels) before tackling the advanced GMP scheduler and bounded worker pools in Lesson 2.1.\n2. Internal Mechanics: Prefixing a function call with `go` schedules a lightweight ~2KB goroutine onto the Go runtime. `sync.WaitGroup` maintains an atomic counter (`Add`, `Done`, `Wait`), and a channel (`chan T`) provides a synchronized queue for passing values between goroutines.\n3. Why Needed: Sequential backends wait idly during network I/O (fetching user profile + permissions + billing one by one takes 30ms + 30ms + 30ms = 90ms; running them concurrently takes ~30ms).\n4. Why Preferred: Learning `sync.WaitGroup` and simple result collection first prevents the classic beginner mistake of spawning fire-and-forget goroutines that silently vanish or race on shared variables.\n5. When To Use: Whenever a handler needs to fan out independent I/O calls or batch-process independent items and wait for all results.\n6. When To Avoid: Do not use goroutines for tiny CPU loops (like summing 5 integers in production)—the scheduling overhead exceeds a simple `for` loop! Use concurrency when tasks block on I/O or heavy independent work.\n7. Advantages: Simple syntax (`go fn()`), built-in race detector (`go test -race`), and deterministic synchronization via `sync.WaitGroup`.\n8. Disadvantages: Forgetting `defer wg.Done()` causes a permanent deadlock; reading/writing the same variable from multiple goroutines without synchronization causes a data race.\n9. Alternatives: Sequential `for` loops (simpler and faster for small in-memory slices) or `errgroup.Group` (for concurrent tasks that can return errors).\n10. Incorrect Consequences: Modifying a shared `total += n * n` variable from multiple goroutines without a mutex or channel corrupts the sum under concurrent execution (`DATA RACE`).\n11. Real-World Usage: Parallelizing independent downstream API calls (e.g., fetching product details and inventory counts simultaneously) while waiting via `sync.WaitGroup`.\n12. Perf/Sec/Maint/Scale: Always bound concurrency in production and run `go test -race ./...` in CI to catch unsynchronized shared memory writes.",
       "code_corrected": "package conc\n\nfunc SumSquaresSafe(nums []int) int {\n\tsum := 0\n\tfor _, n := range nums {\n\t\tsum += n * n\n\t}\n\treturn sum\n}",
       "code_incorrect": "package conc\n\nimport \"sync\"\n\nfunc SumSquaresRacy(nums []int) int {\n\tvar wg sync.WaitGroup\n\tsum := 0\n\tfor _, n := range nums {\n\t\twg.Add(1)\n\t\tgo func(v int) {\n\t\t\tdefer wg.Done()\n\t\t\tsum += v * v // BUG: DATA RACE on shared variable sum!\n\t\t}(n)\n\t}\n\twg.Wait()\n\treturn sum\n}",
@@ -905,6 +1543,28 @@
       "reasoning": "For pure in-memory integer math, a sequential `for _, n := range nums` loop is 100% race-free and zero-allocation; when goroutines are used for I/O, collect results over a buffered channel or protect shared state.",
       "section_type": "core",
       "title": "2.0 Concurrency 101: Your First Goroutine, Buffered Channels \u0026 sync.WaitGroup"
+    },
+    {
+      "body_text": "1. Memanggil wg.Add(1) DI DALAM goroutine: Jika main goroutine mencapai wg.Wait() sebelum anak goroutine mulai dieksekusi, Wait() akan kembali lebih awal!\n2. Data Race: Mengubah variabel bersama tanpa sinkronisasi (seperti total += val dari banyak goroutine). Selalu gunakan race detector: go test -race ./...\n3. Goroutine Leak: Meluncurkan goroutine yang menunggu channel yang tidak pernah ditulis/ditutup.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l2-stage-c-goroutines-channels-waitgroup-sec-pitfalls",
+      "lesson_id": "l2-stage-c-goroutines-channels-waitgroup",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan: Data Race \u0026 Pemanggilan wg.Add di Tempat Salah"
+    },
+    {
+      "body_text": "```go\npackage main\n\nimport (\n\t\"fmt\"\n\t\"sync\"\n\t\"time\"\n)\n\nfunc fetchMetric(id int, ch chan\u003c- string, wg *sync.WaitGroup) {\n\tdefer wg.Done() // Pastikan Done() dipanggil saat fungsi selesai\n\ttime.Sleep(10 * time.Millisecond) // Simulasi I/O\n\tch \u003c- fmt.Sprintf(\"metric_%d: 42.0\", id)\n}\n\nfunc main() {\n\tvar wg sync.WaitGroup\n\tresults := make(chan string, 3) // Buffered channel\n\n\tfor i := 1; i \u003c= 3; i++ {\n\t\twg.Add(1) // Wajib dipanggil sebelum meluncurkan goroutine!\n\t\tgo fetchMetric(i, results, \u0026wg)\n\t}\n\n\twg.Wait()\n\tclose(results) // Tutup channel setelah semua produser selesai\n\n\tfor res := range results {\n\t\tfmt.Println(\"Hasil diterima:\", res)\n\t}\n}\n```\n\nKeluaran terminal:\n```bash\n$ go run main.go\nHasil diterima: metric_1: 42.0\nHasil diterima: metric_2: 42.0\nHasil diterima: metric_3: 42.0\n```",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l2-stage-c-goroutines-channels-waitgroup-sec-walkthrough",
+      "lesson_id": "l2-stage-c-goroutines-channels-waitgroup",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Kode Contoh: Menjalankan Tugas Konkuren Secara Aman"
     },
     {
       "body_text": "{\"beginner\": \"A router looks at the incoming URL and HTTP method (like `GET /users/42`) and calls the right Go function. Middleware wraps your functions like layers of an onion to handle logging, security headers, and authentication in one place. Since Go 1.22, Go's built-in `http.ServeMux` can handle methods and `{id}` variables without needing any external library!\", \"intermediate\": \"Compare routers by `http.Handler` compatibility: `net/http` and `Chi` use standard `func(w http.ResponseWriter, r *http.Request)`, whereas `Gin` (`func(*gin.Context)`) and `Echo` (`func(echo.Context) error`) introduce custom context types. For pagination on tables \u003e100k rows, replace `LIMIT 20 OFFSET 100000` (which forces the DB to scan and discard 100,000 rows) with keyset/cursor pagination (`WHERE (created_at, id) \u003c ($1, $2) ORDER BY created_at DESC, id DESC LIMIT 20`).\", \"advanced\": \"During a Kubernetes rolling update, Kubernetes sends `SIGTERM` to your container while simultaneously removing its IP from `EndpointSlices`. Because kube-proxy/Ingress updates propagate asynchronously across nodes, your pod may still receive new requests for 1\\u20133 seconds after `SIGTERM`. A production shutdown handler traps `SIGTERM`, marks `/readyz` as `503 Service Unavailable`, optionally pauses briefly for load-balancer propagation, and then calls `httpServer.Shutdown(ctx)` so in-flight requests finish cleanly before closing the DB pool.\"}",
@@ -918,6 +1578,50 @@
       "title": "3.1 Standard net/http (Go 1.22+) vs Chi, Gin, Echo \u0026 Fiber + Middleware \u0026 Graceful Shutdown"
     },
     {
+      "body_text": "Server HTTP adalah loket kantor pos yang memeriksa izin, mengukur berat paket sebelum diterima (MaxBytesReader), dan menolak jika melebihi batas. Jika terjadi kesalahan, kantor pos tidak hanya bilang \"gagal\", tetapi memberikan lembar resmi berstempel dengan kode masalah yang jelas (RFC 9457).",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l3-stage-d-first-http-server-crud-sec-analogy",
+      "lesson_id": "l3-stage-d-first-http-server-crud",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Loket Pelayanan Terpadu \u0026 Standar Dokumen"
+    },
+    {
+      "body_text": "http.Transport mengelola pool koneksi TCP idle menggunakan sync.Mutex dan map host. Membaca seluruh resp.Body hingga io.EOF dan menutupnya memungkinkan koneksi TCP dialihkan kembali ke pool idle tanpa overhead 3-way handshake baru pada request berikutnya.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l3-stage-d-first-http-server-crud-sec-deep_dive",
+      "lesson_id": "l3-stage-d-first-http-server-crud",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Koneksi Keep-Alive \u0026 Connection Pooling pada net/http"
+    },
+    {
+      "body_text": "Buat konfigurasi client HTTP yang menyetel Timeout 10 detik dan Transport dengan ResponseHeaderTimeout 5 detik.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l3-stage-d-first-http-server-crud-sec-exercise",
+      "lesson_id": "l3-stage-d-first-http-server-crud",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Tantangan: NewHardenedClient() *http.Client"
+    },
+    {
+      "body_text": "Membangun API REST JSON lengkap dengan router net/http Go 1.22+, membatasi ukuran payload, mengkonfigurasi http.Client dengan timeout aman [Celah 4], dan mengimplementasikan format response standar RFC 9457 Problem Details [Celah 6].",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l3-stage-d-first-http-server-crud-sec-goal",
+      "lesson_id": "l3-stage-d-first-http-server-crud",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan: Server CRUD HTTP, Client Timeout \u0026 Envelope Error"
+    },
+    {
       "body_text": "[Beginner Overview]\nAn HTTP Handler in Go is a function with two arguments: `r *http.Request` (the incoming envelope from the user) and `w http.ResponseWriter` (the outgoing reply sheet). Always follow the 3-step reply order on `w`: (1) Set headers (`Content-Type: application/json`), (2) Set the status code (`w.WriteHeader(200)`), and (3) Write the JSON body!\n\n[Intermediate Technical]\nIn Go 1.22+, `mux := http.NewServeMux()` lets you register `\"GET /api/v1/lessons/{id}\"` and read `id := r.PathValue(\"id\")`. Standardizing a `WriteJSONResponse(w, status, payload)` helper guarantees every endpoint emits UTF-8 JSON with the right status code.\n\n[Advanced Internals]\nUnder the hood, `http.ResponseWriter` buffers headers until the first `WriteHeader(code)` or `Write(bytes)` call. If `Write(bytes)` is called first, `net/http` implicitly calls `WriteHeader(http.StatusOK)` and sniffs the first 512 bytes for `Content-Type`, locking the header map.\n\n[12 Engineering Decision Pillars]\n1. What Is It: The foundational pattern for building a standard-library HTTP server in Go 1.22+ before comparing external routers or middleware chains.\n2. Internal Mechanics: `http.ServeMux` matches the HTTP method and URL path pattern (e.g. `\"GET /api/v1/tasks/{id}\"`), extracts wildcard segments via `r.PathValue(\"id\")`, and invokes your `http.HandlerFunc(w, r)` on the connection goroutine.\n3. Why Needed: Every Go web service is built on the `http.Handler` interface (`ServeHTTP(w http.ResponseWriter, r *http.Request)`). Mastering it first makes every router and middleware library transparent.\n4. Why Preferred: Go 1.22+ `http.ServeMux` supports method routing (`GET`, `POST`, `DELETE`) and path wildcards (`{id}`) in the standard library with zero external dependencies.\n5. When To Use: For all REST APIs, health checks, and microservice HTTP boundaries.\n6. When To Avoid: Never write to `w` before setting response headers and status code.\n7. Advantages: Zero external dependencies; 100% stdlib compatibility; simple testing with `net/http/httptest`.\n8. Disadvantages: Requires writing a small helper (`WriteJSON`) for consistent headers and status codes.\n9. Alternatives: Chi or Echo when specialized sub-router mounting is needed (covered in Lesson 3.1).\n10. Incorrect Consequences: Calling `w.Write()` or `json.NewEncoder(w).Encode()` before `w.Header().Set(...)` and `w.WriteHeader(status)` flushes HTTP `200 OK` with `text/plain`, ignoring your intended status code and `Content-Type`.\n11. Real-World Usage: `internal/platform/http/response.go` (`WriteJSON` and `WriteProblem`) in this repository implements this exact pattern.\n12. Perf/Sec/Maint/Scale: Concurrency note: Because each HTTP request runs in its own goroutine, any in-memory map or slice shared by handlers must be guarded by a `sync.RWMutex` or stored in SQLite/PostgreSQL.",
       "code_corrected": "package api\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n)\n\nfunc WriteJSONResponse(w http.ResponseWriter, status int, payload any) {\n\tw.Header().Set(\"Content-Type\", \"application/json; charset=utf-8\")\n\tw.WriteHeader(status)\n\t_ = json.NewEncoder(w).Encode(payload)\n}",
       "code_incorrect": "package api\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n)\n\nfunc WriteBad(w http.ResponseWriter, status int, payload any) {\n\t// BUG: Encode calls w.Write(), which immediately commits 200 OK!\n\t_ = json.NewEncoder(w).Encode(payload)\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tw.WriteHeader(status)\n}",
@@ -927,6 +1631,28 @@
       "reasoning": "Setting `Content-Type` first, then committing `status` via `w.WriteHeader(status)`, and finally streaming JSON into `w` obeys the HTTP wire protocol order.",
       "section_type": "core",
       "title": "3.0 Building Your First Go HTTP Server: Handlers, ServeMux, Status Codes \u0026 JSON CRUD"
+    },
+    {
+      "body_text": "1. Jangan gunakan http.DefaultClient atau http.Get(): client default TIDAK memiliki batas waktu (timeout = 0), sehingga goroutine akan hang selamanya jika server tujuan tidak merespons.\n2. Selalu panggil resp.Body.Close() setelah mengecek err == nil, jika tidak koneksi TCP tidak bisa digunakan kembali oleh connection pool (socket leak).",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l3-stage-d-first-http-server-crud-sec-pitfalls",
+      "lesson_id": "l3-stage-d-first-http-server-crud",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan: http.DefaultClient \u0026 Kebocoran Response Body"
+    },
+    {
+      "body_text": "```go\npackage main\n\nimport (\n\t\"context\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"time\"\n)\n\ntype ProblemDetails struct {\n\tType   string `json:\"type\"`\n\tTitle  string `json:\"title\"`\n\tStatus int    `json:\"status\"`\n\tDetail string `json:\"detail\"`\n}\n\nfunc main() {\n\tmux := http.NewServeMux()\n\n\tmux.HandleFunc(\"POST /api/v1/items\", func(w http.ResponseWriter, r *http.Request) {\n\t\tr.Body = http.MaxBytesReader(w, r.Body, 64\u003c\u003c10) // Maksimal 64 KB\n\t\tdefer r.Body.Close()\n\n\t\tvar payload struct {\n\t\t\tName string `json:\"name\"`\n\t\t}\n\t\tif err := json.NewDecoder(r.Body).Decode(\u0026payload); err != nil {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/problem+json\")\n\t\t\tw.WriteHeader(http.StatusBadRequest)\n\t\t\t_ = json.NewEncoder(w).Encode(ProblemDetails{\n\t\t\t\tType:   \"https://api.example.com/errors/invalid-json\",\n\t\t\t\tTitle:  \"Bad Request\",\n\t\t\t\tStatus: 400,\n\t\t\t\tDetail: \"Body must be valid JSON under 64 KB\",\n\t\t\t})\n\t\t\treturn\n\t\t}\n\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusCreated)\n\t\t_ = json.NewEncoder(w).Encode(map[string]string{\"status\": \"created\", \"name\": payload.Name})\n\t})\n\n\tsrv := \u0026http.Server{\n\t\tAddr:              \":8080\",\n\t\tHandler:           mux,\n\t\tReadHeaderTimeout: 5 * time.Second, // Melindungi dari Slowloris DoS\n\t\tReadTimeout:       10 * time.Second,\n\t\tWriteTimeout:      15 * time.Second,\n\t}\n\t_ = srv.ListenAndServe()\n}\n```",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l3-stage-d-first-http-server-crud-sec-walkthrough",
+      "lesson_id": "l3-stage-d-first-http-server-crud",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Kode Contoh: Server \u0026 Client yang Diberi Batas Waktu"
     },
     {
       "body_text": "{\"beginner\": \"Rate Limiting stops a single user or bot from sending 10,000 requests per second and crashing your server. A Token Bucket gives each user a bucket of tokens (say, 20 tokens) that refills at 10 tokens per second\\u2014each request costs 1 token, and when the bucket is empty, the server returns `429 Too Many Requests`.\", \"intermediate\": \"When configuring CORS in Go, never reflect `w.Header().Set(\\\"Access-Control-Allow-Origin\\\", r.Header.Get(\\\"Origin\\\"))` unconditionally! Maintain an explicit `map[string]bool` allowlist of trusted origins, and always set `w.Header().Add(\\\"Vary\\\", \\\"Origin\\\")` so reverse proxies and CDNs do not serve Origin A's cached headers to Origin B.\", \"advanced\": \"For an in-memory per-IP Token Bucket map (`map[netip.Addr]*bucket`) in Go, an attacker rotating through IPv6 addresses can create millions of map entries and OOM-kill your process. Always pair in-memory rate limiters with either a bounded LRU/sharded map or a background cleanup ticker that deletes buckets idle for \u003e5 minutes.\"}",
@@ -962,6 +1688,50 @@
       "title": "4.2 Streaming Replication Lag, Declarative Partitioning, Sharding \u0026 Point-in-Time Recovery (PITR)"
     },
     {
+      "body_text": "Database relasional ibarat sekumpulan tabel catatan di mana setiap baris memiliki nomor unik (Primary Key). Tabel Pesanan merujuk ke nomor pelanggan di Tabel Pengguna (Foreign Key). Relasi ini mencegah pesanan fiktif tanpa pemilik yang jelas.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l4-stage-e-sql-relational-fundamentals-sec-analogy",
+      "lesson_id": "l4-stage-e-sql-relational-fundamentals",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Buku Kas Terhubung \u0026 Label Unik"
+    },
+    {
+      "body_text": "Indeks relasional umumnya menggunakan struktur B-Tree seimbang di disk. Pencarian, penambahan, dan penghapusan bernilai O(log N). Indeks komposit (kolom A, kolom B) hanya dapat digunakan jika klausa WHERE mencantumkan kolom paling kiri (Leftmost Prefix Rule). Selain itu, pahami perbedaan antara Clustered Index (data fisik tabel diurutkan berdasarkan primary key) dan Non-Clustered / Secondary Index (daun B-Tree berisi pointer ke baris fisik tabel).",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l4-stage-e-sql-relational-fundamentals-sec-deep_dive",
+      "lesson_id": "l4-stage-e-sql-relational-fundamentals",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Struktur Indeks B-Tree pada Database Relasional"
+    },
+    {
+      "body_text": "Rancang skema tabel products dan categories dengan foreign key constraint yang tepat.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l4-stage-e-sql-relational-fundamentals-sec-exercise",
+      "lesson_id": "l4-stage-e-sql-relational-fundamentals",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Tantangan: Buat Skema SQL Berelasi"
+    },
+    {
+      "body_text": "Memahami dasar database relasional: tabel, tipe data SQL, PRIMARY KEY, FOREIGN KEY, SELECT dengan klausa WHERE, operasi JOIN (INNER vs LEFT), aggregasi GROUP BY, dan indeks B-Tree.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l4-stage-e-sql-relational-fundamentals-sec-goal",
+      "lesson_id": "l4-stage-e-sql-relational-fundamentals",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan: Fundamental SQL Relasional"
+    },
+    {
       "body_text": "[Beginner Overview]\nThink of a Relational Database as a set of connected spreadsheets (Tables) with strict guardrails. `customers` holds one row per person with a unique `id` (**Primary Key**). `orders` holds purchases and points back to `customer_id` (**Foreign Key**). `SELECT` picks columns, `WHERE` filters rows, `JOIN` connects `customers` with their `orders`, and `GROUP BY` sums totals per customer.\n\n[Intermediate Technical]\nNormalization (1NF, 2NF, 3NF) eliminates redundant data: instead of repeating `customer_email` on every order row (which goes stale when a customer changes their email), `orders` stores `customer_id REFERENCES customers(id)`. Use `INNER JOIN` when both sides must match, and `LEFT JOIN` with `COALESCE` when you also want customers with zero orders.\n\n[Advanced Internals]\nIn both PostgreSQL and SQLite, declaring `PRIMARY KEY` or `UNIQUE` automatically creates a B-Tree index, but declaring a `FOREIGN KEY` does NOT automatically index the child column! Always create an explicit index on foreign key columns (like `idx_orders_customer_status_created`) to avoid full-table scans on joins and `ON DELETE CASCADE`.\n\n[12 Engineering Decision Pillars]\n1. What Is It: The foundational language (SQL) and relational model used by PostgreSQL, SQLite, MySQL, and MariaDB to store, constrain, join, and aggregate persistent data.\n2. Internal Mechanics: Data is organized into relations (tables) with typed columns. Primary Keys enforce row identity via a unique B-Tree index; Foreign Keys enforce referential integrity across tables; `CHECK` and `NOT NULL` reject invalid data inside the database engine.\n3. Why Needed: Before you can understand MVCC tuple visibility or B-Tree page splits (Lesson 4.1), you must know how to model tables and write `SELECT`, `JOIN`, `GROUP BY`, and bounded `LIMIT` queries.\n4. Why Preferred: Declarative SQL with schema constraints guarantees data integrity even if multiple services or scripts access the database.\n5. When To Use: Whenever domain entities have structured relationships (users, orders, order_items, payments, progress).\n6. When To Avoid: Never store comma-separated lists in a single column (violates 1NF) or run unbounded `SELECT *` queries without a `LIMIT`.\n7. Advantages: Strict schema enforcement (`PRIMARY KEY`, `FOREIGN KEY`, `UNIQUE`, `CHECK`); expressive joins and aggregations.\n8. Disadvantages: Requires upfront schema design and versioned SQL migrations (`migrations/*.sql`).\n9. Alternatives: Document or key-value stores when records are self-contained blobs with no cross-entity joins.\n10. Incorrect Consequences: Allowing unbounded `LIMIT` or negative `OFFSET` values from query parameters lets a single client request scan millions of rows and crash the database.\n11. Real-World Usage: Go Backend Academy uses 20 normalized tables in `migrations/sqlite/001_initial_schema.up.sql` and `migrations/postgres/001_initial_schema.up.sql`.\n12. Perf/Sec/Maint/Scale: Scalability: Always clamp pagination `LIMIT` (e.g. default 20, max 100) and index Foreign Key columns.",
       "code_corrected": "package sqlutil\n\nfunc ClampPageLimit(limit, offset int) (int, int) {\n\tif limit \u003c= 0 {\n\t\tlimit = 20\n\t}\n\tif limit \u003e 100 {\n\t\tlimit = 100\n\t}\n\tif offset \u003c 0 {\n\t\toffset = 0\n\t}\n\treturn limit, offset\n}",
       "code_incorrect": "package sqlutil\n\n// BUG: Client passing limit=999999999 or offset=-50 causes DB memory exhaustion or SQL error\nfunc RawPageBounds(limit, offset int) (int, int) {\n\treturn limit, offset\n}",
@@ -971,6 +1741,28 @@
       "reasoning": "Enforcing a sensible default (20), hard ceiling (100), and non-negative offset bounds the worst-case memory and I/O cost of any list query.",
       "section_type": "core",
       "title": "4.0 SQL from Scratch: Tables, Primary/Foreign Keys, SELECT, WHERE, JOIN, GROUP BY \u0026 Normalization"
+    },
+    {
+      "body_text": "1. Menyimpan data jamak dalam satu kolom teks (misal tag: \"tech,golang,sql\") melanggar First Normal Form (1NF) dan membuat pencarian menjadi lambat.\n2. Tidak membuat indeks pada kolom Foreign Key (orders.user_id) menyebabkan database melakukan Full Table Scan setiap kali baris pada tabel parent dihapus atau diperbarui.\n3. Mengabaikan Aksi ON DELETE: Jika tabel pesanan mengacu ke pengguna, tentukan apakah penghapusan pengguna memicu ON DELETE CASCADE (menghapus pesanan terkait) atau ON DELETE RESTRICT (mencegah penghapusan pengguna selama ada pesanan aktif).",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l4-stage-e-sql-relational-fundamentals-sec-pitfalls",
+      "lesson_id": "l4-stage-e-sql-relational-fundamentals",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan: Foreign Key Tanpa Index \u0026 Pelanggaran 1NF"
+    },
+    {
+      "body_text": "```sql\n-- 1. Buat Tabel Users\nCREATE TABLE users (\n    id VARCHAR(36) PRIMARY KEY,\n    name VARCHAR(100) NOT NULL,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\n-- 2. Buat Tabel Orders dengan Foreign Key\nCREATE TABLE orders (\n    id VARCHAR(36) PRIMARY KEY,\n    user_id VARCHAR(36) NOT NULL REFERENCES users(id) ON DELETE CASCADE,\n    amount_cents INTEGER NOT NULL CHECK (amount_cents \u003e 0),\n    status VARCHAR(20) NOT NULL DEFAULT 'pending'\n);\n\n-- 3. Kueri JOIN dan Agregasi\nSELECT u.name, COUNT(o.id) AS total_orders, COALESCE(SUM(o.amount_cents), 0) AS total_spent\nFROM users u\nLEFT JOIN orders o ON u.id = o.user_id\nGROUP BY u.id, u.name\nORDER BY total_spent DESC;\n```",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l4-stage-e-sql-relational-fundamentals-sec-walkthrough",
+      "lesson_id": "l4-stage-e-sql-relational-fundamentals",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Contoh SQL: Skema, Relasi \u0026 Kueri Agregasi"
     },
     {
       "body_text": "{\"beginner\": \"In Go, you have four main ways to talk to a SQL database: 1) Raw SQL (`database/sql` or `pgx`), where you write SQL and scan columns into variables yourself; 2) Code Generation (`sqlc`), where you write SQL and a tool generates type-safe Go functions for you; 3) Query Builders (`Bun`), where you chain helper methods; and 4) ORMs (`GORM`), which map Go structs to tables automatically at runtime.\", \"intermediate\": \"Always remember that `*sql.DB` is NOT a single connection\\u2014it is a thread-safe pool of connections created once at startup and shared across the application. When iterating over `rows, err := db.QueryContext(ctx, ...)`, you MUST call `defer rows.Close()` immediately after checking `err != nil`, and check `rows.Err()` after the `for rows.Next()` loop finishes.\", \"advanced\": \"Compare the same `GetUserOrders` operation across all four approaches: `GORM`'s `db.Preload(\\\"Orders\\\").First(\u0026user, id)` executes two queries and uses `reflect.Value` allocation per field; `sqlc` compiles your SQL `JOIN` or `json_agg` query into direct `row.Scan(\u0026item.ID, \u0026item.Total)` calls over `pgx/v5`'s binary protocol, running 3x\\u20135x faster with 70% fewer heap allocations per row.\"}",
@@ -995,6 +1787,50 @@
       "title": "5.2 Expand-and-Contract Zero-Downtime SQL Migrations, Prepared Statements \u0026 Transaction Scopes"
     },
     {
+      "body_text": "*sql.DB bukan satu koneksi ke server, melainkan pengelola armada taksi (connection pool). Ketika Anda memanggil QueryContext, satu taksi diambil, mengantarkan kueri ke database, mengembalikan data, dan kembali ke pangkalan saat rows.Close() dipanggil.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l5-stage-e-database-sql-crud-basics-sec-analogy",
+      "lesson_id": "l5-stage-e-database-sql-crud-basics",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Armada Taksi \u0026 Surat Kuasa"
+    },
+    {
+      "body_text": "SetMaxOpenConns menentukan batas atas koneksi fisik ke server DB untuk mencegah server kehabisan memori. SetMaxIdleConns menentukan jumlah koneksi hangat yang siap digunakan tanpa handshake baru. SetConnMaxLifetime memastikan koneksi basi (misal ditutup oleh firewall/load balancer) disegarkan secara berkala.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l5-stage-e-database-sql-crud-basics-sec-deep_dive",
+      "lesson_id": "l5-stage-e-database-sql-crud-basics",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Konfigurasi Pool *sql.DB di Produksi"
+    },
+    {
+      "body_text": "Implementasikan fungsi query dengan context timeout dan penanganan sql.ErrNoRows yang tepat.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l5-stage-e-database-sql-crud-basics-sec-exercise",
+      "lesson_id": "l5-stage-e-database-sql-crud-basics",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Tantangan: Parameterized Query Verification"
+    },
+    {
+      "body_text": "Menguasai penggunaan package standar database/sql: pembukaan pool *sql.DB, eksekusi QueryRowContext dan QueryContext, pencegahan SQL Injection dengan parameterized queries ($1 / ?), pemindaian Scan(), dan transaksi BeginTx.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l5-stage-e-database-sql-crud-basics-sec-goal",
+      "lesson_id": "l5-stage-e-database-sql-crud-basics",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan: Menghubungkan Go ke SQL dengan database/sql"
+    },
+    {
       "body_text": "[Beginner Overview]\nTo talk to a SQL database from Go, you use `*sql.DB`. There are 3 main methods: (1) `ExecContext` to change data (`INSERT`/`UPDATE`/`DELETE`), (2) `QueryRowContext` to fetch 1 row, and (3) `QueryContext` to fetch many rows. Never glue user strings into SQL—always write `$1` in the SQL and pass the variable as an argument!\n\n[Intermediate Technical]\nWhen fetching a single row with `db.QueryRowContext(ctx, q, arg).Scan(\u0026dest)`, `database/sql` returns `sql.ErrNoRows` if no row matched. Translate `errors.Is(err, sql.ErrNoRows)` into a domain `ErrNotFound` so your HTTP layer can return `404 Not Found` instead of `500`.\n\n[Advanced Internals]\nFor multi-step writes, call `tx, err := db.BeginTx(ctx, nil)`, immediately schedule `defer func() { _ = tx.Rollback() }()`, run all `tx.ExecContext` statements, and finish with `return tx.Commit()`. Once `Commit()` succeeds, the deferred `Rollback()` is a safe no-op.\n\n[12 Engineering Decision Pillars]\n1. What Is It: Practical day-to-day usage of Go standard `database/sql` package for safe CRUD queries and transactions before comparing ORMs or code generators.\n2. Internal Mechanics: `sql.Open(driver, dsn)` initializes a lazy, thread-safe connection pool (`*sql.DB`). `db.PingContext(ctx)` verifies connectivity. `QueryRowContext`, `QueryContext`, and `ExecContext` borrow a connection from the pool, bind parameters separately from SQL text, and return the connection when `Scan` or `rows.Close()` finishes.\n3. Why Needed: Every persistent Go backend must read and write SQL rows without leaking connections or exposing SQL injection vulnerabilities.\n4. Why Preferred: Standard `database/sql` works identically across `modernc.org/sqlite` and `jackc/pgx/v5/stdlib` using `$1` positional placeholders.\n5. When To Use: For all SQL queries, repository methods, and multi-statement atomic transactions (`db.BeginTx`).\n6. When To Avoid: Never build SQL queries with `fmt.Sprintf` or string concatenation `+` on user input, and never call `db.QueryContext` without `defer rows.Close()`.\n7. Advantages: Parameter binding prevents user values from being interpreted as SQL commands. Table/column names and ORDER BY cannot be parameterized (use allowlists); context-aware timeouts; built-in connection pooling.\n8. Disadvantages: Manual `rows.Scan(\u0026a, \u0026b)` column order must match the `SELECT` list.\n9. Alternatives: `sqlc` (generates type-safe Go from SQL) or `pgx/v5` native interface (compared in Lesson 5.1).\n10. Incorrect Consequences: Jika rows tidak ditutup dan iterasi berhenti sebelum Next() mengembalikan false (mis. return lebih awal atau break), koneksi database tetap terpakai sampai rows.Close() dipanggil. Selalu defer rows.Close() dan periksa rows.Err() setelah loop.\n11. Real-World Usage: Look at `internal/platform/database/db.go` and `content.go` in this repository—every single query uses `QueryContext`/`QueryRowContext`/`ExecContext` with `$1` parameters and `defer rows.Close()`.\n12. Perf/Sec/Maint/Scale: Security: `$1` parameter placeholders prevent SQL injection. Reliability: `defer tx.Rollback()` before `tx.Commit()` guarantees transactions never stay open on error.",
       "code_corrected": "package repo\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"errors\"\n)\n\nvar ErrUserNotFound = errors.New(\"user not found\")\n\nfunc FindUserIDByEmail(ctx context.Context, db *sql.DB, email string) (string, error) {\n\tvar id string\n\terr := db.QueryRowContext(ctx, \"SELECT id FROM users WHERE email = $1\", email).Scan(\u0026id)\n\tif errors.Is(err, sql.ErrNoRows) {\n\t\treturn \"\", ErrUserNotFound\n\t}\n\tif err != nil {\n\t\treturn \"\", err\n\t}\n\treturn id, nil\n}",
       "code_incorrect": "package repo\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"fmt\"\n)\n\nfunc FindUserBad(ctx context.Context, db *sql.DB, email string) (string, error) {\n\t// BUG 1: SQL Injection! BUG 2: rows is never closed -\u003e connection pool exhaustion!\n\trows, err := db.QueryContext(ctx, fmt.Sprintf(\"SELECT id FROM users WHERE email = '%s'\", email))\n\tif err != nil { return \"\", err }\n\tvar id string\n\tif rows.Next() { _ = rows.Scan(\u0026id) }\n\treturn id, nil\n}",
@@ -1004,6 +1840,28 @@
       "reasoning": "`QueryRowContext` with `$1` binds `email` safely, releases the pooled connection immediately inside `Scan`, and maps `sql.ErrNoRows` to `ErrUserNotFound`.",
       "section_type": "core",
       "title": "5.0 Connecting Go to SQL: database/sql, QueryContext, Scan, Parameterized Queries \u0026 Transactions"
+    },
+    {
+      "body_text": "1. SQL Injection: Menyusun string SQL menggunakan fmt.Sprintf(\"SELECT * FROM users WHERE name = '%s'\", name) memungkinkan penyerang menyisipkan perintah SQL jahat. SELALU gunakan placeholder parameter ($1 / ?).\n2. Forgetting rows.Close(): Jika loop rows.Next() berhenti lebih awal karena return error sebelum selesai, koneksi tetap terkunci dan tidak kembali ke pool hingga memicu timeout pool.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l5-stage-e-database-sql-crud-basics-sec-pitfalls",
+      "lesson_id": "l5-stage-e-database-sql-crud-basics",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan: SQL Injection \u0026 Kebocoran rows"
+    },
+    {
+      "body_text": "```go\npackage main\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"errors\"\n\t\"fmt\"\n\t\"time\"\n)\n\ntype User struct {\n\tID    string\n\tEmail string\n}\n\nfunc GetUserEmail(ctx context.Context, db *sql.DB, id string) (string, error) {\n\tctx, cancel := context.WithTimeout(ctx, 3*time.Second)\n\tdefer cancel()\n\n\tvar email string\n\t// Selalu gunakan parameter binding $1 (atau ? di SQLite/MySQL)\n\terr := db.QueryRowContext(ctx, \"SELECT email FROM users WHERE id = $1\", id).Scan(\u0026email)\n\tif err != nil {\n\t\tif errors.Is(err, sql.ErrNoRows) {\n\t\t\treturn \"\", fmt.Errorf(\"user %s: not found\", id)\n\t\t}\n\t\treturn \"\", fmt.Errorf(\"querying user: %w\", err)\n\t}\n\treturn email, nil\n}\n```",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l5-stage-e-database-sql-crud-basics-sec-walkthrough",
+      "lesson_id": "l5-stage-e-database-sql-crud-basics",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Kode Contoh: QueryRowContext \u0026 Transaksi Aman"
     },
     {
       "body_text": "{\"beginner\": \"OAuth 2.0 lets users log in via a trusted provider without giving your app their password, and OpenID Connect (OIDC) gives your Go backend a signed ID card (ID Token). RBAC (Role-Based Access Control) groups permissions into roles like `viewer`, `editor`, and `billing_admin` so you check permissions (`HasPermission(role, \\\"invoice:delete\\\")`) instead of scattering `if user.Role == \\\"admin\\\"` everywhere.\", \"intermediate\": \"When verifying JWTs or webhook HMAC signatures during a secret rotation, your Go server must accept **both** the `current` key and the `previous` key during a transition window (e.g., 24 hours). Sign all new tokens with the `current` key (`kid: \\\"key-2026-11\\\"`), while allowing verification to look up `kid` in a map containing both `key-2026-11` and `key-2026-10`.\", \"advanced\": \"Critical OIDC Security Check: Signature verification alone is NEVER sufficient! If two microservices or two client apps share an OAuth2/OIDC issuer, an attacker can take a validly signed JWT intended for `aud: \\\"analytics-viewer\\\"` and send it to `aud: \\\"payments-service\\\"`. Always assert exact `iss` match, `aud` membership, `exp \u003e now - skew`, and `alg` allowlist.\"}",
@@ -1028,6 +1886,50 @@
       "title": "6.1 Argon2id, JWT vs Sessions, OAuth2/OIDC, RBAC, SQLi/SSRF/XSS/CSRF \u0026 OWASP API Top 10"
     },
     {
+      "body_text": "Password hash adalah cap lilin satu arah yang tidak bisa dibalik menjadi password asli. Bearer token adalah gelang masuk konser: siapa pun yang menunjukkan gelang valid di pintu masuk berhak mengakses fasilitas di dalamnya.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l6-stage-f-password-hashing-bearer-auth-sec-analogy",
+      "lesson_id": "l6-stage-f-password-hashing-bearer-auth",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Cap Lilin \u0026 Gelang Masuk Konser"
+    },
+    {
+      "body_text": "Hash bcrypt berukuran 60 karakter yang memuat format: $2a$ (versi), cost factor (misal 12 = 2^12 iterasi), salt acak 128-bit (mencegah serangan Rainbow Table), dan hash ciphertext. Waktu verifikasi yang disengaja lambat (~100-300ms) membuat brute-force tidak ekonomis.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l6-stage-f-password-hashing-bearer-auth-sec-deep_dive",
+      "lesson_id": "l6-stage-f-password-hashing-bearer-auth",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Struktur Internal Hash Bcrypt"
+    },
+    {
+      "body_text": "Implementasikan verifikasi token konstan waktu dan format bearer header.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l6-stage-f-password-hashing-bearer-auth-sec-exercise",
+      "lesson_id": "l6-stage-f-password-hashing-bearer-auth",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Tantangan: VerifyBearerToken(token string) bool"
+    },
+    {
+      "body_text": "Mempelajari prinsip keamanan autentikasi backend: mengapa password tidak boleh disimpan dalam plaintext atau MD5/SHA256, cara menggunakan bcrypt/Argon2id, serta pembuatan middleware autentikasi Bearer token.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l6-stage-f-password-hashing-bearer-auth-sec-goal",
+      "lesson_id": "l6-stage-f-password-hashing-bearer-auth",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan: Autentikasi, Password Hashing \u0026 Bearer Auth"
+    },
+    {
       "body_text": "[Beginner Overview]\nWhen you log into an app, the server gives your browser a digital badge called a **Bearer Token**. Every time your browser asks for private data, it shows that badge in an HTTP header: `Authorization: Bearer abc123xyz`.\n\n**Line-by-Line Syntax Walkthrough:**\n1. `const prefix = \"Bearer \"` — Defines the exact 7-character prefix required by RFC 6750.\n2. `if !strings.HasPrefix(authHeader, prefix) { return \"\", false }` — Safely rejects any header that does not start with `\"Bearer \"` (no slice index panics!).\n3. `tok := strings.TrimSpace(strings.TrimPrefix(authHeader, prefix))` — Removes `\"Bearer \"` and any extra spaces.\n4. `return tok, tok != \"\"` — Returns the token and `true` only if the remaining token is non-empty.\n\n[Intermediate Technical]\nWhy does `strings.Split(h, \" \")[1]` crash production servers? Because an attacker sending `Authorization: Basic` (no space) causes `strings.Split` to return a 1-element slice, triggering a runtime panic! `strings.HasPrefix` + `strings.TrimPrefix` is 100% panic-proof.\n\n[Advanced Internals]\nAfter extracting the bearer token string without allocations, pass it to your JWT verifier (enforcing `alg`, `iss`, `aud`, `exp`) or hash it with SHA-256 to look up the server-side session row.\n\n[12 Engineering Decision Pillars]\n1. What Is It: The foundational gateway to backend security: how passwords are stored safely as salted one-way hashes and how HTTP APIs authenticate requests using `Authorization: Bearer \u003ctoken\u003e` headers.\n2. Internal Mechanics: When a user logs in, the server verifies their password against an Argon2id/bcrypt hash and issues a signed token or session ID. On subsequent API calls, the client sends `Authorization: Bearer \u003ctoken\u003e`, and middleware extracts the token string after the `\"Bearer \"` prefix.\n3. Why Needed: HTTP is stateless; without a clean, strict token extraction boundary, protected endpoints cannot reliably identify the caller or reject malformed credentials.\n4. Why Preferred: Validating the exact `\"Bearer \"` prefix and rejecting blank or whitespace-only tokens fails closed before any database or cryptographic verification runs.\n5. When To Use: On every authenticated REST API middleware chain before parsing JWT claims or looking up session rows.\n6. When To Avoid: Do not accept tokens in URL query parameters (`?token=xyz`) for normal API calls because URLs are logged in plaintext by proxies, browsers, and access logs.\n7. Advantages: Standard RFC 6750 header format, zero allocation string prefix trimming, and clear `401 Unauthorized` failure semantics.\n8. Disadvantages: Bearer tokens grant access to anyone possessing them, so TLS (`HTTPS`) and short expiration times are mandatory.\n9. Alternatives: `HttpOnly; Secure; SameSite=Lax` session cookies (often preferred for browser-only web apps).\n10. Incorrect Consequences: Using `strings.Split(authHeader, \" \")[1]` without checking length panics with `index out of range [1] with length 1` whenever a client sends a malformed `Authorization: Bearer` header!\n11. Real-World Usage: Used in the authentication middleware of virtually every production Go REST and gRPC gateway.\n12. Perf/Sec/Maint/Scale: `strings.HasPrefix` + `strings.TrimPrefix` runs in `O(1)` time with zero heap allocations, preventing panic DoS vectors on malformed headers.",
       "code_corrected": "package auth\n\nimport \"strings\"\n\nfunc ExtractBearerToken(authHeader string) (string, bool) {\n\tconst prefix = \"Bearer \"\n\tif !strings.HasPrefix(authHeader, prefix) {\n\t\treturn \"\", false\n\t}\n\ttok := strings.TrimSpace(strings.TrimPrefix(authHeader, prefix))\n\tif tok == \"\" {\n\t\treturn \"\", false\n\t}\n\treturn tok, true\n}",
       "code_incorrect": "package auth\n\nimport \"strings\"\n\nfunc ExtractBearerUnsafe(authHeader string) string {\n\t// BUG: Panics with index out of range if authHeader has no space!\n\tparts := strings.Split(authHeader, \" \")\n\treturn parts[1]\n}",
@@ -1037,6 +1939,28 @@
       "reasoning": "`HasPrefix` and `TrimPrefix` never panic on short or malformed inputs and allocate zero intermediate slices.",
       "section_type": "core",
       "title": "6.0 Security 101: Password Hashing, Bearer Tokens \u0026 HTTP Auth Middleware"
+    },
+    {
+      "body_text": "1. Menggunakan MD5/SHA256 untuk password: Algoritma ini dirancang cepat untuk integritas data, sehingga penyerang dapat mencoba miliaran kombinasi per detik dengan GPU. Gunakan bcrypt atau Argon2id yang lambat dan membutuhkan memori.\n2. Membandingkan token dengan operator == biasa rentan terhadap timing attacks; gunakan crypto/subtle.ConstantTimeCompare.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l6-stage-f-password-hashing-bearer-auth-sec-pitfalls",
+      "lesson_id": "l6-stage-f-password-hashing-bearer-auth",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan: Algoritma Hashing Cepat \u0026 Timing Attacks"
+    },
+    {
+      "body_text": "```go\npackage main\n\nimport (\n\t\"context\"\n\t\"net/http\"\n\t\"strings\"\n)\n\ntype contextKey string\nconst userContextKey contextKey = \"user_id\"\n\nfunc BearerAuthMiddleware(next http.Handler) http.Handler {\n\treturn http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {\n\t\tauthHeader := r.Header.Get(\"Authorization\")\n\t\tif authHeader == \"\" || !strings.HasPrefix(authHeader, \"Bearer \") {\n\t\t\thttp.Error(w, `{\"error\":\"missing or invalid authorization header\"}`, http.StatusUnauthorized)\n\t\t\treturn\n\t\t}\n\n\t\ttoken := strings.TrimPrefix(authHeader, \"Bearer \")\n\t\tif token != \"secret_token_val\" { // Di produksi, verifikasi signature JWT / DB session\n\t\t\thttp.Error(w, `{\"error\":\"invalid token\"}`, http.StatusUnauthorized)\n\t\t\treturn\n\t\t}\n\n\t\t// Simpan user_id ke dalam context\n\t\tctx := context.WithValue(r.Context(), userContextKey, \"usr_100\")\n\t\tnext.ServeHTTP(w, r.WithContext(ctx))\n\t})\n}\n```",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l6-stage-f-password-hashing-bearer-auth-sec-walkthrough",
+      "lesson_id": "l6-stage-f-password-hashing-bearer-auth",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Kode Contoh: Middleware Autentikasi Token"
     },
     {
       "body_text": "{\"beginner\": \"A **Mock** checks 'Did function A call function B with exact argument X?', while a **Fake** is a simple working in-memory version (like a `FakeUserStore` backed by a Go `map`). In Go, writing a 15-line Fake struct is cleaner, faster, and doesn't break every time you refactor internal helper calls!\", \"intermediate\": \"Use `t.Cleanup(func() { ... })` instead of manual cleanup at the end of a test function: `t.Cleanup` runs automatically when the test and all its child subtests finish, even if `t.Fatalf` aborted the test halfway through.\", \"advanced\": \"How do you run 50 PostgreSQL repository tests in parallel (`t.Parallel()`) in under 1 second? Boot one PostgreSQL container in `TestMain`, apply `migrations/postgres/*.up.sql` once, and in each test generate a unique `tenant_id := uuid.NewString()` (or clone from a template database `CREATE DATABASE test_xyz TEMPLATE migrated_template`). Each test operates on disjoint rows with zero lock contention.\"}",
@@ -1050,6 +1974,50 @@
       "title": "7.2 Fakes vs Mocks, Real Database Integration Testing \u0026 Reproducible CI Pipelines"
     },
     {
+      "body_text": "Membuka server jaringan nyata saat unit test ibarat menerbangkan pesawat sungguhan hanya untuk mengetes apakah lampu indikator menyala. httptest adalah simulator kokpit di darat: menguji handler secara presisi dalam milidetik tanpa bergantung pada port atau jaringan OS.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l7-stage-g-table-driven-tests-httptest-sec-analogy",
+      "lesson_id": "l7-stage-g-table-driven-tests-httptest",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Simulator Kokpit Pesawat"
+    },
+    {
+      "body_text": "httptest.ResponseRecorder mengimplementasikan interface http.ResponseWriter dengan menyimpan header dalam map bawaan dan payload dalam bytes.Buffer di memori. Tidak ada socket kernel yang dialokasikan, sehingga ribuan test handler dapat dieksekusi dalam hitungan milidetik.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l7-stage-g-table-driven-tests-httptest-sec-deep_dive",
+      "lesson_id": "l7-stage-g-table-driven-tests-httptest",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Mekanisme httptest.ResponseRecorder \u0026 Buffer Memori"
+    },
+    {
+      "body_text": "Tulis table-driven test untuk memvalidasi fungsi parsing email dengan berbagai kasus uji valid dan invalid.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l7-stage-g-table-driven-tests-httptest-sec-exercise",
+      "lesson_id": "l7-stage-g-table-driven-tests-httptest",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Tantangan: TestTableDrivenValidation"
+    },
+    {
+      "body_text": "Menguasai pola pengujian standar industri Go: Table-Driven Tests dengan t.Run(), penanda pembantu t.Helper(), serta pengujian handler HTTP tanpa membuka port jaringan nyata menggunakan httptest.ResponseRecorder [Celah 7].",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l7-stage-g-table-driven-tests-httptest-sec-goal",
+      "lesson_id": "l7-stage-g-table-driven-tests-httptest",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan: Table-Driven Testing \u0026 net/http/httptest"
+    },
+    {
       "body_text": "[Beginner Overview]\nHow do you make sure a function works on normal inputs, messy inputs, and empty inputs? You write a **Table-Driven Test**—a checklist of `(input -\u003e expected output)` rows!\n\n**Line-by-Line Syntax Walkthrough:**\n1. `words := strings.Fields(strings.ToLower(title))` — Converts `title` to lowercase and splits it into clean words, automatically ignoring extra spaces or tabs!\n2. `return strings.Join(words, \"-\")` — Joins the clean words with a single `\"-\"` hyphen between each word (returning `\"\"` if `words` is empty).\n\n[Intermediate Technical]\nCompare `strings.Split(s, \" \")` vs `strings.Fields(s)`: `strings.Split(\"  go  backend \", \" \")` produces empty strings `[\"\", \"\", \"go\", \"\", \"backend\", \"\"]`, whereas `strings.Fields` returns `[\"go\", \"backend\"]` cleanly.\n\n[Advanced Internals]\nCombine table-driven unit tests (`TestSlugifyTitle`) in Lesson 7.0 with `testing.F` fuzzing in Lesson 7.1 to prove that arbitrary Unicode strings never panic or produce leading/trailing hyphens.\n\n[12 Engineering Decision Pillars]\n1. What Is It: The foundational guide to Go unit testing: designing pure functions and testing multiple inputs and edge cases systematically using a table of test cases.\n2. Internal Mechanics: Go's `testing` package runs any `func TestXxx(t *testing.T)` in `*_test.go` files. By defining a slice of test cases and iterating with `t.Run(tc.name, ...)`, you test 10 edge cases with a single 5-line assertion loop.\n3. Why Needed: Untested backend code breaks silently when edge cases (like extra spaces or mixed case in article titles) hit production.\n4. Why Preferred: Adding a new bug regression test to a table-driven test takes 1 line (`{name: \"tabs and spaces\", in: \"  Go   101 \", want: \"go-101\"}`) instead of copying a 15-line test function.\n5. When To Use: For every pure business helper, validator, slug generator, parser, and HTTP handler in your service.\n6. When To Avoid: Do not put complex `if/else` branching logic inside the test loop itself—keep test expectations explicit and literal.\n7. Advantages: Zero external test framework dependencies (`assert` libraries are optional in Go), fast execution, and isolated subtest filtering.\n8. Disadvantages: Requires discipline to keep functions deterministic (passing time or random seeds as arguments).\n9. Alternatives: Repetitive copy-pasted `TestCase1`, `TestCase2` functions.\n10. Incorrect Consequences: Using `strings.ReplaceAll(strings.ToLower(title), \" \", \"-\")` turns `\"  Hello   Go \"` into `\"--hello---go-\"` with ugly leading/consecutive hyphens!\n11. Real-World Usage: Used across the Go standard library (`strings_test.go`, `net/http/serve_test.go`) and Go Backend Academy's own `server_integration_test.go`.\n12. Perf/Sec/Maint/Scale: `strings.Fields` splits on any run of whitespace characters and trims leading/trailing spaces in a single pass.",
       "code_corrected": "package slug\n\nimport \"strings\"\n\nfunc SlugifyTitle(title string) string {\n\twords := strings.Fields(strings.ToLower(title))\n\treturn strings.Join(words, \"-\")\n}",
       "code_incorrect": "package slug\n\nimport \"strings\"\n\nfunc SlugifyNaive(title string) string {\n\t// BUG: \"  Go   Backend  \" becomes \"--go---backend--\"\n\treturn strings.ReplaceAll(strings.ToLower(title), \" \", \"-\")\n}",
@@ -1059,6 +2027,28 @@
       "reasoning": "`strings.Fields` collapses arbitrary runs of spaces, tabs, and newlines into clean tokens before `strings.Join` links them with `\"-\"`.",
       "section_type": "core",
       "title": "7.0 Testing 101: Writing Table-Driven Unit Tests \u0026 Testable Pure Functions"
+    },
+    {
+      "body_text": "1. Memodifikasi variabel global atau state database yang sama di dalam loop test tanpa reset membuat hasil test tidak deterministik (flaky tests).\n2. Lupa memanggil t.Helper() pada helper function membuat nomor baris kegagalan di stack trace menunjuk ke helper, bukan ke baris test yang bermasalah.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l7-stage-g-table-driven-tests-httptest-sec-pitfalls",
+      "lesson_id": "l7-stage-g-table-driven-tests-httptest",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan: State Bersama Antar Test Case"
+    },
+    {
+      "body_text": "```go\npackage main\n\nimport (\n\t\"net/http\"\n\t\"net/http/httptest\"\n\t\"strings\"\n\t\"testing\"\n)\n\nfunc StatusHandler(w http.ResponseWriter, r *http.Request) {\n\tif r.Method != http.MethodGet {\n\t\thttp.Error(w, \"method not allowed\", http.StatusMethodNotAllowed)\n\t\treturn\n\t}\n\tw.WriteHeader(http.StatusOK)\n\t_, _ = w.Write([]byte(\"OK\"))\n}\n\nfunc TestStatusHandler(t *testing.T) {\n\ttests := []struct {\n\t\tname       string\n\t\tmethod     string\n\t\twantStatus int\n\t\twantBody   string\n\t}{\n\t\t{\"valid GET\", http.MethodGet, http.StatusOK, \"OK\"},\n\t\t{\"invalid POST\", http.MethodPost, http.StatusMethodNotAllowed, \"method not allowed\\n\"},\n\t}\n\n\tfor _, tt := range tests {\n\t\tt.Run(tt.name, func(t *testing.T) {\n\t\t\treq := httptest.NewRequest(tt.method, \"/status\", nil)\n\t\t\trec := httptest.NewRecorder()\n\n\t\t\tStatusHandler(rec, req)\n\n\t\t\tif rec.Code != tt.wantStatus {\n\t\t\t\tt.Errorf(\"status = %d, want %d\", rec.Code, tt.wantStatus)\n\t\t\t}\n\t\t\tif rec.Body.String() != tt.wantBody {\n\t\t\t\tt.Errorf(\"body = %q, want %q\", rec.Body.String(), tt.wantBody)\n\t\t\t}\n\t\t})\n\t}\n}\n```\n\nJalankan test:\n```bash\n$ go test -v -run TestStatusHandler ./...\n=== RUN   TestStatusHandler\n=== RUN   TestStatusHandler/valid_GET\n=== RUN   TestStatusHandler/invalid_POST\n--- PASS: TestStatusHandler (0.00s)\nPASS\n```",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l7-stage-g-table-driven-tests-httptest-sec-walkthrough",
+      "lesson_id": "l7-stage-g-table-driven-tests-httptest",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Kode Contoh: Table Test Handler dengan httptest"
     },
     {
       "body_text": "{\"beginner\": \"Instead of writing 10 separate test functions that copy-paste the same setup code, Go engineers put test cases into a slice of structs (a 'table') and loop over them with `t.Run(tc.name, ...)`. That way, adding a new edge case is just adding one line to the slice!\", \"intermediate\": \"Use `httptest.NewRequest` and `httptest.NewRecorder` to test `http.Handler` functions in microseconds without binding a real network port, or `httptest.NewServer` when testing a full HTTP client-server roundtrip. For parsers and validators, add a `Fuzz...(f *testing.F)` function so Go's coverage-guided fuzzer automatically feeds malformed inputs to verify your code never panics.\", \"advanced\": \"Understand the limits of mocks vs fakes vs real dependencies: an in-memory Fake implementing a narrow consumer interface is great for unit-testing domain orchestration, but repository layers MUST be tested against the real database engine (e.g., PostgreSQL via Testcontainers) to validate migrations, indexes, `ON CONFLICT` clauses, and transaction isolation.\"}",
@@ -1094,6 +2084,50 @@
       "title": "8.2 Enforcing Modular Monolith Boundaries, CQRS Read Models \u0026 Domain Modeling"
     },
     {
+      "body_text": "Di sebuah toko: Resepsionis (Handler) menyapa pelanggan dan memvalidasi formulir pemesanan. Manajer (Service) memeriksa apakah pesanan memenuhi diskon dan aturan perusahaan. Petugas Gudang (Repository) mengambil barang fisik dari rak database. Manajer tidak perlu tahu apakah pesanan datang lewat telepon atau web.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l8-stage-h-handler-service-repo-layers-sec-analogy",
+      "lesson_id": "l8-stage-h-handler-service-repo-layers",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Resepsionis, Manajer \u0026 Petugas Gudang"
+    },
+    {
+      "body_text": "Go lebih menyukai Dependency Injection eksplisit melalui fungsi konstruktor (NewService(repo)) daripada framework berbasis reflection seperti Spring atau Guice. Hal ini menjaga dependensi tetap jelas, type-safe saat kompilasi, dan waktu kompilasi yang instan. Jika proyek berkembang menjadi modular monolith, paket internal/ menjamin batas arsitektur antar modul tidak dapat diimpor sembarangan oleh modul luar.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l8-stage-h-handler-service-repo-layers-sec-deep_dive",
+      "lesson_id": "l8-stage-h-handler-service-repo-layers",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Dependency Injection Murni Tanpa Reflection Framework"
+    },
+    {
+      "body_text": "Buat struct MockUserRepo untuk menguji UserService tanpa koneksi database nyata.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l8-stage-h-handler-service-repo-layers-sec-exercise",
+      "lesson_id": "l8-stage-h-handler-service-repo-layers",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Tantangan: Implementasi Interface Repository Mock"
+    },
+    {
+      "body_text": "Memahami pemisahan tanggung jawab pada backend Go: Handler bertanggung jawab atas protokol HTTP/JSON DTO, Service menangani aturan bisnis murni, dan Repository bertanggung jawab atas persistensi database [Celah 8].",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l8-stage-h-handler-service-repo-layers-sec-goal",
+      "lesson_id": "l8-stage-h-handler-service-repo-layers",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan: Arsitektur 3-Layer (Handler, Service, Repository)"
+    },
+    {
       "body_text": "[Beginner Overview]\nWhen organizing a Go backend project, give each layer **one job**:\n- **Handler**: Speaks HTTP (reads JSON request, writes `200 OK` or `400 Bad Request`).\n- **Service / Domain**: Enforces business rules (e.g., *\"You cannot add USD and EUR together without conversion!\"*).\n- **Repository**: Speaks SQL (`SELECT` / `INSERT`).\n\n**Line-by-Line Syntax Walkthrough:**\n1. `if a == nil || b == nil { return Money{}, errors.New(\"money operand is nil\") }` — Prevents nil-pointer crashes.\n2. `if a.Currency != b.Currency { return Money{}, errors.New(\"currency mismatch\") }` — Enforces the domain rule that currencies must match.\n3. `return Money{Cents: a.Cents + b.Cents, Currency: a.Currency}, nil` — Returns the combined `Money` struct safely.\n\n[Intermediate Technical]\nNotice that `AddMoney(a, b *Money) (Money, error)` does not import `net/http` or `database/sql`. That means you can call it from an HTTP handler, a CLI command, or a background worker without changing a single line!\n\n[Advanced Internals]\nThis pure domain boundary is the exact foundation of Hexagonal (Ports \u0026 Adapters) Architecture in Lesson 8.1: the domain sits at the center with zero outbound infrastructure imports.\n\n[12 Engineering Decision Pillars]\n1. What Is It: A practical, jargon-free introduction to structuring a Go backend service into three focused responsibilities: **Handler** (HTTP), **Service** (Business Logic), and **Repository** (Database).\n2. Internal Mechanics: The HTTP handler decodes JSON and calls the Service. The Service checks business rules (like verifying two `Money` values share the same currency before adding them) and calls the Repository. The Repository runs SQL queries.\n3. Why Needed: Putting SQL queries, JSON decoding, and financial math inside a single 300-line `http.HandlerFunc` makes it impossible to test business rules without spinning up an HTTP server and database.\n4. Why Preferred: Starting with clean pure domain structs (`Money`) and functions lets you test 100% of your business rules in 0.1ms before adding interfaces or adapters.\n5. When To Use: As the default starting structure for any Go REST API or microservice.\n6. When To Avoid: Do not create 5 layers of empty pass-through interfaces for a 2-endpoint tool—only introduce interfaces where you actually need to swap or fake an external dependency.\n7. Advantages: Crystal-clear file organization, instant unit testing of domain rules, and zero circular imports.\n8. Disadvantages: Requires mapping between HTTP DTOs and domain structs when API contracts diverge from storage tables.\n9. Alternatives: Fat HTTP handlers (hard to test) or heavy enterprise Java-style boilerplate (hard to read).\n10. Incorrect Consequences: Adding `1000 USD` + `1000 IDR` without checking `a.Currency != b.Currency` silently corrupts financial balances across currencies!\n11. Real-World Usage: Look at Go Backend Academy's own `internal/modules/` directory: each module cleanly separates domain logic (`service.go`) from HTTP routing (`router.go`) and SQL (`database/`).\n12. Perf/Sec/Maint/Scale: Pure value/pointer domain methods allocate zero heap memory and execute in nanoseconds.",
       "code_corrected": "package money\n\nimport \"errors\"\n\ntype Money struct {\n\tCents    int64\n\tCurrency string\n}\n\nfunc AddMoney(a, b *Money) (Money, error) {\n\tif a == nil || b == nil {\n\t\treturn Money{}, errors.New(\"money operand cannot be nil\")\n\t}\n\tif a.Currency != b.Currency {\n\t\treturn Money{}, errors.New(\"currency mismatch\")\n\t}\n\treturn Money{Cents: a.Cents + b.Cents, Currency: a.Currency}, nil\n}",
       "code_incorrect": "package money\n\ntype Money struct {\n\tCents    int64\n\tCurrency string\n}\n\nfunc AddMoneyUnsafe(a, b *Money) Money {\n\t// BUG: Panics if a or b is nil, and silently adds USD + JPY!\n\treturn Money{Cents: a.Cents + b.Cents, Currency: a.Currency}\n}",
@@ -1103,6 +2137,28 @@
       "reasoning": "Validating `a == nil || b == nil` and `a.Currency != b.Currency` inside the domain layer guarantees no caller can violate financial invariants.",
       "section_type": "core",
       "title": "8.0 Architecture 101: Separating Handler, Service \u0026 Repository Without Boilerplate"
+    },
+    {
+      "body_text": "1. Mengirim *http.Request atau w http.ResponseWriter ke dalam Service atau Repository layer merusak isolasi arsitektur dan membuat kode bisnis tidak bisa diuji tanpa mock HTTP.\n2. Membocorkan entitas database SQL langsung ke JSON response client tanpa DTO mapper (mengakibatkan field internal bocor).\n3. Mengabaikan pemetaan error: Repository harus mengembalikan domain error (seperti ErrUserNotFound) alih-alih sql.ErrNoRows, sehingga Handler dapat memetakannya ke HTTP 404 tanpa mengetahui jenis database yang digunakan.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l8-stage-h-handler-service-repo-layers-sec-pitfalls",
+      "lesson_id": "l8-stage-h-handler-service-repo-layers",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan: Bocornya Abstraksi Antar Lapisan"
+    },
+    {
+      "body_text": "```go\npackage main\n\nimport (\n\t\"context\"\n\t\"errors\"\n\t\"fmt\"\n)\n\n// Repository Interface\ntype UserRepository interface {\n\tGetByID(ctx context.Context, id string) (*UserEntity, error)\n}\n\ntype UserEntity struct {\n\tID    string\n\tEmail string\n}\n\n// Service Layer\ntype UserService struct {\n\trepo UserRepository // Tergantung pada interface, bukan struct konkret!\n}\n\nfunc NewUserService(repo UserRepository) *UserService {\n\treturn \u0026UserService{repo: repo}\n}\n\nfunc (s *UserService) CanAccessService(ctx context.Context, id string) (bool, error) {\n\tuser, err := s.repo.GetByID(ctx, id)\n\tif err != nil {\n\t\treturn false, err\n\t}\n\treturn user.Email != \"\", nil\n}\n```",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l8-stage-h-handler-service-repo-layers-sec-walkthrough",
+      "lesson_id": "l8-stage-h-handler-service-repo-layers",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Kode Contoh: Injeksi Dependensi Antar Lapisan"
     },
     {
       "body_text": "{\"beginner\": \"What happens if your code saves an Order to PostgreSQL, and then the server loses power 1 millisecond before sending the 'OrderCreated' message to Kafka? The order is saved, but the warehouse never ships it! The **Outbox Pattern** solves this by saving both the Order and the 'OrderCreated' message into PostgreSQL in the exact same database transaction, and a background worker reliably sends it to Kafka until Kafka confirms receipt.\", \"intermediate\": \"Compare the three major message brokers in Go ecosystems: **RabbitMQ** is a smart broker (AMQP exchanges, routing keys, per-message acks/priorities\\u2014great for background task queues); **Apache Kafka** is a distributed partitioned append-only log (retains events on disk for days/weeks, consumer groups read by offset\\u2014great for event streaming and audit logs); **NATS / JetStream** is written in Go, ultra-lightweight, and excels at low-latency pub/sub and edge/microservice messaging.\", \"advanced\": \"To prevent Cache Stampedes in Go: 1) Wrap cache-miss DB fetches in `singleflight.Group.Do(key, fn)` so 1,000 concurrent requests on the same pod collapse into 1 DB query. 2) Add random TTL jitter (`baseTTL + rand(0, 10% of baseTTL)`) when writing batch keys so 10,000 pre-warmed keys don't expire at the exact same second. 3) Cache negative results ('not found' sentinel) with a short 30s TTL to stop Cache Penetration attacks querying nonexistent IDs.\"}",
@@ -1127,6 +2183,50 @@
       "title": "9.2 gRPC \u0026 Protobuf Contracts, WebSockets vs SSE \u0026 OpenTelemetry Distributed Tracing"
     },
     {
+      "body_text": "Bartender menyimpan botol minuman yang paling sering dipesan di atas meja saji (Redis cache). Jika ada pesanan minuman langka, ia turun ke gudang bawah tanah (Database), membawanya ke meja, dan meletakkannya di rak depan untuk pesanan berikutnya.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l9-stage-i-redis-cache-aside-backoff-sec-analogy",
+      "lesson_id": "l9-stage-i-redis-cache-aside-backoff",
+      "reasoning": "",
+      "section_type": "analogy",
+      "title": "Meja Bartender \u0026 Gudang Bawah Tanah"
+    },
+    {
+      "body_text": "Tanpa jitter acak, jika 10.000 worker gagal bersamaan, mereka semua akan melakukan retry serentak pada detik ke-1, detik ke-2, dan detik ke-4. Hal ini menciptakan gelombang lonjakan beban (thundering herd) yang merobohkan server yang baru saja pulih. Jitter meratakan retry di sepanjang rentang waktu. Gabungkan backoff dengan Circuit Breaker (seperti sony/gobreaker) untuk memutus aliran request ketika kegagalan hilir melampaui batas toleransi.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l9-stage-i-redis-cache-aside-backoff-sec-deep_dive",
+      "lesson_id": "l9-stage-i-redis-cache-aside-backoff",
+      "reasoning": "",
+      "section_type": "deep_dive",
+      "title": "Mengapa Jitter Sangat Penting pada Backoff Terdistribusi"
+    },
+    {
+      "body_text": "Buat fungsi pembangun cache key yang konsisten dengan pemisah titik dua (contoh: \"users:profile:usr_123\").",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l9-stage-i-redis-cache-aside-backoff-sec-exercise",
+      "lesson_id": "l9-stage-i-redis-cache-aside-backoff",
+      "reasoning": "",
+      "section_type": "exercise",
+      "title": "Tantangan: CacheKeyGenerator(prefix, id string) string"
+    },
+    {
+      "body_text": "Memahami strategi caching terdistribusi: pola Cache-Aside (Lazy Loading), penentuan TTL (Time-To-Live), penanganan Cache Miss, serta algoritma Exponential Backoff dengan Jitter untuk retry panggilan jaringan.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l9-stage-i-redis-cache-aside-backoff-sec-goal",
+      "lesson_id": "l9-stage-i-redis-cache-aside-backoff",
+      "reasoning": "",
+      "section_type": "goal",
+      "title": "Tujuan: Redis Cache-Aside \u0026 Exponential Backoff"
+    },
+    {
       "body_text": "[Beginner Overview]\nIf a website or database is temporarily busy, clicking refresh 100 times per second only makes it crash harder! Instead, smart backends wait **100ms**, then **200ms**, then **400ms**, then **800ms** (doubling each time up to a maximum cap like **5,000ms**). This is called **Exponential Backoff**.\n\n**Line-by-Line Syntax Walkthrough:**\n1. `if attempt \u003c 1 { attempt = 1 }` — Ensures attempt number starts at 1 or higher.\n2. `if attempt \u003e 30 { return maxMs }` — Prevents bit-shift overflow on large attempt numbers.\n3. `delay := baseMs \u003c\u003c (attempt - 1)` — Doubles `baseMs` for each attempt (`100 \u003c\u003c 0 = 100`, `100 \u003c\u003c 1 = 200`, `100 \u003c\u003c 2 = 400`).\n4. `if delay \u003e maxMs || delay \u003c= 0 { return maxMs }` — Caps the wait time so it never exceeds `maxMs`.\n\n[Intermediate Technical]\nWhy does `baseMs \u003c\u003c (attempt - 1)` double the number? Because shifting binary bits left by 1 position multiplies by `2^1 = 2`, shifting by 2 multiplies by `2^2 = 4`, and shifting by 3 multiplies by `2^3 = 8`!\n\n[Advanced Internals]\nIn production (Lesson 9.1), combine this capped exponential backoff with **Full Jitter** (`rand.Int63n(delay)`) and a **Circuit Breaker** so 500 concurrent pods do not wake up on the exact same millisecond.\n\n[12 Engineering Decision Pillars]\n1. What Is It: Your foundational guide to two everyday distributed backend patterns: **Cache-Aside** (speeding up reads with Redis) and **Exponential Backoff** (retrying temporary network glitches safely).\n2. Internal Mechanics: When a downstream service or cache node hiccups, instead of hammering it 1,000 times per second in a tight loop, exponential backoff doubles the wait duration after each failed attempt (`baseMs * 2^(attempt-1)`), capped at `maxMs`.\n3. Why Needed: In distributed systems, networks and databases occasionally drop packets or restart. Naive instant retries turn a 1-second blip into a cascading outage (a **Retry Storm**).\n4. Why Preferred: Bit-shifting `baseMs \u003c\u003c (attempt - 1)` with an explicit `attempt \u003c 1` floor and `delay \u003e maxMs` cap computes retry delays in nanoseconds without `math.Pow` float conversions.\n5. When To Use: On every outbound background job worker, webhook delivery client, and idempotent RPC retry loop.\n6. When To Avoid: Never retry non-idempotent mutations (like charging a credit card without an `Idempotency-Key`) blindly on timeout.\n7. Advantages: Gives recovering databases and downstream APIs breathing room to finish restarting.\n8. Disadvantages: Increases tail latency for the caller during retries (which is why retries must also respect `ctx.Done()`).\n9. Alternatives: Fixed sleep intervals (too aggressive during outages) or immediate fail-fast circuit breaking (Lesson 9.1).\n10. Incorrect Consequences: Retrying with zero delay (`for { err := sendWebhook(); if err == nil { break } }`) saturates CPU and DDOSes your own database or partner API.\n11. Real-World Usage: Used in AWS SDK for Go, gRPC retry interceptors, and background outbox relay workers.\n12. Perf/Sec/Maint/Scale: Capping `attempt` and clamping `delay` to `maxMs` prevents 64-bit integer shift overflow and bounds maximum retry wait time.",
       "code_corrected": "package retry\n\nfunc ComputeBackoffMs(baseMs int64, maxMs int64, attempt int) int64 {\n\tif attempt \u003c 1 {\n\t\tattempt = 1\n\t}\n\tif attempt \u003e 30 {\n\t\treturn maxMs\n\t}\n\tdelay := baseMs \u003c\u003c (attempt - 1)\n\tif delay \u003e maxMs || delay \u003c= 0 {\n\t\treturn maxMs\n\t}\n\treturn delay\n}",
       "code_incorrect": "package retry\n\nfunc ComputeBackoffUnsafe(baseMs int64, attempt int) int64 {\n\t// BUG: Panics if attempt \u003c 1 (negative shift) and overflows int64 on large attempts!\n\treturn baseMs \u003c\u003c (attempt - 1)\n}",
@@ -1136,11 +2236,33 @@
       "reasoning": "Clamping `attempt \u003e= 1`, guarding `attempt \u003e 30`, and capping at `maxMs` guarantees safe, bounded backoff durations for any input.",
       "section_type": "core",
       "title": "9.0 Distributed 101: Redis Cache-Aside Mental Model \u0026 Exponential Backoff Retries"
+    },
+    {
+      "body_text": "1. Menyimpan data di Redis tanpa TTL (expire): data akan bertahan selamanya, menyebabkan RAM server Redis penuh (OOM) dan menyajikan data basi.\n2. Thundering Herd (Cache Stampede): Ketika key populer kedaluwarsa, ribuan request bersamaan langsung menghantam database. Gunakan singleflight untuk menduplikasi fetch ke DB.\n3. Cache Penetration: Penyerang menanyakan ID yang tidak ada di database secara terus-menerus. Solusi: simpan hasil nil/kosong di cache dengan TTL pendek (misal 60 detik) atau gunakan Bloom Filter.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l9-stage-i-redis-cache-aside-backoff-sec-pitfalls",
+      "lesson_id": "l9-stage-i-redis-cache-aside-backoff",
+      "reasoning": "",
+      "section_type": "pitfalls",
+      "title": "Jebakan: Thundering Herd \u0026 Cache Tanpa TTL"
+    },
+    {
+      "body_text": "```go\npackage main\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"math/rand\"\n\t\"time\"\n)\n\nfunc RetryWithBackoff(ctx context.Context, maxAttempts int, op func() error) error {\n\tbaseDelay := 100 * time.Millisecond\n\tfor attempt := 0; attempt \u003c maxAttempts; attempt++ {\n\t\terr := op()\n\t\tif err == nil {\n\t\t\treturn nil\n\t\t}\n\t\t// Full Jitter: rand(0, base * 2^attempt)\n\t\tbackoff := time.Duration(float64(baseDelay) * float64(1\u003c\u003cattempt))\n\t\tjitter := time.Duration(rand.Int63n(int64(backoff)))\n\t\tselect {\n\t\tcase \u003c-time.After(jitter):\n\t\tcase \u003c-ctx.Done():\n\t\t\treturn ctx.Err()\n\t\t}\n\t}\n\treturn fmt.Errorf(\"operation failed after %d attempts\", maxAttempts)\n}\n```\n\n**Perbandingan Strategi Caching:**\n- *Cache-Aside (Lazy Loading)*: Aplikasi membaca cache; jika miss, baca DB lalu tulis ke cache. Bagus untuk data yang lebih sering dibaca daripada ditulis.\n- *Write-Through*: Aplikasi menulis ke cache dan database secara bersamaan. Menjamin cache selalu segar tapi menambah latensi operasi tulis.\n- *Write-Behind (Write-Back)*: Aplikasi menulis ke cache, worker background menyinkronkan ke DB. Cepat tapi berisiko kehilangan data jika cache crash sebelum sinkronisasi.",
+      "code_corrected": "",
+      "code_incorrect": "",
+      "diagram_text": "",
+      "id": "l9-stage-i-redis-cache-aside-backoff-sec-walkthrough",
+      "lesson_id": "l9-stage-i-redis-cache-aside-backoff",
+      "reasoning": "",
+      "section_type": "walkthrough",
+      "title": "Kode Contoh: Pola Cache-Aside \u0026 Exponential Backoff"
     }
   ],
   "lessons": [
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "beginner",
       "display_no": "0.0A",
       "id": "l0-stage-a-what-is-backend",
@@ -1153,7 +2275,7 @@
       "title": "0.0A What is a Backend? Servers, Terminal, Files, Processes \u0026 Ports"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "beginner",
       "display_no": "0.0B",
       "id": "l0-stage-a-git-go-workspace",
@@ -1166,7 +2288,7 @@
       "title": "0.0B Installing Go, Terminal Commands, Git Basics \u0026 Your First main.go"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "0.1",
       "id": "l0-backend-http-lifecycle",
@@ -1179,7 +2301,7 @@
       "title": "0.1 Client-Server Architecture, DNS/TCP/TLS \u0026 HTTP Request Lifecycle"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "0.2",
       "id": "l0-stateless-vs-stateful-arch",
@@ -1192,7 +2314,7 @@
       "title": "0.2 Stateless vs Stateful Systems, AuthN vs AuthZ \u0026 Monolith vs Microservices"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "0.3",
       "id": "l0-rest-json-api-contracts",
@@ -1205,7 +2327,7 @@
       "title": "0.3 REST Idempotency, JSON Marshaling Internals \u0026 Backward-Compatible API Contracts"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "beginner",
       "display_no": "1.0A",
       "id": "l1-stage-b-variables-types-zerovalues",
@@ -1218,7 +2340,7 @@
       "title": "1.0A Go Variables, Primitive Types, Zero Values \u0026 Formatting (fmt)"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "beginner",
       "display_no": "1.0B",
       "id": "l1-stage-b-control-flow-loops-functions",
@@ -1231,7 +2353,7 @@
       "title": "1.0B Conditionals (if/switch), For Loops, Functions \u0026 Multiple Return Values"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "beginner",
       "display_no": "1.0C",
       "id": "l1-stage-b-slices-maps-iteration",
@@ -1244,7 +2366,7 @@
       "title": "1.0C Working with Collections: Arrays, Slices, Maps \u0026 Range Loops"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "beginner",
       "display_no": "1.0D",
       "id": "l1-stage-b-structs-methods-pointers",
@@ -1257,7 +2379,7 @@
       "title": "1.0D Structs, Methods, Value vs Pointer Receivers \u0026 Safe Nil Checks"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "beginner",
       "display_no": "1.0E",
       "id": "l1-stage-b-interfaces-errors-fundamentals",
@@ -1270,7 +2392,7 @@
       "title": "1.0E Interfaces, Explicit Error Handling, Custom Errors \u0026 Defer"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "beginner",
       "display_no": "1.0F",
       "id": "l1-stage-b-json-files-unit-testing",
@@ -1283,7 +2405,7 @@
       "title": "1.0F JSON Struct Tags, File I/O, Environment Variables \u0026 Your First Go Test"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "1.1",
       "id": "l1-toolchain-modules-packages",
@@ -1296,7 +2418,7 @@
       "title": "1.0 Go Toolchain, Module Minimal Version Selection (MVS), internal/ Packages \u0026 Struct Layout"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "1.2",
       "id": "l1-memory-slices-maps-escape",
@@ -1309,7 +2431,7 @@
       "title": "1.1 Slices, Maps, Pointers, Stack vs Heap \u0026 Escape Analysis"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "1.3",
       "id": "l1-interfaces-errors-generics",
@@ -1322,7 +2444,7 @@
       "title": "1.2 Implicit Interfaces, Composition, Errors as Values \u0026 Generics"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "beginner",
       "display_no": "2.0",
       "id": "l2-stage-c-goroutines-channels-waitgroup",
@@ -1335,7 +2457,7 @@
       "title": "2.0 Concurrency 101: Your First Goroutine, Buffered Channels \u0026 sync.WaitGroup"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "2.1",
       "id": "l2-gmp-channels-context-workers",
@@ -1348,7 +2470,7 @@
       "title": "2.1 GMP Scheduler, Channels, Select, Mutexes, Context \u0026 Bounded Worker Pools"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "2.2",
       "id": "l2-profiling-pprof-benchmarks",
@@ -1361,7 +2483,7 @@
       "title": "2.2 CPU \u0026 Heap Profiling (pprof), sync.Pool, Contention Profiling \u0026 Execution Tracer"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "beginner",
       "display_no": "3.0",
       "id": "l3-stage-d-first-http-server-crud",
@@ -1374,7 +2496,7 @@
       "title": "3.0 Building Your First Go HTTP Server: Handlers, ServeMux, Status Codes \u0026 JSON CRUD"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "3.1",
       "id": "l3-net-http-routers",
@@ -1387,7 +2509,7 @@
       "title": "3.1 Standard net/http (Go 1.22+) vs Chi, Gin, Echo \u0026 Fiber + Middleware \u0026 Graceful Shutdown"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "3.2",
       "id": "l3-validation-openapi-ratelimit",
@@ -1400,7 +2522,7 @@
       "title": "3.2 Request Validation, Token-Bucket Rate Limiting, CORS Allowlists \u0026 OpenAPI 3.1 Contracts"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "beginner",
       "display_no": "4.0",
       "id": "l4-stage-e-sql-relational-fundamentals",
@@ -1413,7 +2535,7 @@
       "title": "4.0 SQL from Scratch: Tables, Primary/Foreign Keys, SELECT, WHERE, JOIN, GROUP BY \u0026 Normalization"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "4.1",
       "id": "l4-acid-isolation-mvcc",
@@ -1426,7 +2548,7 @@
       "title": "4.1 Relational vs NoSQL Internals, MVCC, ACID Isolation Levels, Indexing \u0026 EXPLAIN ANALYZE"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "4.2",
       "id": "l4-partitioning-replication-sharding",
@@ -1439,7 +2561,7 @@
       "title": "4.2 Streaming Replication Lag, Declarative Partitioning, Sharding \u0026 Point-in-Time Recovery (PITR)"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "beginner",
       "display_no": "5.0",
       "id": "l5-stage-e-database-sql-crud-basics",
@@ -1452,7 +2574,7 @@
       "title": "5.0 Connecting Go to SQL: database/sql, QueryContext, Scan, Parameterized Queries \u0026 Transactions"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "5.1",
       "id": "l5-db-ecosystem-comparison",
@@ -1465,7 +2587,7 @@
       "title": "5.1 database/sql vs pgx/v5 vs sqlc vs GORM vs Ent vs Bun \u0026 Pool Internals"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "5.2",
       "id": "l5-migrations-transactions-prepared",
@@ -1478,7 +2600,7 @@
       "title": "5.2 Expand-and-Contract Zero-Downtime SQL Migrations, Prepared Statements \u0026 Transaction Scopes"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "beginner",
       "display_no": "6.0",
       "id": "l6-stage-f-password-hashing-bearer-auth",
@@ -1491,7 +2613,7 @@
       "title": "6.0 Security 101: Password Hashing, Bearer Tokens \u0026 HTTP Auth Middleware"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "6.1",
       "id": "l6-security-auth-owasp",
@@ -1504,7 +2626,7 @@
       "title": "6.1 Argon2id, JWT vs Sessions, OAuth2/OIDC, RBAC, SQLi/SSRF/XSS/CSRF \u0026 OWASP API Top 10"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "6.2",
       "id": "l6-oauth2-oidc-rbac-abac",
@@ -1517,7 +2639,7 @@
       "title": "6.2 OAuth 2.0 with PKCE, OpenID Connect (JWKS), RBAC vs ABAC \u0026 Secrets Rotation"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "beginner",
       "display_no": "7.0",
       "id": "l7-stage-g-table-driven-tests-httptest",
@@ -1530,7 +2652,7 @@
       "title": "7.0 Testing 101: Writing Table-Driven Unit Tests \u0026 Testable Pure Functions"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "7.1",
       "id": "l7-testing-fuzzing-benchmarks",
@@ -1543,7 +2665,7 @@
       "title": "7.1 Table-Driven Tests, httptest, Testcontainers, Fuzzing \u0026 Benchmarking"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "7.2",
       "id": "l7-integration-testcontainers-ci",
@@ -1556,7 +2678,7 @@
       "title": "7.2 Fakes vs Mocks, Real Database Integration Testing \u0026 Reproducible CI Pipelines"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "beginner",
       "display_no": "8.0",
       "id": "l8-stage-h-handler-service-repo-layers",
@@ -1569,7 +2691,7 @@
       "title": "8.0 Architecture 101: Separating Handler, Service \u0026 Repository Without Boilerplate"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "8.1",
       "id": "l8-clean-hexagonal-ddd",
@@ -1582,7 +2704,7 @@
       "title": "8.1 Layered vs Clean vs Hexagonal (Ports \u0026 Adapters), DDD, CQRS \u0026 Modular Monolith"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "8.2",
       "id": "l8-modular-monolith-cqrs-boundaries",
@@ -1595,7 +2717,7 @@
       "title": "8.2 Enforcing Modular Monolith Boundaries, CQRS Read Models \u0026 Domain Modeling"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "beginner",
       "display_no": "9.0",
       "id": "l9-stage-i-redis-cache-aside-backoff",
@@ -1608,7 +2730,7 @@
       "title": "9.0 Distributed 101: Redis Cache-Aside Mental Model \u0026 Exponential Backoff Retries"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "9.1",
       "id": "l9-caching-queues-outbox-sagas",
@@ -1621,7 +2743,7 @@
       "title": "9.1 Redis Caching (Singleflight), Kafka vs RabbitMQ vs NATS, Outbox Pattern, Sagas \u0026 OpenTelemetry"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "9.2",
       "id": "l9-grpc-websockets-otel-tracing",
@@ -1634,7 +2756,7 @@
       "title": "9.2 gRPC \u0026 Protobuf Contracts, WebSockets vs SSE \u0026 OpenTelemetry Distributed Tracing"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "10.1",
       "id": "l10-devops-docker-k8s-production",
@@ -1647,7 +2769,7 @@
       "title": "10.1 Multi-Stage Distroless Docker Builds, Kubernetes Probes, Caddy/Nginx \u0026 Disaster Recovery"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "10.2",
       "id": "l10-reverse-proxy-cicd-rollback-dr",
@@ -1660,7 +2782,7 @@
       "title": "10.2 Caddy \u0026 Nginx Reverse Proxies, Trusted X-Forwarded-For, Canary Rollbacks \u0026 Disaster Recovery"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "difficulty": "intermediate",
       "display_no": "10.3",
       "id": "l10-stage-j-capstone-production-blueprint",
@@ -1675,7 +2797,7 @@
   ],
   "levels": [
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "estimated_hours": 6,
       "id": 1,
       "level_number": 0,
@@ -1684,7 +2806,7 @@
       "title": "Level 0 — Backend Engineering Fundamentals"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "estimated_hours": 12,
       "id": 2,
       "level_number": 1,
@@ -1693,7 +2815,7 @@
       "title": "Level 1 — Go Fundamentals"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "estimated_hours": 14,
       "id": 3,
       "level_number": 2,
@@ -1702,7 +2824,7 @@
       "title": "Level 2 — Intermediate \u0026 Advanced Go"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "estimated_hours": 12,
       "id": 4,
       "level_number": 3,
@@ -1711,7 +2833,7 @@
       "title": "Level 3 — HTTP Backend Engineering"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "estimated_hours": 18,
       "id": 5,
       "level_number": 4,
@@ -1720,7 +2842,7 @@
       "title": "Level 4 — Database Engineering"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "estimated_hours": 10,
       "id": 6,
       "level_number": 5,
@@ -1729,7 +2851,7 @@
       "title": "Level 5 — Go Database Ecosystem"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "estimated_hours": 14,
       "id": 7,
       "level_number": 6,
@@ -1738,7 +2860,7 @@
       "title": "Level 6 — Authentication \u0026 Security"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "estimated_hours": 10,
       "id": 8,
       "level_number": 7,
@@ -1747,7 +2869,7 @@
       "title": "Level 7 — Testing \u0026 Code Quality"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "estimated_hours": 14,
       "id": 9,
       "level_number": 8,
@@ -1756,7 +2878,7 @@
       "title": "Level 8 — Software Architecture"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "estimated_hours": 16,
       "id": 10,
       "level_number": 9,
@@ -1765,7 +2887,7 @@
       "title": "Level 9 — Distributed Systems"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "estimated_hours": 12,
       "id": 11,
       "level_number": 10,

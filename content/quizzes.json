@@ -125,6 +125,141 @@
       "order_index": 1,
       "question_text": "Your Go pod in Kubernetes has `resources.limits.memory: 512Mi`. What is the recommended `GOMEMLIMIT` configuration and why?",
       "quiz_id": "qz-5"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "http.MaxBytesReader membungkus r.Body sehingga pembacaan melebihi batas ukuran langsung dihentikan dan menghasilkan error, melindungi memori server.",
+      "id": "qq-l3-01",
+      "options_json": "[\"Mempercepat proses parsing JSON secara asinkron\",\"Membatasi pembacaan stream request body agar server tidak mengalami Out-Of-Memory (OOM) DoS\",\"Mengompres payload HTTP secara otomatis dengan gzip\",\"Menghapus header HTTP yang tidak dikenal\"]",
+      "order_index": 1,
+      "question_text": "Apa fungsi utama http.MaxBytesReader(w, r.Body, maxBytes) dalam handler HTTP di Go?",
+      "quiz_id": "qz-l3-http-servers"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "ReadHeaderTimeout membatasi waktu pembacaan header request. Tanpa timeout ini, client jahat dapat mengirim 1 byte per menit untuk menahan socket terbuka selamanya.",
+      "id": "qq-l3-02",
+      "options_json": "[\"Untuk mempercepat rendering file HTML\",\"Mencegah serangan Slowloris di mana penyerang membuka ribuan koneksi lambat dan menahan file descriptor\",\"Mengaktifkan fitur HTTP/3 QUIC secara otomatis\",\"Mengatur batas waktu koneksi database\"]",
+      "order_index": 2,
+      "question_text": "Mengapa menyetel ReadHeaderTimeout penting pada struct http.Server produksi?",
+      "quiz_id": "qz-l3-http-servers"
+    },
+    {
+      "correct_index": 0,
+      "explanation": "DisallowUnknownFields menjamin kepatuhan kontrak API (API contract) dengan menolak payload yang memuat field tak dikenal dengan error.",
+      "id": "qq-l3-03",
+      "options_json": "[\"Menolak payload jika memuat field yang tidak terdefinisi pada struct target DTO\",\"Menghapus field asing secara diam-diam tanpa menghasilkan error\",\"Mengubah nama field menjadi huruf kapital semua\",\"Mencegah enkripsi data di jaringan\"]",
+      "order_index": 3,
+      "question_text": "Bagaimana perilaku json.NewDecoder(r.Body).DisallowUnknownFields() saat menerima payload JSON?",
+      "quiz_id": "qz-l3-http-servers"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "Koneksi database tetap terikat pada object *sql.Rows sampai rows.Close() dipanggil atau rows.Next() mengembalikan false. Tanpa Close(), terjadi connection pool exhaustion.",
+      "id": "qq-l5-01",
+      "options_json": "[\"Database otomatis melakukan rollback transaksi\",\"Koneksi fisik database tetap tertahan dan tidak kembali ke connection pool hingga pool kehabisan koneksi\",\"Tabel database terkunci secara permanen\",\"Compiler Go memicu panic saat kompilasi\"]",
+      "order_index": 1,
+      "question_text": "Apa yang terjadi jika defer rows.Close() diabaikan setelah db.QueryContext() dan perulangan rows.Next() berhenti lebih awal?",
+      "quiz_id": "qz-l5-database-sql"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "Parameter binding memisahkan instruksi SQL dari data literal sehingga input pengguna tidak pernah dapat mengubah struktur sintaks pohon perintah SQL.",
+      "id": "qq-l5-02",
+      "options_json": "[\"Karena input pengguna dienkripsi dengan AES-256\",\"Input pengguna dikirim terpisah sebagai nilai literal dan tidak pernah dievaluasi sebagai kode perintah SQL oleh parser DB\",\"Database mengubah huruf kapital menjadi huruf kecil\",\"Server memblokir semua karakter tanda petik\"]",
+      "order_index": 2,
+      "question_text": "Mengapa parameter binding ($1 / ?) mencegah serangan SQL Injection?",
+      "quiz_id": "qz-l5-database-sql"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "QueryRowContext mengembalikan sql.ErrNoRows saat Scan() dipanggil pada hasil query yang tidak menemukan baris yang cocok.",
+      "id": "qq-l5-03",
+      "options_json": "[\"Ketika tabel database belum dibuat\",\"Ketika query tidak menghasilkan baris data apapun saat Scan() dipanggil\",\"Ketika koneksi database terputus di tengah jalan\",\"Ketika tipe kolom tidak cocok dengan pointer target\"]",
+      "order_index": 3,
+      "question_text": "Kapan method db.QueryRowContext() mengembalikan error sql.ErrNoRows?",
+      "quiz_id": "qz-l5-database-sql"
+    },
+    {
+      "correct_index": 0,
+      "explanation": "httptest.ResponseRecorder mengimplementasikan http.ResponseWriter di memori, memungkinkan ribuan test handler dieksekusi dalam hitungan milidetik tanpa alokasi port jaringan.",
+      "id": "qq-l7-01",
+      "options_json": "[\"Menguji handler di memori tanpa membuka port TCP nyata pada sistem operasi\",\"Menguji kecepatan koneksi internet eksternal\",\"Menghasilkan dokumentasi Swagger secara otomatis\",\"Menghapus database setelah setiap pengujian\"]",
+      "order_index": 1,
+      "question_text": "Apa keuntungan utama menggunakan httptest.ResponseRecorder dalam pengujian handler HTTP?",
+      "quiz_id": "qz-l7-testing-qa"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "t.Helper() menandai fungsi sebagai pembantu sehingga jika terjadi kegagalan, pesan error menunjuk ke nomor baris test yang memanggil helper tersebut.",
+      "id": "qq-l7-02",
+      "options_json": "[\"Membuat helper berjalan secara konkuren\",\"Menghapus jejak baris helper dari log kegagalan agar stack trace menunjuk langsung ke baris pemanggil di fungsi test\",\"Menghentikan eksekusi test seketika saat terjadi error\",\"Menyimpan hasil test ke file eksternal\"]",
+      "order_index": 2,
+      "question_text": "Apa fungsi pemanggilan t.Helper() di dalam fungsi pembantu pengujian (test helper)?",
+      "quiz_id": "qz-l7-testing-qa"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "Table-driven tests memisahkan data kasus uji dari logika pengujian, mempermudah pengujian berbagai kondisi batas (boundary conditions) secara deklaratif.",
+      "id": "qq-l7-03",
+      "options_json": "[\"Karena hanya tabel yang bisa dieksekusi oleh perintah go test\",\"Memungkinkan penambahan kasus uji baru (edge cases) secara mudah tanpa menduplikasi kode setup eksekusi\",\"Mempercepat kompilasi binary produksi\",\"Mencegah penggunaan interface di kode aplikasi\"]",
+      "order_index": 3,
+      "question_text": "Mengapa pola Table-Driven Tests sangat dianjurkan di komunitas Go?",
+      "quiz_id": "qz-l7-testing-qa"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "Service layer harus berfokus pada aturan bisnis; mengaitkannya dengan *http.Request merusak portabilitas dan mempersulit penulisan unit test.",
+      "id": "qq-l8-01",
+      "options_json": "[\"Karena struct *http.Request terlalu lambat untuk di-copy\",\"Menjaga logika bisnis murni dan independen dari protokol HTTP sehingga mudah diuji dan dapat dipanggil dari gRPC/CLI\",\"Kompiler Go melarang import net/http di luar package main\",\"Mencegah data race pada request context\"]",
+      "order_index": 1,
+      "question_text": "Mengapa Service Layer sebaiknya tidak menerima parameter *http.Request?",
+      "quiz_id": "qz-l8-architecture"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "Repository pattern memisahkan logika persistensi dari logika domain, memungkinkan penggantian atau mocking database dengan mudah.",
+      "id": "qq-l8-02",
+      "options_json": "[\"Mengelola rute URL dan parsing cookie\",\"Mengabstraksikan akses data persistensi di balik interface sehingga logika bisnis tidak bergantung pada detail SQL/DB tertentu\",\"Mengkompilasi kode Go menjadi web assembly\",\"Menjalankan background cron job\"]",
+      "order_index": 2,
+      "question_text": "Apa peran Repository Pattern dalam arsitektur layered?",
+      "quiz_id": "qz-l8-architecture"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "DI manual di Go memberikan transparansi dependensi, keterlacakan kode statis, dan kecepatan kompilasi tanpa black-magic reflection.",
+      "id": "qq-l8-03",
+      "options_json": "[\"Karena Go tidak mendukung library pihak ketiga\",\"Constructor eksplisit menjamin type-safety saat kompilasi tanpa overhead reflection runtime\",\"Untuk menghemat memori swap pada Linux\",\"Agar semua struct bertipe private\"]",
+      "order_index": 3,
+      "question_text": "Mengapa Dependency Injection dianjurkan menggunakan constructor fungsi biasa (NewService) di Go?",
+      "quiz_id": "qz-l8-architecture"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "Transactional Outbox menyimpan mutasi bisnis dan catatan event dalam satu transaksi ACID database yang sama, menghindari inkonsistensi saat kegagalan jaringan.",
+      "id": "qq-l9-01",
+      "options_json": "[\"Untuk mempercepat serialisasi pesan JSON\",\"Menjamin konsistensi bahwa perubahan database dan penerbitan event terjadi secara atomik (tidak ada event hilang jika crash)\",\"Menghapus data lama di database secara otomatis\",\"Mencegah enkripsi TLS pada message broker\"]",
+      "order_index": 1,
+      "question_text": "Mengapa pola Transactional Outbox digunakan saat mengirim event ke message broker (Kafka/RabbitMQ)?",
+      "quiz_id": "qz-l9-distributed"
+    },
+    {
+      "correct_index": 0,
+      "explanation": "Jitter menyebarkan waktu retry secara acak di seluruh klien sehingga mereka tidak membanjiri server tujuan pada detik yang sama persis.",
+      "id": "qq-l9-02",
+      "options_json": "[\"Membuat interval retry menjadi acak untuk mencegah thundering herd yang merobohkan server yang sedang pulih\",\"Menghapus cache yang kedaluwarsa seketika\",\"Memaksa request berikutnya dialihkan ke server cadangan\",\"Mengurangi penggunaan bandwidth jaringan sebesar 50%\"]",
+      "order_index": 2,
+      "question_text": "Apa fungsi Full Jitter dalam algoritma Exponential Backoff saat melakukan retry?",
+      "quiz_id": "qz-l9-distributed"
+    },
+    {
+      "correct_index": 0,
+      "explanation": "singleflight menahan ribuan request konkuren untuk key yang sama dan hanya mengirim 1 query ke database, membagikan hasil ke ribuan penunggu.",
+      "id": "qq-l9-03",
+      "options_json": "[\"Mengizinkan hanya satu eksekusi fungsi duplikat secara konkuren untuk key yang sama dan membagikan hasilnya ke semua pemanggil\",\"Mengompresi nilai cache sebelum dikirim ke Redis\",\"Mengunci seluruh tabel database saat cache miss\",\"Mematikan server cache secara otomatis saat kelebihan beban\"]",
+      "order_index": 3,
+      "question_text": "Apa peran singleflight.Group dalam mencegah Cache Stampede?",
+      "quiz_id": "qz-l9-distributed"
     }
   ],
   "quizzes": [
@@ -149,6 +284,11 @@
       "title": "Level 2 Diagnostic Quiz"
     },
     {
+      "id": "qz-l3-http-servers",
+      "level_id": 4,
+      "title": "Level 3 — HTTP Routing, Middleware \u0026 Server Hardening Quiz"
+    },
+    {
       "id": "qz-3",
       "level_id": 5,
       "title": "Level 4 Diagnostic Quiz"
@@ -159,9 +299,29 @@
       "title": "Stage E Relational SQL \u0026 database/sql Fundamentals Quiz"
     },
     {
+      "id": "qz-l5-database-sql",
+      "level_id": 6,
+      "title": "Level 5 — database/sql, Transactions \u0026 Connection Pool Quiz"
+    },
+    {
       "id": "qz-4",
       "level_id": 7,
       "title": "Level 6 Diagnostic Quiz"
+    },
+    {
+      "id": "qz-l7-testing-qa",
+      "level_id": 8,
+      "title": "Level 7 — Table-Driven Testing \u0026 httptest Quiz"
+    },
+    {
+      "id": "qz-l8-architecture",
+      "level_id": 9,
+      "title": "Level 8 — Layered Architecture \u0026 Domain Boundaries Quiz"
+    },
+    {
+      "id": "qz-l9-distributed",
+      "level_id": 10,
+      "title": "Level 9 — Caching, Sagas \u0026 Distributed Patterns Quiz"
     },
     {
       "id": "qz-5",

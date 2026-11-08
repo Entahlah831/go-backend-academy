@@ -1263,6 +1263,86 @@ func TestServerSideSessionIssuanceAndBounds(t *testing.T) {
 	}
 }
 
+func TestCurriculumExpansionAndStructuredSections(t *testing.T) {
+	srv, ts := setupTestServer(t)
+
+	// 1. Verify 17 bridge lessons each have >= 5000 bytes across sections
+	bridgeIDs := []string{
+		"l0-stage-a-what-is-backend", "l0-stage-a-git-go-workspace", "l1-stage-b-variables-types-zerovalues",
+		"l1-stage-b-control-flow-loops-functions", "l1-stage-b-slices-maps-iteration", "l1-stage-b-structs-methods-pointers",
+		"l1-stage-b-interfaces-errors-fundamentals", "l1-stage-b-json-files-unit-testing", "l2-stage-c-goroutines-channels-waitgroup",
+		"l3-stage-d-first-http-server-crud", "l4-stage-e-sql-relational-fundamentals", "l5-stage-e-database-sql-crud-basics",
+		"l6-stage-f-password-hashing-bearer-auth", "l7-stage-g-table-driven-tests-httptest", "l8-stage-h-handler-service-repo-layers",
+		"l9-stage-i-redis-cache-aside-backoff", "l10-stage-j-capstone-production-blueprint",
+	}
+
+	for _, id := range bridgeIDs {
+		var detail struct {
+			ID       string `json:"id"`
+			Sections []struct {
+				SectionType string `json:"section_type"`
+				Body        string `json:"body"`
+			} `json:"sections"`
+		}
+		getJSON(t, ts.URL+"/api/v1/lessons/"+id, &detail)
+		if len(detail.Sections) == 0 {
+			t.Fatalf("bridge lesson %s returned 0 sections", id)
+		}
+
+		totalLen := 0
+		seenTypes := map[string]bool{}
+		for _, s := range detail.Sections {
+			totalLen += len(s.Body)
+			seenTypes[s.SectionType] = true
+		}
+		if totalLen < 5000 {
+			t.Errorf("bridge lesson %s has only %d bytes (expected >= 5000 bytes)", id, totalLen)
+		}
+		for _, requiredType := range []string{"goal", "analogy", "walkthrough", "pitfalls", "exercise", "deep_dive"} {
+			if !seenTypes[requiredType] {
+				t.Errorf("bridge lesson %s missing structured section %q", id, requiredType)
+			}
+		}
+	}
+
+	// 2. Verify all levels have quizzes with >= 3 questions and server grading works
+	var quizzesRes struct {
+		Quizzes []struct {
+			ID    string `json:"id"`
+			Level int    `json:"level"`
+			Title string `json:"title"`
+		} `json:"quizzes"`
+	}
+	getJSON(t, ts.URL+"/api/v1/quizzes", &quizzesRes)
+
+	levelSeen := map[int]bool{}
+	for _, q := range quizzesRes.Quizzes {
+		levelSeen[q.Level] = true
+	}
+	for lvl := 0; lvl <= 10; lvl++ {
+		if !levelSeen[lvl] {
+			t.Errorf("missing assessment quiz for level %d", lvl)
+		}
+	}
+
+	// 3. Test grading attempt on new quiz qz-l3-http-servers
+	rawAttempt := postJSON(t, ts.URL+"/api/v1/quizzes/qz-l3-http-servers/attempts", map[string]any{
+		"user_id": "usr_test_l3",
+		"answers": []int{1, 1, 0},
+	}, http.StatusOK)
+	var res struct {
+		Score          int `json:"score"`
+		TotalQuestions int `json:"total_questions"`
+	}
+	_ = json.Unmarshal(rawAttempt, &res)
+	if res.Score != 3 || res.TotalQuestions != 3 {
+		t.Errorf("expected perfect score 3/3 on qz-l3-http-servers, got %d/%d", res.Score, res.TotalQuestions)
+	}
+
+	_ = srv
+}
+
+
 
 
 

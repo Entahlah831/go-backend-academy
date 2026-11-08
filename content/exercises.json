@@ -536,91 +536,91 @@
   ],
   "exercise_tests": [
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "exercise_id": "ex-l0-stage-a-git-go-workspace",
       "filename": "main_test.go",
       "id": "test-ex-l0-stage-a-git-go-workspace",
       "test_code": "package main\n\nimport \"testing\"\n\nfunc TestGreeting(t *testing.T) {\n\tif got := Greeting(\"\"); got != \"Hello, Backend Engineer!\" {\n\t\tt.Fatalf(\"Greeting(\\\"\\\") = %q, want \\\"Hello, Backend Engineer!\\\"\", got)\n\t}\n\tif got := Greeting(\"Nadia\"); got != \"Hello, Nadia!\" {\n\t\tt.Fatalf(\"Greeting(\\\"Nadia\\\") = %q, want \\\"Hello, Nadia!\\\"\", got)\n\t}\n}\n"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "exercise_id": "ex-l0-stage-a-what-is-backend",
       "filename": "main_test.go",
       "id": "test-ex-l0-stage-a-what-is-backend",
       "test_code": "package main\n\nimport \"testing\"\n\nfunc TestDefaultPort(t *testing.T) {\n\tif got := DefaultPort(); got != \":8080\" {\n\t\tt.Fatalf(\"DefaultPort() = %q, want %q\", got, \":8080\")\n\t}\n}\n"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "exercise_id": "ex-l1-stage-b-control-flow-loops-functions",
       "filename": "main_test.go",
       "id": "test-ex-l1-stage-b-control-flow-loops-functions",
       "test_code": "package auth\n\nimport \"testing\"\n\nfunc TestValidateAccountAge(t *testing.T) {\n\tif _, err := ValidateAccountAge(-1); err == nil {\n\t\tt.Fatal(\"expected error for age -1, got nil\")\n\t}\n\tif _, err := ValidateAccountAge(131); err == nil {\n\t\tt.Fatal(\"expected error for age 131, got nil\")\n\t}\n\tok, err := ValidateAccountAge(16)\n\tif err != nil || ok {\n\t\tt.Fatalf(\"ValidateAccountAge(16) = (%v, %v), want (false, nil)\", ok, err)\n\t}\n\tok, err = ValidateAccountAge(25)\n\tif err != nil || !ok {\n\t\tt.Fatalf(\"ValidateAccountAge(25) = (%v, %v), want (true, nil)\", ok, err)\n\t}\n}\n"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "exercise_id": "ex-l1-stage-b-slices-maps-iteration",
       "filename": "main_test.go",
       "id": "test-ex-l1-stage-b-slices-maps-iteration",
       "test_code": "package stats\n\nimport \"testing\"\n\nfunc TestCountStatuses(t *testing.T) {\n\tinput := []string{\"ok\", \"err\", \"ok\", \"\", \"err\", \"ok\"}\n\tcounts := CountStatuses(input)\n\tif counts[\"ok\"] != 3 {\n\t\tt.Fatalf(\"counts[\\\"ok\\\"] = %d, want 3\", counts[\"ok\"])\n\t}\n\tif counts[\"err\"] != 2 {\n\t\tt.Fatalf(\"counts[\\\"err\\\"] = %d, want 2\", counts[\"err\"])\n\t}\n\tif _, exists := counts[\"\"]; exists {\n\t\tt.Fatal(\"expected empty string \\\"\\\" not to be in map\")\n\t}\n}\n"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "exercise_id": "ex-l1-stage-b-variables-types-zerovalues",
       "filename": "main_test.go",
       "id": "test-ex-l1-stage-b-variables-types-zerovalues",
       "test_code": "package billing\n\nimport \"testing\"\n\nfunc TestComputeInvoiceCents(t *testing.T) {\n\tif got := ComputeInvoiceCents(1000, 2, 500); got != 1500 {\n\t\tt.Fatalf(\"ComputeInvoiceCents(1000, 2, 500) = %d, want 1500\", got)\n\t}\n\tif got := ComputeInvoiceCents(1000, 0, 500); got != 0 {\n\t\tt.Fatalf(\"ComputeInvoiceCents(1000, 0, 500) = %d, want 0\", got)\n\t}\n\tif got := ComputeInvoiceCents(1000, 1, 1500); got != 0 {\n\t\tt.Fatalf(\"ComputeInvoiceCents(1000, 1, 1500) = %d, want 0\", got)\n\t}\n}\n"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "exercise_id": "ex-l10-stage-j-capstone-production-blueprint",
       "filename": "main_test.go",
       "id": "test-ex-l10-stage-j-capstone-production-blueprint",
       "test_code": "package capstone\n\nimport \"testing\"\n\nfunc TestEvaluateCapstoneReadiness(t *testing.T) {\n\tcode, err := EvaluateCapstoneReadiness(ReadinessGate{ShuttingDown: false, DBConnected: true, MigrationsUp: true})\n\tif err != nil || code != 200 {\n\t\tt.Fatalf(\"ready gate = (%d, %v), want (200, nil)\", code, err)\n\t}\n\tcode, err = EvaluateCapstoneReadiness(ReadinessGate{ShuttingDown: true, DBConnected: true, MigrationsUp: true})\n\tif err == nil || code != 503 {\n\t\tt.Fatalf(\"shutting down gate = (%d, %v), want (503, error)\", code, err)\n\t}\n\tcode, err = EvaluateCapstoneReadiness(ReadinessGate{ShuttingDown: false, DBConnected: false, MigrationsUp: true})\n\tif err == nil || code != 503 {\n\t\tt.Fatalf(\"db disconnected gate = (%d, %v), want (503, error)\", code, err)\n\t}\n}\n"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "exercise_id": "ex-l2-stage-c-goroutines-channels-waitgroup",
       "filename": "main_test.go",
       "id": "test-ex-l2-stage-c-goroutines-channels-waitgroup",
       "test_code": "package conc\n\nimport \"testing\"\n\nfunc TestSumSquaresSafe(t *testing.T) {\n\tnums := []int{1, 2, 3, 4}\n\twant := 1 + 4 + 9 + 16\n\tif got := SumSquaresSafe(nums); got != want {\n\t\tt.Fatalf(\"SumSquaresSafe(%v) = %d, want %d\", nums, got, want)\n\t}\n}\n"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "exercise_id": "ex-l3-stage-d-first-http-server-crud",
       "filename": "main_test.go",
       "id": "test-ex-l3-stage-d-first-http-server-crud",
       "test_code": "package api\n\nimport (\n\t\"net/http\"\n\t\"net/http/httptest\"\n\t\"strings\"\n\t\"testing\"\n)\n\nfunc TestWriteJSONResponse(t *testing.T) {\n\trec := httptest.NewRecorder()\n\tpayload := map[string]string{\"message\": \"hello\"}\n\tWriteJSONResponse(rec, http.StatusCreated, payload)\n\n\tif rec.Code != http.StatusCreated {\n\t\tt.Fatalf(\"status = %d, want %d\", rec.Code, http.StatusCreated)\n\t}\n\tct := rec.Header().Get(\"Content-Type\")\n\tif !strings.HasPrefix(ct, \"application/json\") {\n\t\tt.Fatalf(\"Content-Type = %q, want application/json\", ct)\n\t}\n\tbody := strings.TrimSpace(rec.Body.String())\n\tif !strings.Contains(body, \"\\\"hello\\\"\") {\n\t\tt.Fatalf(\"body = %q, want to contain \\\"hello\\\"\", body)\n\t}\n}\n"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "exercise_id": "ex-l4-stage-e-sql-relational-fundamentals",
       "filename": "main_test.go",
       "id": "test-ex-l4-stage-e-sql-relational-fundamentals",
       "test_code": "package sqlutil\n\nimport \"testing\"\n\nfunc TestClampPageLimit(t *testing.T) {\n\tl, o := ClampPageLimit(0, -5)\n\tif l != 20 || o != 0 {\n\t\tt.Fatalf(\"ClampPageLimit(0, -5) = (%d, %d), want (20, 0)\", l, o)\n\t}\n\tl, o = ClampPageLimit(500, 40)\n\tif l != 100 || o != 40 {\n\t\tt.Fatalf(\"ClampPageLimit(500, 40) = (%d, %d), want (100, 40)\", l, o)\n\t}\n}\n"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "exercise_id": "ex-l6-stage-f-password-hashing-bearer-auth",
       "filename": "main_test.go",
       "id": "test-ex-l6-stage-f-password-hashing-bearer-auth",
       "test_code": "package auth\n\nimport \"testing\"\n\nfunc TestExtractBearerToken(t *testing.T) {\n\ttok, ok := ExtractBearerToken(\"Bearer secret-token-123\")\n\tif !ok || tok != \"secret-token-123\" {\n\t\tt.Fatalf(\"ExtractBearerToken = (%q, %v), want (\\\"secret-token-123\\\", true)\", tok, ok)\n\t}\n\t_, ok = ExtractBearerToken(\"Basic user:pass\")\n\tif ok {\n\t\tt.Fatal(\"expected false for Basic auth header\")\n\t}\n\t_, ok = ExtractBearerToken(\"Bearer \")\n\tif ok {\n\t\tt.Fatal(\"expected false for empty token\")\n\t}\n}\n"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "exercise_id": "ex-l7-stage-g-table-driven-tests-httptest",
       "filename": "main_test.go",
       "id": "test-ex-l7-stage-g-table-driven-tests-httptest",
       "test_code": "package slug\n\nimport \"testing\"\n\nfunc TestSlugifyTitle(t *testing.T) {\n\ttests := []struct {\n\t\tinput string\n\t\twant  string\n\t}{\n\t\t{\"Hello World\", \"hello-world\"},\n\t\t{\"  Go   Backend   Academy  \", \"go-backend-academy\"},\n\t\t{\"API Design 101\", \"api-design-101\"},\n\t}\n\tfor _, tc := range tests {\n\t\tgot := SlugifyTitle(tc.input)\n\t\tif got != tc.want {\n\t\t\tt.Errorf(\"SlugifyTitle(%q) = %q, want %q\", tc.input, got, tc.want)\n\t\t}\n\t}\n}\n"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "exercise_id": "ex-l8-stage-h-handler-service-repo-layers",
       "filename": "main_test.go",
       "id": "test-ex-l8-stage-h-handler-service-repo-layers",
       "test_code": "package money\n\nimport \"testing\"\n\nfunc TestAddMoney(t *testing.T) {\n\ta := \u0026Money{Cents: 500, Currency: \"USD\"}\n\tb := \u0026Money{Cents: 750, Currency: \"USD\"}\n\tc, err := AddMoney(a, b)\n\tif err != nil || c.Cents != 1250 || c.Currency != \"USD\" {\n\t\tt.Fatalf(\"AddMoney(500, 750) = (%+v, %v), want ({1250, USD}, nil)\", c, err)\n\t}\n\tif _, err := AddMoney(nil, b); err == nil {\n\t\tt.Fatal(\"expected error when a is nil\")\n\t}\n\tdiff := \u0026Money{Cents: 100, Currency: \"EUR\"}\n\tif _, err := AddMoney(a, diff); err == nil {\n\t\tt.Fatal(\"expected error when currencies differ\")\n\t}\n}\n"
     },
     {
-      "created_at": "2026-11-08T04:08:15Z",
+      "created_at": "2026-11-08T04:20:56Z",
       "exercise_id": "ex-l9-stage-i-redis-cache-aside-backoff",
       "filename": "main_test.go",
       "id": "test-ex-l9-stage-i-redis-cache-aside-backoff",
