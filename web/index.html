@@ -294,7 +294,18 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-ac
       margin-top: var(--space-xs);
       border-top: 1px solid var(--color-rule);
     }
-
+    .tech-term {
+      border-bottom: 1px dotted var(--color-accent);
+      cursor: help;
+      text-decoration: none;
+      color: inherit;
+    }
+    .glossary-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--space-xs);
+    }
   </style>
 </head>
 <body>
@@ -311,7 +322,7 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-ac
         <div class="brand-title-wrap">
           <div class="brand-head-line">
             <h1>Go Backend Academy</h1>
-            <span class="tag-pill ok">100% Offline, Go 1.23+</span>
+            <span class="tag-pill ok">Tanpa Cloud AI · Go 1.23+</span>
           </div>
           <p class="brand-sub">Understand, Experiment, Implement, Debug, Compare, Optimize, Apply</p>
         </div>
@@ -404,12 +415,16 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-ac
               <span class="nav-meta">Diagnostik offline</span>
             </button>
             <button type="button" data-view="projects" class="nav-btn">
-              <span>10. Real-World Projects</span>
-              <span class="nav-meta">14 Specs</span>
+              <span>10. Proyek Nyata</span>
+              <span class="nav-meta">14 Blueprint</span>
             </button>
             <button type="button" data-view="practice" class="nav-btn">
-              <span>11. Practice Center</span>
-              <span class="nav-meta">Quiz &amp; Cards</span>
+              <span>11. Pusat Latihan</span>
+              <span class="nav-meta">Kuis &amp; Flashcard</span>
+            </button>
+            <button type="button" data-view="glossary" class="nav-btn">
+              <span>12. Glosarium Istilah</span>
+              <span class="nav-meta">45 Istilah</span>
             </button>
           </div>
         </div>
@@ -1135,6 +1150,31 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
           </div>
           <div id="quizzes-container" class="view-stack"></div>
         </div>
+      </section>
+
+      <!-- VIEW 12: GLOSARIUM ISTILAH TEKNIK -->
+      <section id="view-glossary" class="hidden view-stack">
+        <div class="surface-card">
+          <div class="surface-header">
+            <div class="title-stack">
+              <h2>Glosarium Istilah Backend &amp; Go</h2>
+              <p>45 definisi teknis esensial untuk membedakan konsep produksi tanpa jargon yang membingungkan.</p>
+            </div>
+            <span id="glossary-count-badge" class="tag-pill num">45 Istilah</span>
+          </div>
+          <div class="control-group" style="margin-top: var(--space-xs); flex-wrap: wrap; gap: var(--space-xs);">
+            <input type="search" id="glossary-search-input" placeholder="Cari istilah, akronim, atau konsep (contoh: BOLA, WAL, GMP, SSRF)..." style="flex: 1; min-width: 240px;" aria-label="Cari Glosarium">
+            <div class="pill-group" id="glossary-category-filters" role="group" aria-label="Kategori Glosarium">
+              <button type="button" class="btn-subtle is-active" data-cat="all">Semua</button>
+              <button type="button" class="btn-subtle" data-cat="security">Keamanan</button>
+              <button type="button" class="btn-subtle" data-cat="database">Database</button>
+              <button type="button" class="btn-subtle" data-cat="concurrency">Konkurensi</button>
+              <button type="button" class="btn-subtle" data-cat="architecture">Arsitektur</button>
+              <button type="button" class="btn-subtle" data-cat="runtime">Runtime</button>
+            </div>
+          </div>
+        </div>
+        <div id="glossary-cards-grid" class="grid-2"></div>
       </section>
 
     </main>
@@ -4374,7 +4414,504 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
       "explainWithIndex": "Limit (cost=0.28..1.94 rows=2 width=64) (actual time=0.038..0.047 ms rows=2 loops=1)\n  -> LockRows\n       -> Index Scan using idx_outbox_unpublished_partial on outbox_events\n            Buffers: shared hit=3\nExecution Time: 0.062 ms (Partial index WHERE published_at IS NULL + SKIP LOCKED allows parallel workers with 0 lock wait!)",
       "explainWithoutIndex": "Seq Scan on 10,000,000 historical published rows (Execution Time: 340.120 ms)"
     }
-  }
+  },
+  "glossary": [
+    {
+      "id": "term-bola",
+      "term": "BOLA",
+      "fullName": "Broken Object Level Authorization",
+      "category": "security",
+      "categoryLabel": "Keamanan",
+      "shortDef": "Pengguna bisa mengakses atau memodifikasi data milik orang lain hanya dengan mengganti ID pada URL atau payload request.",
+      "fullDef": "Terjadi ketika backend memverifikasi identitas pengguna (autentikasi) tetapi tidak memvalidasi kepemilikan objek (otorisasi). Di Go, selalu sertakan tenant_id atau user_id dari sesi/token dalam klausa WHERE SQL.",
+      "relatedLessonId": "l6-security-auth-owasp",
+      "relatedLessonTitle": "Level 6 — Security, Auth, OWASP"
+    },
+    {
+      "id": "term-ssrf",
+      "term": "SSRF",
+      "fullName": "Server-Side Request Forgery",
+      "category": "security",
+      "categoryLabel": "Keamanan",
+      "shortDef": "Server dibujuk mengirim request HTTP ke alamat internal privat yang tidak boleh diakses publik.",
+      "fullDef": "Penyerang memberikan URL seperti 169.254.169.254 (metadata cloud) atau localhost. Di Go, validasi IP harus dilakukan di dalam net.Dialer.Control pada http.Transport untuk mencegah DNS rebinding (TOCTOU).",
+      "relatedLessonId": "l6-security-auth-owasp",
+      "relatedLessonTitle": "Level 6 — Security, Auth, OWASP"
+    },
+    {
+      "id": "term-gmp",
+      "term": "GMP",
+      "fullName": "Goroutine, Machine, Processor Scheduler",
+      "category": "runtime",
+      "categoryLabel": "Runtime",
+      "shortDef": "Model penjadwal internal Go runtime yang memetakan M goroutine ke N thread OS via P processor logis.",
+      "fullDef": "G adalah goroutine dengan stack awal 2 KB; M adalah OS thread; P adalah logical processor (sebanyak GOMAXPROCS) yang memegang antrean runnable goroutine (local run queue 256) dengan mekanisme work-stealing.",
+      "relatedLessonId": "l2-gmp-channels-context-workers",
+      "relatedLessonTitle": "Level 2 — GMP, Concurrency & Workers"
+    },
+    {
+      "id": "term-wal",
+      "term": "WAL",
+      "fullName": "Write-Ahead Logging",
+      "category": "database",
+      "categoryLabel": "Database",
+      "shortDef": "Perubahan data dicatat dulu ke log sekuensial disk sebelum ditulis ke file data utama demi ketahanan crash.",
+      "fullDef": "Prinsip ACID Durability: sebelum transaksi dinyatakan COMMIT, entri log WAL di-fsync ke disk. Jika server mati mendadak, recovery replay log WAL akan memulihkan data tanpa kehilangan.",
+      "relatedLessonId": "l5-db-ecosystem-comparison",
+      "relatedLessonTitle": "Level 5 — Database Ecosystem"
+    },
+    {
+      "id": "term-mvcc",
+      "term": "MVCC",
+      "fullName": "Multi-Version Concurrency Control",
+      "category": "database",
+      "categoryLabel": "Database",
+      "shortDef": "Metode konkurensi di mana pembacaan tidak memblokir penulisan karena tiap transaksi melihat snapshot versi data tertentu.",
+      "fullDef": "Di PostgreSQL, baris yang di-UPDATE atau DELETE tidak langsung ditimpa, melainkan ditandai xmin/xmax baru. Autovacuum bertugas membersihkan tuple usang (dead tuples) di latar belakang.",
+      "relatedLessonId": "l5-db-ecosystem-comparison",
+      "relatedLessonTitle": "Level 5 — Database Ecosystem"
+    },
+    {
+      "id": "term-idempotency",
+      "term": "Idempotensi",
+      "fullName": "Idempotent Operations",
+      "category": "architecture",
+      "categoryLabel": "Arsitektur",
+      "shortDef": "Mengirimkan permintaan yang sama berkali-kali menghasilkan status akhir sistem yang identik tanpa efek samping ganda.",
+      "fullDef": "GET, PUT, dan DELETE menurut spesifikasi HTTP bersifat idempoten. Untuk POST (misal transfer uang atau pembuatan order), gunakan Idempotency-Key header yang disimpan di database/cache dengan locking unik.",
+      "relatedLessonId": "l3-net-http-routers",
+      "relatedLessonTitle": "Level 3 — net/http, Routing & REST"
+    },
+    {
+      "id": "term-race-condition",
+      "term": "Race Condition",
+      "fullName": "Kondisi Balapan Memori Konkuren",
+      "category": "concurrency",
+      "categoryLabel": "Konkurensi",
+      "shortDef": "Dua goroutine mengakses lokasi memori yang sama bersamaan dan salah satunya menulis tanpa sinkronisasi.",
+      "fullDef": "Menyebabkan memory corruption atau nilai yang hilang. Selalu uji kode dengan flag 'go test -race' dan lindungi state bersama menggunakan sync.Mutex, sync/atomic, atau saluran channels.",
+      "relatedLessonId": "l2-gmp-channels-context-workers",
+      "relatedLessonTitle": "Level 2 — GMP, Concurrency & Workers"
+    },
+    {
+      "id": "term-deadlock",
+      "term": "Deadlock",
+      "fullName": "Kebuntuan Eksekusi Konkuren",
+      "category": "concurrency",
+      "categoryLabel": "Konkurensi",
+      "shortDef": "Dua atau lebih goroutine saling menunggu resource atau channel selamanya tanpa ada yang bisa lanjut.",
+      "fullDef": "Sering terjadi akibat penguncian mutex dengan urutan terbalik (lock inversion) atau pengiriman channel tanpa buffer tanpa ada penerima. Go runtime mendeteksi deadlock global, tetapi tidak selalu mendeteksi goroutine leak terisolasi.",
+      "relatedLessonId": "l2-gmp-channels-context-workers",
+      "relatedLessonTitle": "Level 2 — GMP, Concurrency & Workers"
+    },
+    {
+      "id": "term-middleware",
+      "term": "Middleware",
+      "fullName": "HTTP Handler Middleware Pipeline",
+      "category": "architecture",
+      "categoryLabel": "Arsitektur",
+      "shortDef": "Fungsi penengah yang membungkus http.Handler untuk memproses request sebelum dan sesudah handler inti.",
+      "fullDef": "Pola standar di Go: func(http.Handler) http.Handler. Digunakan untuk request tracing (RequestID), logging (slog), panic recovery, otentikasi JWT, CORS, dan rate limiting.",
+      "relatedLessonId": "l3-net-http-routers",
+      "relatedLessonTitle": "Level 3 — net/http, Routing & REST"
+    },
+    {
+      "id": "term-explain-analyze",
+      "term": "EXPLAIN ANALYZE",
+      "fullName": "Query Execution Plan & Real Execution Profiling",
+      "category": "database",
+      "categoryLabel": "Database",
+      "shortDef": "Perintah SQL untuk melihat rencana eksekusi dan waktu nyata per operator (Seq Scan vs Index Scan).",
+      "fullDef": "EXPLAIN biasa hanya menghitung perkiraan planner, sedangkan EXPLAIN ANALYZE benar-benar mengeksekusi query dan melaporkan actual time, loops, rows, dan shared buffer hits/reads.",
+      "relatedLessonId": "l5-db-ecosystem-comparison",
+      "relatedLessonTitle": "Level 5 — Database Ecosystem"
+    },
+    {
+      "id": "term-hexagonal",
+      "term": "Hexagonal Architecture",
+      "fullName": "Ports and Adapters Architecture",
+      "category": "architecture",
+      "categoryLabel": "Arsitektur",
+      "shortDef": "Pola arsitektur yang memisahkan logika domain inti dari dependensi eksternal (HTTP, DB) lewat interface.",
+      "fullDef": "Inti domain tidak mengimpor package database atau web framework. Driver/adapter luar (seperti Gin/Chi atau SQL Postgres) mengimplementasikan interface port yang ditentukan oleh domain, memudahkan unit test dengan mock/in-memory.",
+      "relatedLessonId": "l4-clean-hexagonal-modular-monolith",
+      "relatedLessonTitle": "Level 4 — Architecture Patterns"
+    },
+    {
+      "id": "term-escape-analysis",
+      "term": "Escape Analysis",
+      "fullName": "Compiler Heap Allocation Analysis",
+      "category": "runtime",
+      "categoryLabel": "Runtime",
+      "shortDef": "Analisis kompilator Go untuk menentukan apakah variabel cukup dialokasikan di stack atau harus ke heap.",
+      "fullDef": "Alokasi stack hampir tanpa biaya (hanya geser stack pointer). Jika pointer dikembalikan ke luar fungsi atau dibungkus interface{}, variabel 'escape to heap' yang menambah beban kerja Garbage Collector.",
+      "relatedLessonId": "l1-memory-slices-maps-escape",
+      "relatedLessonTitle": "Level 1 — Go Internals & Memory"
+    },
+    {
+      "id": "term-goroutine-leak",
+      "term": "Goroutine Leak",
+      "fullName": "Uncollected Blocked Goroutine",
+      "category": "concurrency",
+      "categoryLabel": "Konkurensi",
+      "shortDef": "Goroutine yang tertinggal terblokir selamanya di memori karena channel tidak pernah menerima/mengirim data.",
+      "fullDef": "Goroutine yang bocor tidak dapat dibersihkan oleh Garbage Collector, menghabiskan memori heap secara perlahan sampai aplikasi mati OOM. Selalu pasangkan goroutine dengan context.Context atau unblock path.",
+      "relatedLessonId": "l2-gmp-channels-context-workers",
+      "relatedLessonTitle": "Level 2 — GMP, Concurrency & Workers"
+    },
+    {
+      "id": "term-context-propagation",
+      "term": "Context Propagation",
+      "fullName": "Request-Scoped Context Propagation",
+      "category": "runtime",
+      "categoryLabel": "Runtime",
+      "shortDef": "Penerusan context.Context di sepanjang rantai fungsi untuk menyebarkan pembatalan dan batas waktu (timeout).",
+      "fullDef": "Dalam backend Go, parameter pertama fungsi I/O harus ctx context.Context. Jika klien HTTP memutus koneksi (r.Context().Done()), query database atau RPC turunan otomatis dibatalkan tanpa memboroskan CPU.",
+      "relatedLessonId": "l2-gmp-channels-context-workers",
+      "relatedLessonTitle": "Level 2 — GMP, Concurrency & Workers"
+    },
+    {
+      "id": "term-sqli",
+      "term": "SQL Injection",
+      "fullName": "Unsanitized Query Construction Vulnerability",
+      "category": "security",
+      "categoryLabel": "Keamanan",
+      "shortDef": "Penggabungan string mentah dari pengguna ke dalam query SQL sehingga penyerang dapat mengubah perintah database.",
+      "fullDef": "Jangan pernah gunakan fmt.Sprintf atau operator '+' untuk menyusun klausa WHERE. Gunakan placeholder terparameter ($1 di Postgres atau ? di SQLite/MySQL) agar driver memisah data dari AST perintah.",
+      "relatedLessonId": "l6-security-auth-owasp",
+      "relatedLessonTitle": "Level 6 — Security, Auth, OWASP"
+    },
+    {
+      "id": "term-csrf",
+      "term": "CSRF",
+      "fullName": "Cross-Site Request Forgery",
+      "category": "security",
+      "categoryLabel": "Keamanan",
+      "shortDef": "Serangan di mana browser korban dipaksa mengeksekusi request berbahaya ke situs web tempat korban sedang login.",
+      "fullDef": "Dicegah dengan menetapkan cookie sesi menggunakan SameSite=Lax atau SameSite=Strict, serta validasi anti-CSRF token pada request mutasi state (POST, PUT, DELETE).",
+      "relatedLessonId": "l6-security-auth-owasp",
+      "relatedLessonTitle": "Level 6 — Security, Auth, OWASP"
+    },
+    {
+      "id": "term-pool-starvation",
+      "term": "Connection Starvation",
+      "fullName": "Database Connection Pool Exhaustion",
+      "category": "database",
+      "categoryLabel": "Database",
+      "shortDef": "Kondisi ketika semua koneksi database terpakai dan tertahan sehingga request baru mengalami antrean panjang atau timeout.",
+      "fullDef": "Penyebab paling umum di Go: lupa memanggil rows.Close() setelah db.Query, atau query lambat tanpa index yang menahan koneksi selama berdetik-detik. Selalu defer rows.Close() dan atur SetMaxOpenConns serta timeouts.",
+      "relatedLessonId": "l5-db-ecosystem-comparison",
+      "relatedLessonTitle": "Level 5 — Database Ecosystem"
+    },
+    {
+      "id": "term-index-selectivity",
+      "term": "Selektivitas Indeks",
+      "fullName": "B-Tree Index Cardinality & Selectivity",
+      "category": "database",
+      "categoryLabel": "Database",
+      "shortDef": "Rasio jumlah nilai unik dalam kolom terhadap total baris; menentukan apakah planner SQL akan memakai index.",
+      "fullDef": "Jika kolom hanya punya 2 nilai (misal is_active boolean 50/50), selektivitas rendah sehingga PostgreSQL lebih memilih Sequential Scan. Indeks paling efektif pada kolom dengan selektivitas tinggi (unik/kardinalitas tinggi).",
+      "relatedLessonId": "l5-db-ecosystem-comparison",
+      "relatedLessonTitle": "Level 5 — Database Ecosystem"
+    },
+    {
+      "id": "term-n-plus-1",
+      "term": "N+1 Query Problem",
+      "fullName": "Looping Relational Query Anti-Pattern",
+      "category": "database",
+      "categoryLabel": "Database",
+      "shortDef": "Anti-pattern di mana aplikasi menjalankan 1 query awal untuk mengambil list induk lalu N query di dalam loop untuk mengambil relasi.",
+      "fullDef": "Menyebabkan latensi jaringan membengkak N kali lipat. Perbaiki dengan SQL JOIN atau query batch tunggal menggunakan klausa WHERE parent_id = ANY($1) atau WHERE parent_id IN (...).",
+      "relatedLessonId": "l5-db-ecosystem-comparison",
+      "relatedLessonTitle": "Level 5 — Database Ecosystem"
+    },
+    {
+      "id": "term-slowloris",
+      "term": "Slowloris Attack",
+      "fullName": "Slow HTTP Headers Socket Exhaustion",
+      "category": "security",
+      "categoryLabel": "Keamanan",
+      "shortDef": "Serangan DoS dengan membuka ribuan koneksi lambat yang mengirim header sedikit demi sedikit hingga batas koneksi server habis.",
+      "fullDef": "Server Go bawaan http.ListenAndServe default rentan karena ReadHeaderTimeout bernilai 0 (tanpa batas). Solusinya: inisialisasi &http.Server{ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second}.",
+      "relatedLessonId": "l0-backend-http-lifecycle",
+      "relatedLessonTitle": "Level 0 — Backend Engineering Fundamentals"
+    },
+    {
+      "id": "term-graceful-shutdown",
+      "term": "Graceful Shutdown",
+      "fullName": "Orderly Process Termination",
+      "category": "architecture",
+      "categoryLabel": "Arsitektur",
+      "shortDef": "Proses penghentian server teratur saat menerima sinyal SIGTERM/SIGINT tanpa memutus koneksi aktif di tengah jalan.",
+      "fullDef": "Di Go, tangkap signal.NotifyContext, lalu panggil srv.Shutdown(ctx). Server akan berhenti menerima koneksi baru dan menunggu semua request yang sedang diproses selesai dalam tenggat waktu tertentu.",
+      "relatedLessonId": "l3-net-http-routers",
+      "relatedLessonTitle": "Level 3 — net/http, Routing & REST"
+    },
+    {
+      "id": "term-rate-limiting",
+      "term": "Rate Limiting",
+      "fullName": "Request Rate Limiting & Throttling",
+      "category": "security",
+      "categoryLabel": "Keamanan",
+      "shortDef": "Mekanisme membatasi frekuensi request dari satu IP atau pengguna untuk melindungi backend dari lonjakan atau serangan brute force.",
+      "fullDef": "Umumnya diimplementasikan dengan algoritma Token Bucket (misal x/time/rate di Go) atau Redis leaky bucket untuk sistem terdistribusi. Kembalikan status HTTP 429 Too Many Requests saat kuota habis.",
+      "relatedLessonId": "l3-net-http-routers",
+      "relatedLessonTitle": "Level 3 — net/http, Routing & REST"
+    },
+    {
+      "id": "term-mutex",
+      "term": "sync.Mutex",
+      "fullName": "Mutual Exclusion Lock",
+      "category": "concurrency",
+      "categoryLabel": "Konkurensi",
+      "shortDef": "Primitif sinkronisasi Go yang menjamin hanya satu goroutine yang dapat memasuki area kritis memori pada satu saat.",
+      "fullDef": "Gunakan pola mu.Lock() diikuti defer mu.Unlock(). Jangan pernah menyalin (pass by value) struct yang memiliki field Mutex karena akan menduplikasi status penguncian.",
+      "relatedLessonId": "l2-gmp-channels-context-workers",
+      "relatedLessonTitle": "Level 2 — GMP, Concurrency & Workers"
+    },
+    {
+      "id": "term-rwmutex",
+      "term": "sync.RWMutex",
+      "fullName": "Reader/Writer Mutual Exclusion Lock",
+      "category": "concurrency",
+      "categoryLabel": "Konkurensi",
+      "shortDef": "Mutex yang mengizinkan banyak goroutine membaca bersamaan (RLock), tetapi menulis secara eksklusif (Lock).",
+      "fullDef": "Sangat ideal untuk resource yang sering dibaca tetapi jarang dimodifikasi (read-heavy cache). Pembaca tidak saling memblokir, meningkatkan throughput CPU multi-core.",
+      "relatedLessonId": "l2-gmp-channels-context-workers",
+      "relatedLessonTitle": "Level 2 — GMP, Concurrency & Workers"
+    },
+    {
+      "id": "term-atomic",
+      "term": "sync/atomic",
+      "fullName": "Lock-Free CPU Atomic Operations",
+      "category": "concurrency",
+      "categoryLabel": "Konkurensi",
+      "shortDef": "Operasi baca/tulis bilangan primitif langsung di tingkat instruksi CPU tanpa overhead penguncian mutex.",
+      "fullDef": "Tersedia tipe modern seperti atomic.Int64, atomic.Bool, dan atomic.Pointer[T]. Sangat cepat untuk penghitung metrics atau flag status atomic.",
+      "relatedLessonId": "l2-gmp-channels-context-workers",
+      "relatedLessonTitle": "Level 2 — GMP, Concurrency & Workers"
+    },
+    {
+      "id": "term-pprof",
+      "term": "Pprof",
+      "fullName": "Go Runtime Performance Profiler",
+      "category": "runtime",
+      "categoryLabel": "Runtime",
+      "shortDef": "Alat bawaan Go untuk menganalisis pemakaian CPU, alokasi memori heap, goroutine blocking, dan lock contention.",
+      "fullDef": "Gunakan package runtime/pprof untuk benchmark dan net/http/pprof untuk server HTTP live. Analisis grafik flamegraph dengan perintah 'go tool pprof -http=:8081 profile.pb.gz'.",
+      "relatedLessonId": "l2-profiling-pprof-benchmarks",
+      "relatedLessonTitle": "Level 2 — Profiling, pprof & Benchmarks"
+    },
+    {
+      "id": "term-backpressure",
+      "term": "Backpressure",
+      "fullName": "Flow Control & Overload Protection",
+      "category": "architecture",
+      "categoryLabel": "Arsitektur",
+      "shortDef": "Mekanisme menolak atau memperlambat data masuk ketika antrean pemrosesan melebihi kapasitas agar sistem tidak crash.",
+      "fullDef": "Jika produsen lebih cepat dari konsumen, buffer memori akan jebol. Di Go, batasi channel buffer dan gunakan bounded worker pool; tolak request dengan status HTTP 503 jika antrean penuh.",
+      "relatedLessonId": "l7-distributed-resilience-circuit-breaker",
+      "relatedLessonTitle": "Level 7 — Distributed Resilience"
+    },
+    {
+      "id": "term-circuit-breaker",
+      "term": "Circuit Breaker",
+      "fullName": "Cascading Failure Isolation Pattern",
+      "category": "architecture",
+      "categoryLabel": "Arsitektur",
+      "shortDef": "Pola pencegah kegagalan beruntun yang memutus panggilan ke dependensi luar jika error rate melebihi ambang batas.",
+      "fullDef": "Memiliki 3 status: Closed (normal), Open (semua panggilan langsung ditolak cepat dengan error fallback), dan Half-Open (menguji beberapa panggilan sampel untuk memeriksa pemulihan layanan).",
+      "relatedLessonId": "l7-distributed-resilience-circuit-breaker",
+      "relatedLessonTitle": "Level 7 — Distributed Resilience"
+    },
+    {
+      "id": "term-outbox-pattern",
+      "term": "Transactional Outbox",
+      "fullName": "Atomic Database to Event Broker Pattern",
+      "category": "architecture",
+      "categoryLabel": "Arsitektur",
+      "shortDef": "Menyimpan event ke tabel outbox dalam transaksi database yang sama dengan entitas bisnis sebelum diteruskan ke message broker.",
+      "fullDef": "Menghindari masalah dual-write di mana database berhasil disimpan tetapi broker pesan gagal dihubungi. Worker terpisah membaca tabel outbox secara aman (menggunakan SELECT FOR UPDATE SKIP LOCKED).",
+      "relatedLessonId": "l8-event-driven-eda-cdc-kafka",
+      "relatedLessonTitle": "Level 8 — Event-Driven Architecture & Kafka"
+    },
+    {
+      "id": "term-cdc",
+      "term": "CDC",
+      "fullName": "Change Data Capture",
+      "category": "database",
+      "categoryLabel": "Database",
+      "shortDef": "Teknik menangkap setiap mutasi data (insert, update, delete) langsung dari log transaksi database (WAL).",
+      "fullDef": "Dengan CDC (seperti Debezium atau logical replication Postgres), aplikasi hilir mendapatkan aliran event real-time dari database tanpa perlu polling berkala yang membebani query.",
+      "relatedLessonId": "l8-event-driven-eda-cdc-kafka",
+      "relatedLessonTitle": "Level 8 — Event-Driven Architecture & Kafka"
+    },
+    {
+      "id": "term-acid",
+      "term": "ACID",
+      "fullName": "Atomicity, Consistency, Isolation, Durability",
+      "category": "database",
+      "categoryLabel": "Database",
+      "shortDef": "Empat prinsip keandalan transaksi database relasional untuk menjamin integritas data dalam segala kondisi.",
+      "fullDef": "Atomicity: semua berhasil atau batal rollback; Consistency: aturan integritas skema terjaga; Isolation: transaksi konkuren tidak saling merusak; Durability: data yang commit bertahan walau crash.",
+      "relatedLessonId": "l5-db-ecosystem-comparison",
+      "relatedLessonTitle": "Level 5 — Database Ecosystem"
+    },
+    {
+      "id": "term-isolation-levels",
+      "term": "Tingkat Isolasi SQL",
+      "fullName": "Transaction Isolation Levels (ANSI SQL)",
+      "category": "database",
+      "categoryLabel": "Database",
+      "shortDef": "Tingkat isolasi transaksi: Read Uncommitted, Read Committed, Repeatable Read, dan Serializable.",
+      "fullDef": "Tingkat lebih tinggi mencegah anomali (Dirty Read, Non-Repeatable Read, Phantom Read) tetapi membutuhkan lock lebih banyak atau retry logic ketika terjadi serialization failure.",
+      "relatedLessonId": "l5-db-ecosystem-comparison",
+      "relatedLessonTitle": "Level 5 — Database Ecosystem"
+    },
+    {
+      "id": "term-token-bucket",
+      "term": "Token Bucket",
+      "fullName": "Token Bucket Rate Limiting Algorithm",
+      "category": "architecture",
+      "categoryLabel": "Arsitektur",
+      "shortDef": "Algoritma di mana token diisi secara konstan; request hanya diproses jika tersedia token di dalam keranjang.",
+      "fullDef": "Mengizinkan burst traffic jangka pendek hingga kapasitas maksimum bucket, sambil tetap menjamin batas rata-rata kecepatan request jangka panjang.",
+      "relatedLessonId": "l3-net-http-routers",
+      "relatedLessonTitle": "Level 3 — net/http, Routing & REST"
+    },
+    {
+      "id": "term-cors",
+      "term": "CORS",
+      "fullName": "Cross-Origin Resource Sharing",
+      "category": "security",
+      "categoryLabel": "Keamanan",
+      "shortDef": "Mekanisme keamanan browser yang membatasi script dari satu origin meminta data dari origin yang berbeda.",
+      "fullDef": "Backend mengontrol izin lewat header: Access-Control-Allow-Origin, Access-Control-Allow-Methods, dan merespons preflight request HTTP OPTIONS dengan benar.",
+      "relatedLessonId": "l3-net-http-routers",
+      "relatedLessonTitle": "Level 3 — net/http, Routing & REST"
+    },
+    {
+      "id": "term-jwt",
+      "term": "JWT",
+      "fullName": "JSON Web Token (RFC 7519)",
+      "category": "security",
+      "categoryLabel": "Keamanan",
+      "shortDef": "Format token kompak bertanda tangan kriptografis untuk transmisi klaim identitas stateless antara client dan server.",
+      "fullDef": "Terdiri dari Header, Payload, dan Signature (Base64URL terpisah titik). Backend memverifikasi tanda tangan menggunakan secret (HMAC) atau public key (RSA/ECDSA) tanpa query DB sesi.",
+      "relatedLessonId": "l6-security-auth-owasp",
+      "relatedLessonTitle": "Level 6 — Security, Auth, OWASP"
+    },
+    {
+      "id": "term-argon2id",
+      "term": "Argon2id",
+      "fullName": "Memory-Hard Password Hashing",
+      "category": "security",
+      "categoryLabel": "Keamanan",
+      "shortDef": "Algoritma hashing password modern yang dirancang tahan terhadap serangan brute-force berbasis GPU dan ASIC.",
+      "fullDef": "Direkomendasikan oleh OWASP. Membutuhkan alokasi memori yang signifikan (memory-hard) dan iterasi waktu komputasi, menjadikannya jauh lebih aman daripada MD5, SHA-256, atau bcrypt usang.",
+      "relatedLessonId": "l6-security-auth-owasp",
+      "relatedLessonTitle": "Level 6 — Security, Auth, OWASP"
+    },
+    {
+      "id": "term-buffered-channel",
+      "term": "Buffered Channel",
+      "fullName": "Asynchronous Bounded Channel",
+      "category": "concurrency",
+      "categoryLabel": "Konkurensi",
+      "shortDef": "Channel dengan kapasitas antrean tetap: pengirim tidak memblokir selama slot antrean masih kosong.",
+      "fullDef": "Dibuat dengan make(chan T, capacity). Mengurangi lock-step synchronization antar goroutine. Buffer ukuran 1 sering digunakan untuk mengembalikan hasil worker tanpa memblokir jika penerima membatalkan context.",
+      "relatedLessonId": "l2-gmp-channels-context-workers",
+      "relatedLessonTitle": "Level 2 — GMP, Concurrency & Workers"
+    },
+    {
+      "id": "term-select",
+      "term": "Select Statement",
+      "fullName": "Channel Multiplexing Control",
+      "category": "concurrency",
+      "categoryLabel": "Konkurensi",
+      "shortDef": "Struktur kontrol Go untuk mendengarkan beberapa operasi channel secara bersamaan dan memilih yang siap pertama kali.",
+      "fullDef": "Jika ada klausa default, select bersifat non-blocking. Kombinasi umum: 'case val := <-dataCh:' dipadukan dengan 'case <-ctx.Done():' untuk membatalkan operasi saat batas waktu habis.",
+      "relatedLessonId": "l2-gmp-channels-context-workers",
+      "relatedLessonTitle": "Level 2 — GMP, Concurrency & Workers"
+    },
+    {
+      "id": "term-sync-once",
+      "term": "sync.Once",
+      "fullName": "Thread-Safe Lazy Initialization",
+      "category": "concurrency",
+      "categoryLabel": "Konkurensi",
+      "shortDef": "Objek sinkronisasi yang menjamin sebuah fungsi hanya akan dieksekusi tepat satu kali sepanjang umur proses.",
+      "fullDef": "Sangat aman untuk inisialisasi singleton koneksi DB atau konfigurasi tanpa perlunya lock mutex manual yang rawan race condition.",
+      "relatedLessonId": "l2-gmp-channels-context-workers",
+      "relatedLessonTitle": "Level 2 — GMP, Concurrency & Workers"
+    },
+    {
+      "id": "term-stack-heap",
+      "term": "Stack vs Heap",
+      "fullName": "Go Runtime Memory Allocation Models",
+      "category": "runtime",
+      "categoryLabel": "Runtime",
+      "shortDef": "Stack dialokasikan per goroutine dengan pembersihan cepat; Heap adalah memori bersama yang dibersihkan oleh Garbage Collector.",
+      "fullDef": "Stack di Go dinamis (mulai 2 KB dan bisa tumbuh/berpindah). Mengoptimalkan alokasi stack mengurangi beban GC dan meningkatkan performa backend secara drastis.",
+      "relatedLessonId": "l1-memory-slices-maps-escape",
+      "relatedLessonTitle": "Level 1 — Go Internals & Memory"
+    },
+    {
+      "id": "term-gc-pacing",
+      "term": "GC Pacing & GOMEMLIMIT",
+      "fullName": "Go Garbage Collector Pacing & Memory Limits",
+      "category": "runtime",
+      "categoryLabel": "Runtime",
+      "shortDef": "Mekanisme pengatur frekuensi siklus GC untuk menjaga konsumsi memori agar tidak melanggar batas cgroup container.",
+      "fullDef": "GOMEMLIMIT (Go 1.19+) mencegah container di Kubernetes mati terkena OOM-killer dengan memicu GC tepat waktu sebelum mencapai batas memori pod.",
+      "relatedLessonId": "l1-memory-slices-maps-escape",
+      "relatedLessonTitle": "Level 1 — Go Internals & Memory"
+    },
+    {
+      "id": "term-zero-alloc-logging",
+      "term": "Zero-Alloc Logging",
+      "fullName": "Structured Low-Allocation Logging",
+      "category": "architecture",
+      "categoryLabel": "Arsitektur",
+      "shortDef": "Praktik penulisan log terstruktur tanpa membuat alokasi heap baru pada hot path aplikasi backend.",
+      "fullDef": "Menggunakan package bawaan log/slog dengan slog.Attr dan level terukur. Menghindari string formatting dinamis yang memicu alokasi memori berulang pada beban tinggi.",
+      "relatedLessonId": "l3-net-http-routers",
+      "relatedLessonTitle": "Level 3 — net/http, Routing & REST"
+    },
+    {
+      "id": "term-zero-downtime",
+      "term": "Zero-Downtime Deployment",
+      "fullName": "Seamless Service Upgrades",
+      "category": "architecture",
+      "categoryLabel": "Arsitektur",
+      "shortDef": "Metode rilis aplikasi di mana versi baru diluncurkan tanpa memutus layanan pengguna atau menghasilkan error 502.",
+      "fullDef": "Memadukan rolling update di Kubernetes, graceful shutdown pada server backend Go, dan health check readiness probe (/readyz) yang akurat.",
+      "relatedLessonId": "l10-production-readiness-runbooks",
+      "relatedLessonTitle": "Level 10 — Production Readiness"
+    },
+    {
+      "id": "term-observability-pillars",
+      "term": "Tiga Pilar Observabilitas",
+      "fullName": "Metrics, Logs, and Traces",
+      "category": "architecture",
+      "categoryLabel": "Arsitektur",
+      "shortDef": "Tiga pilar pemantauan sistem produksi: Metrics (angka agregat), Logs (kejadian detail), dan Traces (alur perjalanan request).",
+      "fullDef": "Metrics memberi tahu ada yang salah (latensi p99 naik); Logs menjelaskan apa yang salah (pesan error dan stack trace); Traces menunjukkan di mana titik lambat terjadi dalam arsitektur mikroservis.",
+      "relatedLessonId": "l9-observability-opentelemetry",
+      "relatedLessonTitle": "Level 9 — Observability & OpenTelemetry"
+    },
+    {
+      "id": "term-opentelemetry",
+      "term": "OpenTelemetry (OTel)",
+      "fullName": "Vendor-Neutral Telemetry Standard",
+      "category": "architecture",
+      "categoryLabel": "Arsitektur",
+      "shortDef": "Standar dan framework terbuka untuk menghasilkan dan mengumpulkan telemetri dari aplikasi ke backend analitik.",
+      "fullDef": "Di Go, gunakan SDK go.opentelemetry.io untuk menyisipkan trace context (W3C traceparent header) dan mengekspor span ke Jaeger, Tempo, atau Prometheus.",
+      "relatedLessonId": "l9-observability-opentelemetry",
+      "relatedLessonTitle": "Level 9 — Observability & OpenTelemetry"
+    }
+  ]
 };
 
     const SafeStore = {
@@ -4814,10 +5351,10 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
       });
     }
 
-    // View Switching across all 11 views
+    // View Switching across all views (including glossary)
     function switchView(viewName) {
       AppState.currentView = viewName;
-      const views = ['dashboard', 'roadmap', 'curriculum', 'dblab', 'apilab', 'playground', 'concurrencylab', 'archlab', 'diagnostics', 'projects', 'practice'];
+      const views = ['dashboard', 'roadmap', 'curriculum', 'dblab', 'apilab', 'playground', 'concurrencylab', 'archlab', 'diagnostics', 'projects', 'practice', 'glossary'];
       views.forEach(v => {
         const sec = document.getElementById('view-' + v);
         if (sec) sec.classList.toggle('hidden', v !== viewName);
@@ -4847,6 +5384,7 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
       if (viewName === 'diagnostics') runMainDiagnostics();
       if (viewName === 'projects') renderProjectDetail();
       if (viewName === 'practice') renderPracticeView();
+      if (viewName === 'glossary') renderGlossaryView();
     }
 
     function updateProgressMetrics() {
@@ -6020,6 +6558,75 @@ func SafeSocketControl(network, address string, c syscall.RawConn) error {
       });
     }
 
+    // VIEW 12: Glosarium Istilah Backend & Go
+    function renderGlossaryView() {
+      const grid = document.getElementById('glossary-cards-grid');
+      const countBadge = document.getElementById('glossary-count-badge');
+      if (!grid) return;
+
+      const items = PLATFORM_DATA.glossary || [];
+      const cat = AppState.glossaryFilter || 'all';
+      const search = (AppState.glossarySearch || '').trim().toLowerCase();
+
+      const filtered = items.filter(item => {
+        const matchCat = cat === 'all' || item.category === cat;
+        if (!matchCat) return false;
+        if (!search) return true;
+        return (
+          item.term.toLowerCase().includes(search) ||
+          item.fullName.toLowerCase().includes(search) ||
+          item.shortDef.toLowerCase().includes(search) ||
+          item.fullDef.toLowerCase().includes(search)
+        );
+      });
+
+      if (countBadge) {
+        countBadge.textContent = filtered.length + ' / ' + items.length + ' Istilah';
+      }
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="surface-card" style="grid-column: 1 / -1; text-align: center; padding: var(--space-xl);">
+            <h3>Tidak Ada Istilah yang Cocok</h3>
+            <p>Coba kata kunci lain atau pilih kategori Semua.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(item => `
+        <article class="surface-card glossary-card" id="${item.id}">
+          <div class="view-stack" style="gap: var(--space-2xs);">
+            <div class="surface-header" style="align-items: flex-start;">
+              <div class="title-stack">
+                <h3 style="color: var(--color-accent);">${escapeHtml(item.term)} <span style="font-size: var(--text-xs); color: var(--color-muted); font-weight: normal;">(${escapeHtml(item.fullName)})</span></h3>
+              </div>
+              <span class="tag-pill info">${escapeHtml(item.categoryLabel)}</span>
+            </div>
+            <p style="font-weight: 500; color: var(--color-ink);">${escapeHtml(item.shortDef)}</p>
+            <p style="font-size: var(--text-xs); line-height: 1.5; color: var(--color-muted);">${escapeHtml(item.fullDef)}</p>
+          </div>
+          ${item.relatedLessonId ? `
+            <div style="padding-top: var(--space-xs); border-top: 1px solid var(--color-rule); display: flex; justify-content: flex-end;">
+              <button type="button" class="btn-subtle" data-glossary-jump="${escapeHtml(item.relatedLessonId)}" style="font-size: var(--text-xs);">
+                Pelajari di Pelajaran &rarr;
+              </button>
+            </div>
+          ` : ''}
+        </article>
+      `).join('');
+
+      grid.querySelectorAll('[data-glossary-jump]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetLessonId = btn.getAttribute('data-glossary-jump');
+          if (targetLessonId) {
+            AppState.currentLessonId = targetLessonId;
+            switchView('curriculum');
+          }
+        });
+      });
+    }
+
     // Global Search
     function handleGlobalSearch(query) {
       const q = query.trim().toLowerCase();
@@ -6046,6 +6653,23 @@ func SafeSocketControl(network, address string, c syscall.RawConn) error {
           matches.push({ type: 'DB Scenario', title: s.title, sub: s.recommended, action: () => { AppState.currentDbScenarioId = s.id; switchView('dblab'); } });
         }
       });
+      if (PLATFORM_DATA.glossary) {
+        PLATFORM_DATA.glossary.forEach(g => {
+          if (g.term.toLowerCase().includes(q) || g.fullName.toLowerCase().includes(q) || g.shortDef.toLowerCase().includes(q)) {
+            matches.push({
+              type: 'Glosarium (' + g.categoryLabel + ')',
+              title: g.term + ' — ' + g.fullName,
+              sub: g.shortDef,
+              action: () => {
+                AppState.glossarySearch = g.term;
+                const input = document.getElementById('glossary-search-input');
+                if (input) input.value = g.term;
+                switchView('glossary');
+              }
+            });
+          }
+        });
+      }
 
       panel.classList.remove('hidden');
       if (matches.length === 0) {
@@ -6346,6 +6970,39 @@ func SafeSocketControl(network, address string, c syscall.RawConn) error {
           }).catch(() => {});
         }
         showToast('Engineering notes saved!');
+      });
+
+      // Glossary controls
+      const glossSearch = document.getElementById('glossary-search-input');
+      if (glossSearch) {
+        glossSearch.addEventListener('input', e => {
+          AppState.glossarySearch = e.target.value;
+          renderGlossaryView();
+        });
+      }
+      const catFilters = document.getElementById('glossary-category-filters');
+      if (catFilters) {
+        catFilters.querySelectorAll('button').forEach(btn => {
+          btn.addEventListener('click', () => {
+            catFilters.querySelectorAll('button').forEach(b => b.classList.remove('is-active'));
+            btn.classList.add('is-active');
+            AppState.glossaryFilter = btn.getAttribute('data-cat') || 'all';
+            renderGlossaryView();
+          });
+        });
+      }
+
+      // Tech terms popover / tooltip support
+      document.body.addEventListener('click', e => {
+        const termEl = e.target.closest('.tech-term');
+        if (!termEl) return;
+        const termKey = termEl.getAttribute('data-term') || termEl.textContent.trim();
+        const found = PLATFORM_DATA.glossary && PLATFORM_DATA.glossary.find(g =>
+          g.term.toLowerCase() === termKey.toLowerCase() || g.id.toLowerCase() === ('term-' + termKey).toLowerCase()
+        );
+        if (found) {
+          showToast(found.term + ': ' + found.shortDef);
+        }
       });
 
       // Initialize
