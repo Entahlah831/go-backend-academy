@@ -256,6 +256,9 @@ func (s *Store) CountUserBookmarks(ctx context.Context, userID string) (int, err
 }
 
 func (s *Store) CreateSession(ctx context.Context, sessionHash, userID string, expiresAt time.Time) error {
+	if strings.TrimSpace(sessionHash) == "" {
+		return errors.New("sessionHash cannot be empty")
+	}
 	if err := s.ensureUser(ctx, userID); err != nil {
 		return err
 	}
@@ -264,16 +267,66 @@ func (s *Store) CreateSession(ctx context.Context, sessionHash, userID string, e
 		VALUES ($1, $2, $3)
 		ON CONFLICT (id) DO UPDATE SET expires_at = EXCLUDED.expires_at
 	`
-	if _, err := s.db.ExecContext(ctx, q, sessionHash, userID, expiresAt); err != nil {
+	if _, err := s.db.ExecContext(ctx, q, sessionHash, userID, expiresAt.UTC()); err != nil {
 		return fmt.Errorf("creating session: %w", err)
 	}
 	return nil
 }
 
+func (s *Store) PurgeExpiredSessions(ctx context.Context) (int64, error) {
+	res, err := s.db.ExecContext(ctx, `DELETE FROM sessions WHERE expires_at < $1`, time.Now().UTC())
+	if err != nil {
+		return 0, fmt.Errorf("purging expired sessions: %w", err)
+	}
+	return res.RowsAffected()
+}
+
+func (s *Store) ClaimLegacyUser(ctx context.Context, legacyUID, targetUID string) error {
+	if legacyUID == "" || targetUID == "" || legacyUID == targetUID {
+		return errors.New("invalid legacy or target user ID")
+	}
+	var existingLegacy string
+	if err := s.db.QueryRowContext(ctx, `SELECT id FROM users WHERE id = $1`, legacyUID).Scan(&existingLegacy); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrNotFound
+		}
+		return fmt.Errorf("checking legacy user: %w", err)
+	}
+	if err := s.ensureUser(ctx, targetUID); err != nil {
+		return err
+	}
+
+	var pCount, nCount, bCount int
+	_ = s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM user_progress WHERE user_id = $1`, targetUID).Scan(&pCount)
+	_ = s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM user_notes WHERE user_id = $1`, targetUID).Scan(&nCount)
+	_ = s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM user_bookmarks WHERE user_id = $1`, targetUID).Scan(&bCount)
+	if (pCount + nCount + bCount) > 0 {
+		return errors.New("target session already contains learning progress")
+	}
+
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("starting claim transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	tables := []string{"user_progress", "user_bookmarks", "user_notes", "exercise_attempts", "quiz_attempts"}
+	for _, tbl := range tables {
+		q := fmt.Sprintf("UPDATE %s SET user_id = $1 WHERE user_id = $2", tbl)
+		if _, err := tx.ExecContext(ctx, q, targetUID, legacyUID); err != nil {
+			return fmt.Errorf("migrating %s: %w", tbl, err)
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("committing claim: %w", err)
+	}
+	return nil
+}
+
 func (s *Store) GetSessionUser(ctx context.Context, sessionHash string) (string, error) {
-	const q = `SELECT user_id FROM sessions WHERE id = $1 AND expires_at > CURRENT_TIMESTAMP`
+	const q = `SELECT user_id FROM sessions WHERE id = $1 AND expires_at > $2`
 	var userID string
-	if err := s.db.QueryRowContext(ctx, q, sessionHash).Scan(&userID); err != nil {
+	if err := s.db.QueryRowContext(ctx, q, sessionHash, time.Now().UTC()).Scan(&userID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", ErrNotFound
 		}

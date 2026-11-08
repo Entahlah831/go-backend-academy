@@ -11,23 +11,10 @@
     return window.location.origin + path;
   }
 
-  // Per-Browser Isolated Learner Identity (P0-AUTH-001)
+  // Sesi pengguna dikelola sepenuhnya oleh cookie server-side gba_sid (HttpOnly, SameSite, Secure).
+  // Penyimpanan identitas di sisi klien (active_uid / userId) tidak lagi digunakan.
   function getActiveUserId() {
-    if (typeof SafeStore !== 'undefined') {
-      let uid = SafeStore.get('userId', '');
-      if (!uid || typeof uid !== 'string' || uid === 'usr_local_default' || !uid.startsWith('usr_')) {
-        let randHex;
-        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-          randHex = crypto.randomUUID().replace(/-/g, '').slice(0, 32);
-        } else {
-          randHex = Math.random().toString(16).slice(2, 10) + Date.now().toString(16).slice(-6);
-        }
-        uid = 'usr_' + randHex;
-        SafeStore.set('userId', uid);
-      }
-      return uid;
-    }
-    return 'usr_local_default';
+    return 'session_cookie_managed';
   }
   window.getActiveUserId = getActiveUserId;
 
@@ -264,7 +251,7 @@
       const rawCode = document.getElementById('exercise-code-editor').value;
       const code = stripGoCommentsJS(rawCode);
       const outEl = document.getElementById('exercise-console-output');
-      const uid = getActiveUserId();
+      // user identity resolved server-side from session cookie
 
       if (lesson && lesson.exercise && Array.isArray(lesson.exercise.requiredTokens)) {
         const hasUnfinishedStep = rawCode.includes('// STEP:');
@@ -314,8 +301,8 @@
         window.fetch(apiUrl('/api/v1/exercises/verify'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
           body: JSON.stringify({
-            user_id: uid,
             exercise_id: exId,
             code: rawCode,
             required_tokens: (lesson.exercise && lesson.exercise.requiredTokens) || []
@@ -382,21 +369,37 @@
   // 6. Bidirectional hydration & sync with all Go Backend API endpoints using per-browser user_id
   async function hydrateFromBackendAPI() {
     if (!isHttpOrigin()) return;
-    const uid = getActiveUserId();
     try {
-      const readyRes = await window.fetch(apiUrl('/readyz'));
+      // One-time legacy migration from client localStorage usr_... to secure server session
+      const legacyUid = (typeof SafeStore !== 'undefined' ? (SafeStore.get('userId', '') || SafeStore.get('active_uid', '')) : '');
+      if (legacyUid && typeof legacyUid === 'string' && legacyUid.startsWith('usr_')) {
+        try {
+          await window.fetch(apiUrl('/api/v1/session/claim-legacy'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ legacy_user_id: legacyUid })
+          });
+        } catch (_) {}
+        try {
+          localStorage.removeItem('gba_v2_userId');
+          localStorage.removeItem('gba_v2_active_uid');
+        } catch (_) {}
+      }
+
+      const readyRes = await window.fetch(apiUrl('/readyz'), { credentials: 'same-origin' });
       if (readyRes.ok) {
         const info = await readyRes.json();
         const progPill = document.getElementById('top-progress-pill');
         if (progPill && info.db_driver) {
-          progPill.title = 'Connected to Go Backend (' + info.db_driver + ', learner=' + uid + ')';
+          progPill.title = 'Connected to Go Backend (' + info.db_driver + ')';
         }
       }
 
       const [progRes, bmRes, notesRes] = await Promise.all([
-        window.fetch(apiUrl('/api/v1/progress?user_id=' + encodeURIComponent(uid))),
-        window.fetch(apiUrl('/api/v1/bookmarks?user_id=' + encodeURIComponent(uid))),
-        window.fetch(apiUrl('/api/v1/notes?user_id=' + encodeURIComponent(uid)))
+        window.fetch(apiUrl('/api/v1/progress'), { credentials: 'same-origin' }),
+        window.fetch(apiUrl('/api/v1/bookmarks'), { credentials: 'same-origin' }),
+        window.fetch(apiUrl('/api/v1/notes'), { credentials: 'same-origin' })
       ]);
 
       if (progRes.ok) {
@@ -484,8 +487,8 @@
         window.fetch(apiUrl('/api/v1/progress'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
           body: JSON.stringify({
-            user_id: getActiveUserId(),
             lesson_id: id,
             status: AppState.completedLessons[id] ? 'completed' : 'in_progress'
           })
@@ -502,8 +505,8 @@
         window.fetch(apiUrl('/api/v1/bookmarks'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
           body: JSON.stringify({
-            user_id: getActiveUserId(),
             item_type: 'lesson',
             item_id: id,
             note: AppState.bookmarks[id] ? 'Bookmarked' : ''
@@ -519,8 +522,8 @@
         window.fetch(apiUrl('/api/v1/notes'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
           body: JSON.stringify({
-            user_id: getActiveUserId(),
             lesson_id: AppState.currentLessonId,
             content: AppState.personalNotes || ''
           })

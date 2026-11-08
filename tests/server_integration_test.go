@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"errors"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/fs"
 	"net/http"
+	"net/http/cookiejar"
 	"net/http/httptest"
 	"os"
 	"os/exec"
@@ -203,41 +205,39 @@ func TestPersistenceAcrossServerRestartsAndMigrationsCycle(t *testing.T) {
 	srv1 := httpplatform.NewServer(cfg, log, store1)
 	ts1 := httptest.NewServer(srv1.Handler())
 
-	// 1. Save progress
-	postJSON(t, ts1.URL+"/api/v1/progress", map[string]any{
-		"user_id":   "usr_persist",
+	// 1. Save progress and capture session cookie
+	sessCookie, _ := postJSONWithCookie(t, ts1.URL+"/api/v1/progress", map[string]any{
 		"lesson_id": "l0-backend-http-lifecycle",
 		"status":    "completed",
-	}, http.StatusOK)
+	}, http.StatusOK, nil)
+	if sessCookie == nil {
+		t.Fatalf("expected gba_sid cookie to be returned")
+	}
 
-	// 2. Save note
-	postJSON(t, ts1.URL+"/api/v1/notes", map[string]any{
-		"user_id":   "usr_persist",
+	// 2. Save note using session cookie
+	postJSONWithCookie(t, ts1.URL+"/api/v1/notes", map[string]any{
 		"lesson_id": "l0-backend-http-lifecycle",
 		"content":   "Persisted across SQLite restart!",
-	}, http.StatusOK)
+	}, http.StatusOK, sessCookie)
 
 	// 3. Save bookmark
-	postJSON(t, ts1.URL+"/api/v1/bookmarks", map[string]any{
-		"user_id":   "usr_persist",
+	postJSONWithCookie(t, ts1.URL+"/api/v1/bookmarks", map[string]any{
 		"item_type": "case_study",
 		"item_id":   "cs-01-task-api",
 		"note":      "Reference architecture",
-	}, http.StatusOK)
+	}, http.StatusOK, sessCookie)
 
 	// 4. Record exercise attempt
-	postJSON(t, ts1.URL+"/api/v1/exercises/verify", map[string]any{
-		"user_id":         "usr_persist",
+	postJSONWithCookie(t, ts1.URL+"/api/v1/exercises/verify", map[string]any{
 		"exercise_id":     "ex-l0-backend-http-lifecycle",
 		"code":            "package main\nimport \"net/http\"\nfunc ok() { r.Body = http.MaxBytesReader(w, r.Body, 64); dec.DisallowUnknownFields(); _ = &http.Server{ReadHeaderTimeout: 5} }",
 		"required_tokens": []string{},
-	}, http.StatusOK)
+	}, http.StatusOK, sessCookie)
 
 	// 5. Record quiz attempt
-	postJSON(t, ts1.URL+"/api/v1/quizzes/qz-1/attempts", map[string]any{
-		"user_id": "usr_persist",
+	postJSONWithCookie(t, ts1.URL+"/api/v1/quizzes/qz-1/attempts", map[string]any{
 		"answers": []int{1},
-	}, http.StatusOK)
+	}, http.StatusOK, sessCookie)
 
 	// Shut down Server #1 and close database connection completely
 	ts1.Close()
@@ -255,11 +255,11 @@ func TestPersistenceAcrossServerRestartsAndMigrationsCycle(t *testing.T) {
 	ts2 := httptest.NewServer(srv2.Handler())
 	defer ts2.Close()
 
-	// Verify progress survived restart
+	// Verify progress survived restart (using session cookie)
 	var progResp struct {
 		Progress map[string]string `json:"progress"`
 	}
-	getJSON(t, ts2.URL+"/api/v1/progress?user_id=usr_persist", &progResp)
+	getJSONWithCookie(t, ts2.URL+"/api/v1/progress", &progResp, sessCookie)
 	if progResp.Progress["l0-backend-http-lifecycle"] != "completed" {
 		t.Errorf("progress lost across restart: %+v", progResp.Progress)
 	}
@@ -268,7 +268,7 @@ func TestPersistenceAcrossServerRestartsAndMigrationsCycle(t *testing.T) {
 	var notesResp struct {
 		Notes map[string]string `json:"notes"`
 	}
-	getJSON(t, ts2.URL+"/api/v1/notes?user_id=usr_persist", &notesResp)
+	getJSONWithCookie(t, ts2.URL+"/api/v1/notes", &notesResp, sessCookie)
 	if notesResp.Notes["l0-backend-http-lifecycle"] != "Persisted across SQLite restart!" {
 		t.Errorf("notes lost across restart: %+v", notesResp.Notes)
 	}
@@ -280,7 +280,7 @@ func TestPersistenceAcrossServerRestartsAndMigrationsCycle(t *testing.T) {
 			Note   string `json:"note"`
 		} `json:"bookmarks"`
 	}
-	getJSON(t, ts2.URL+"/api/v1/bookmarks?user_id=usr_persist", &bmResp)
+	getJSONWithCookie(t, ts2.URL+"/api/v1/bookmarks", &bmResp, sessCookie)
 	if len(bmResp.Bookmarks) != 1 || bmResp.Bookmarks[0].ItemID != "cs-01-task-api" {
 		t.Errorf("bookmarks lost across restart: %+v", bmResp.Bookmarks)
 	}
@@ -289,7 +289,7 @@ func TestPersistenceAcrossServerRestartsAndMigrationsCycle(t *testing.T) {
 	var exAttResp struct {
 		Attempts []database.ExerciseAttemptRecord `json:"attempts"`
 	}
-	getJSON(t, ts2.URL+"/api/v1/exercises/attempts?user_id=usr_persist", &exAttResp)
+	getJSONWithCookie(t, ts2.URL+"/api/v1/exercises/attempts", &exAttResp, sessCookie)
 	if len(exAttResp.Attempts) != 1 || !exAttResp.Attempts[0].Passed {
 		t.Errorf("exercise attempts lost across restart: %+v", exAttResp.Attempts)
 	}
@@ -301,7 +301,7 @@ func TestPersistenceAcrossServerRestartsAndMigrationsCycle(t *testing.T) {
 			Score  int    `json:"score"`
 		} `json:"attempts"`
 	}
-	getJSON(t, ts2.URL+"/api/v1/quiz-attempts?user_id=usr_persist", &qzAttResp)
+	getJSONWithCookie(t, ts2.URL+"/api/v1/quiz-attempts", &qzAttResp, sessCookie)
 	if len(qzAttResp.Attempts) != 1 || qzAttResp.Attempts[0].Score != 1 {
 		t.Errorf("quiz attempts lost across restart: %+v", qzAttResp.Attempts)
 	}
@@ -538,18 +538,20 @@ func TestAnalyzerFalsePositiveAndFalseNegativeProbes(t *testing.T) {
 func TestProgressAndBookmarksRoundTripAndValidation(t *testing.T) {
 	_, ts := setupTestServer(t)
 
+	jar, _ := cookiejar.New(nil)
+	client := ts.Client()
+	client.Jar = jar
 	saveBody, _ := json.Marshal(map[string]string{
-		"user_id":   "usr_test",
 		"lesson_id": "l4-acid-isolation-mvcc",
 		"status":    "completed",
 	})
-	postResp, err := http.Post(ts.URL+"/api/v1/progress", "application/json", bytes.NewReader(saveBody))
+	postResp, err := client.Post(ts.URL+"/api/v1/progress", "application/json", bytes.NewReader(saveBody))
 	if err != nil || postResp.StatusCode != http.StatusOK {
 		t.Fatalf("POST /api/v1/progress failed: %v", err)
 	}
 	_ = postResp.Body.Close()
 
-	getResp, err := http.Get(ts.URL + "/api/v1/progress?user_id=usr_test")
+	getResp, err := client.Get(ts.URL + "/api/v1/progress")
 	if err != nil || getResp.StatusCode != http.StatusOK {
 		t.Fatalf("GET /api/v1/progress failed: %v", err)
 	}
@@ -663,11 +665,25 @@ func TestExerciseVerifyMultipleAttemptsAndCommentStuffingRejection(t *testing.T)
 
 func postJSON(t *testing.T, url string, payload any, wantStatus int) []byte {
 	t.Helper()
+	_, raw := postJSONWithCookie(t, url, payload, wantStatus, nil)
+	return raw
+}
+
+func postJSONWithCookie(t *testing.T, url string, payload any, wantStatus int, cookie *http.Cookie) (*http.Cookie, []byte) {
+	t.Helper()
 	b, err := json.Marshal(payload)
 	if err != nil {
 		t.Fatalf("marshaling payload: %v", err)
 	}
-	resp, err := http.Post(url, "application/json", bytes.NewReader(b))
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		t.Fatalf("creating POST req: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if cookie != nil {
+		req.AddCookie(cookie)
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatalf("POST %s failed: %v", url, err)
 	}
@@ -676,12 +692,34 @@ func postJSON(t *testing.T, url string, payload any, wantStatus int) []byte {
 	if resp.StatusCode != wantStatus {
 		t.Fatalf("POST %s status=%d want=%d body=%s", url, resp.StatusCode, wantStatus, string(raw))
 	}
-	return raw
+	var retCookie *http.Cookie
+	for _, ck := range resp.Cookies() {
+		if ck.Name == "gba_sid" {
+			retCookie = ck
+			break
+		}
+	}
+	if retCookie == nil {
+		retCookie = cookie
+	}
+	return retCookie, raw
 }
 
 func getJSON(t *testing.T, url string, dst any) {
 	t.Helper()
-	resp, err := http.Get(url)
+	getJSONWithCookie(t, url, dst, nil)
+}
+
+func getJSONWithCookie(t *testing.T, url string, dst any, cookie *http.Cookie) {
+	t.Helper()
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		t.Fatalf("creating GET req: %v", err)
+	}
+	if cookie != nil {
+		req.AddCookie(cookie)
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatalf("GET %s failed: %v", url, err)
 	}
@@ -1340,4 +1378,303 @@ func TestCurriculumExpansionAndStructuredSections(t *testing.T) {
 	}
 
 	_ = srv
+}
+
+
+// ---------------------------------------------------------------------
+// Acceptance Tests for P0-1 & P1-6: Session & Identity Hardening
+// ---------------------------------------------------------------------
+
+func TestUserIdFromQueryIgnored(t *testing.T) {
+	_, ts := setupTestServer(t)
+
+	jarA, _ := cookiejar.New(nil)
+	clientA := &http.Client{Jar: jarA}
+
+	jarB, _ := cookiejar.New(nil)
+	clientB := &http.Client{Jar: jarB}
+
+	// 1. Client A saves progress: completed
+	bodyA, _ := json.Marshal(map[string]string{
+		"lesson_id": "l0-backend-http-lifecycle",
+		"status":    "completed",
+	})
+	respA, err := clientA.Post(ts.URL+"/api/v1/progress", "application/json", bytes.NewReader(bodyA))
+	if err != nil || respA.StatusCode != http.StatusOK {
+		t.Fatalf("clientA save progress failed: %v", err)
+	}
+	_ = respA.Body.Close()
+
+	// 2. Client B saves progress: in_progress
+	bodyB, _ := json.Marshal(map[string]string{
+		"lesson_id": "l0-backend-http-lifecycle",
+		"status":    "in_progress",
+	})
+	respB, err := clientB.Post(ts.URL+"/api/v1/progress", "application/json", bytes.NewReader(bodyB))
+	if err != nil || respB.StatusCode != http.StatusOK {
+		t.Fatalf("clientB save progress failed: %v", err)
+	}
+	_ = respB.Body.Close()
+
+	// 3. Client A requests GET /api/v1/progress?user_id=usr_victim (spoofing B or anyone else)
+	spoofedResp, err := clientA.Get(ts.URL + "/api/v1/progress?user_id=usr_some_other_victim")
+	if err != nil || spoofedResp.StatusCode != http.StatusOK {
+		t.Fatalf("clientA spoofed GET failed: %v", err)
+	}
+	defer spoofedResp.Body.Close()
+
+	var data struct {
+		Progress map[string]string `json:"progress"`
+	}
+	if err := json.NewDecoder(spoofedResp.Body).Decode(&data); err != nil {
+		t.Fatalf("decoding progress: %v", err)
+	}
+
+	// Must return client A's actual status ("completed"), NEVER victim's or blank
+	if got := data.Progress["l0-backend-http-lifecycle"]; got != "completed" {
+		t.Fatalf("expected progress 'completed' from session cookie, got %q (user_id spoofing allowed!)", got)
+	}
+}
+
+func TestNoCookieCreatesSessionOnlyForUserRoutes(t *testing.T) {
+	srv, ts := setupTestServer(t)
+	db := srv.Store().DB()
+
+	countSessions := func() int {
+		var n int
+		_ = db.QueryRow("SELECT COUNT(*) FROM sessions").Scan(&n)
+		return n
+	}
+	countUsers := func() int {
+		var n int
+		_ = db.QueryRow("SELECT COUNT(*) FROM users").Scan(&n)
+		return n
+	}
+
+	initialSessions := countSessions()
+	initialUsers := countUsers()
+
+	// Healthz requests must NEVER create sessions or users
+	for i := 0; i < 5; i++ {
+		resp, err := http.Get(ts.URL + "/healthz")
+		if err != nil || resp.StatusCode != http.StatusOK {
+			t.Fatalf("healthz failed: %v", err)
+		}
+		_ = resp.Body.Close()
+	}
+
+	// Readyz requests must NEVER create sessions or users
+	for i := 0; i < 5; i++ {
+		resp, err := http.Get(ts.URL + "/readyz")
+		if err != nil || resp.StatusCode != http.StatusOK {
+			t.Fatalf("readyz failed: %v", err)
+		}
+		_ = resp.Body.Close()
+	}
+
+	// Static frontend requests must NEVER create sessions or users
+	respStatic, err := http.Get(ts.URL + "/")
+	if err != nil || respStatic.StatusCode != http.StatusOK {
+		t.Fatalf("static / failed: %v", err)
+	}
+	_ = respStatic.Body.Close()
+
+	if got := countSessions(); got != initialSessions {
+		t.Fatalf("expected sessions count unchanged (%d), got %d after public/healthz requests", initialSessions, got)
+	}
+	if got := countUsers(); got != initialUsers {
+		t.Fatalf("expected users count unchanged (%d), got %d after public/healthz requests", initialUsers, got)
+	}
+
+	// Now make a stateful user request without cookie: should create exactly 1 user & 1 session
+	saveBody, _ := json.Marshal(map[string]string{
+		"lesson_id": "l0-backend-http-lifecycle",
+		"status":    "completed",
+	})
+	postResp, err := http.Post(ts.URL+"/api/v1/progress", "application/json", bytes.NewReader(saveBody))
+	if err != nil || postResp.StatusCode != http.StatusOK {
+		t.Fatalf("stateful request failed: %v", err)
+	}
+	_ = postResp.Body.Close()
+
+	if got := countSessions(); got != initialSessions+1 {
+		t.Fatalf("expected sessions count to increment by 1, got %d (initial: %d)", got, initialSessions)
+	}
+	if got := countUsers(); got != initialUsers+1 {
+		t.Fatalf("expected users count to increment by 1, got %d (initial: %d)", got, initialUsers)
+	}
+}
+
+func TestExplicitUserIDNoEmptySessionRow(t *testing.T) {
+	srv, ts := setupTestServer(t)
+
+	// Send POST with explicit attacker user_id in body and query
+	payload, _ := json.Marshal(map[string]string{
+		"user_id":   "usr_injected_attacker",
+		"lesson_id": "l0-backend-http-lifecycle",
+		"status":    "completed",
+	})
+	resp, err := http.Post(ts.URL+"/api/v1/progress?user_id=usr_query_injected", "application/json", bytes.NewReader(payload))
+	if err != nil || resp.StatusCode != http.StatusOK {
+		t.Fatalf("POST failed: %v", err)
+	}
+	_ = resp.Body.Close()
+
+	// Verify no session with empty id or explicit injected id was created directly in sessions.id
+	var emptyCount int
+	err = srv.Store().DB().QueryRow("SELECT COUNT(*) FROM sessions WHERE id = '' OR id = 'usr_injected_attacker'").Scan(&emptyCount)
+	if err != nil {
+		t.Fatalf("querying sessions: %v", err)
+	}
+	if emptyCount != 0 {
+		t.Fatalf("found %d invalid session rows with empty or unhashed token id", emptyCount)
+	}
+}
+
+func TestSecureCookieBehindHTTPSProxy(t *testing.T) {
+	_, ts := setupTestServer(t)
+
+	// 1. Direct connection or plain HTTP: cookie should NOT have Secure flag
+	req1, _ := http.NewRequest(http.MethodPost, ts.URL+"/api/v1/progress", bytes.NewReader([]byte(`{"lesson_id":"l0-backend-http-lifecycle","status":"completed"}`)))
+	req1.Header.Set("Content-Type", "application/json")
+	resp1, err := http.DefaultClient.Do(req1)
+	if err != nil || resp1.StatusCode != http.StatusOK {
+		t.Fatalf("req1 failed: %v", err)
+	}
+	defer resp1.Body.Close()
+
+	var ck1 *http.Cookie
+	for _, c := range resp1.Cookies() {
+		if c.Name == "gba_sid" {
+			ck1 = c
+			break
+		}
+	}
+	if ck1 == nil {
+		t.Fatalf("expected gba_sid cookie on req1")
+	}
+	if ck1.Secure {
+		t.Errorf("expected Secure=false for direct HTTP connection, got true")
+	}
+
+	// 2. Behind trusted proxy with X-Forwarded-Proto: https -> cookie MUST have Secure flag
+	req2, _ := http.NewRequest(http.MethodPost, ts.URL+"/api/v1/progress", bytes.NewReader([]byte(`{"lesson_id":"l0-backend-http-lifecycle","status":"completed"}`)))
+	req2.Header.Set("Content-Type", "application/json")
+	req2.Header.Set("X-Forwarded-Proto", "https")
+	// Loopback 127.0.0.1 is in trusted proxies by default
+	resp2, err := http.DefaultClient.Do(req2)
+	if err != nil || resp2.StatusCode != http.StatusOK {
+		t.Fatalf("req2 failed: %v", err)
+	}
+	defer resp2.Body.Close()
+
+	var ck2 *http.Cookie
+	for _, c := range resp2.Cookies() {
+		if c.Name == "gba_sid" {
+			ck2 = c
+			break
+		}
+	}
+	if ck2 == nil {
+		t.Fatalf("expected gba_sid cookie on req2")
+	}
+	if !ck2.Secure {
+		t.Errorf("expected Secure=true behind trusted HTTPS proxy, got false")
+	}
+}
+
+func TestExpiredSessionsPurged(t *testing.T) {
+	srv, _ := setupTestServer(t)
+	ctx := context.Background()
+
+	// Insert active session
+	activeHash := "hash_active_12345"
+	activeUID := "usr_active_session_test"
+	if err := srv.Store().CreateSession(ctx, activeHash, activeUID, time.Now().Add(1*time.Hour)); err != nil {
+		t.Fatalf("CreateSession active failed: %v", err)
+	}
+
+	// Insert expired session
+	expiredHash := "hash_expired_98765"
+	expiredUID := "usr_expired_session_test"
+	if err := srv.Store().CreateSession(ctx, expiredHash, expiredUID, time.Now().Add(-1*time.Hour)); err != nil {
+		t.Fatalf("CreateSession expired failed: %v", err)
+	}
+
+	// Purge expired sessions
+	n, err := srv.Store().PurgeExpiredSessions(ctx)
+	if err != nil {
+		t.Fatalf("PurgeExpiredSessions failed: %v", err)
+	}
+	if n < 1 {
+		t.Fatalf("expected at least 1 purged session, got %d", n)
+	}
+
+	// Active session still exists
+	uid, err := srv.Store().GetSessionUser(ctx, activeHash)
+	if err != nil || uid != activeUID {
+		t.Fatalf("active session was incorrectly purged: %v", err)
+	}
+
+	// Expired session is gone
+	_, err = srv.Store().GetSessionUser(ctx, expiredHash)
+	if !errors.Is(err, database.ErrNotFound) {
+		t.Fatalf("expected ErrNotFound for purged expired session, got %v", err)
+	}
+}
+
+func TestClaimLegacyUserProgress(t *testing.T) {
+	srv, ts := setupTestServer(t)
+	ctx := context.Background()
+
+	// 1. Seed legacy user data directly
+	legacyUID := "usr_legacy_student_999"
+	_ = srv.Store().SetLessonProgress(ctx, legacyUID, "l0-backend-http-lifecycle", "completed")
+	_ = srv.Store().SaveNote(ctx, "not_legacy_001", legacyUID, "l0-backend-http-lifecycle", "My legacy notes")
+
+	// 2. Start new client session
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{Jar: jar}
+
+	// Initial request to issue session cookie
+	initResp, err := client.Get(ts.URL + "/api/v1/curriculum")
+	if err != nil || initResp.StatusCode != http.StatusOK {
+		t.Fatalf("init curriculum failed: %v", err)
+	}
+	_ = initResp.Body.Close()
+
+	// 3. Claim legacy user data
+	claimPayload, _ := json.Marshal(map[string]string{
+		"legacy_user_id": legacyUID,
+	})
+	claimResp, err := client.Post(ts.URL+"/api/v1/session/claim-legacy", "application/json", bytes.NewReader(claimPayload))
+	if err != nil || claimResp.StatusCode != http.StatusOK {
+		t.Fatalf("claim-legacy failed: %v", err)
+	}
+	_ = claimResp.Body.Close()
+
+	// 4. Verify client session now has legacy data
+	progResp, err := client.Get(ts.URL + "/api/v1/progress")
+	if err != nil || progResp.StatusCode != http.StatusOK {
+		t.Fatalf("GET progress failed: %v", err)
+	}
+	defer progResp.Body.Close()
+
+	var data struct {
+		Progress map[string]string `json:"progress"`
+	}
+	_ = json.NewDecoder(progResp.Body).Decode(&data)
+	if data.Progress["l0-backend-http-lifecycle"] != "completed" {
+		t.Fatalf("claimed progress not transferred, got: %+v", data.Progress)
+	}
+
+	// 5. Claiming again when session already has progress returns 409 Conflict
+	claimResp2, err := client.Post(ts.URL+"/api/v1/session/claim-legacy", "application/json", bytes.NewReader(claimPayload))
+	if err != nil {
+		t.Fatalf("second claim failed: %v", err)
+	}
+	defer claimResp2.Body.Close()
+	if claimResp2.StatusCode != http.StatusConflict {
+		t.Fatalf("expected 409 Conflict on claiming when session already has data, got %d", claimResp2.StatusCode)
+	}
 }

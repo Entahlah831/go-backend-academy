@@ -342,7 +342,7 @@ func (s *Service) VerifySubmission(ctx context.Context, req SubmissionRequest) (
 
 	userID := req.UserID
 	if userID == "" {
-		userID = "usr_local_default"
+		return SubmissionResult{}, errors.New("userID is required")
 	}
 	attemptID := s.nextAttemptID(canonicalExID)
 	if err := s.store.RecordExerciseAttempt(ctx, database.ExerciseAttemptRecord{

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -103,6 +104,74 @@ func (s *Server) Handler() http.Handler {
 	return h
 }
 
+func (s *Server) isRemoteAddrTrusted(r *http.Request) bool {
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		host = r.RemoteAddr
+	}
+	ip := net.ParseIP(host)
+	if ip == nil {
+		return false
+	}
+	for _, n := range s.cfg.TrustedProxyCIDRs {
+		if n.Contains(ip) {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *Server) isSecureRequest(r *http.Request) bool {
+	if r.TLS != nil {
+		return true
+	}
+	if s.isRemoteAddrTrusted(r) && strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https") {
+		return true
+	}
+	return false
+}
+
+func (s *Server) issueUserSession(w http.ResponseWriter, r *http.Request) (string, error) {
+	raw := make([]byte, 32)
+	if _, err := rand.Read(raw); err != nil {
+		return "", fmt.Errorf("generating session token: %w", err)
+	}
+	tokenStr := base64.RawURLEncoding.EncodeToString(raw)
+	tokenHash := fmt.Sprintf("%x", sha256.Sum256([]byte(tokenStr)))
+
+	sessionUID := "usr_" + strings.ReplaceAll(uuid.NewString(), "-", "")[:24]
+	expiresAt := time.Now().Add(30 * 24 * time.Hour)
+	if err := s.store.CreateSession(r.Context(), tokenHash, sessionUID, expiresAt); err != nil {
+		return "", fmt.Errorf("persisting session: %w", err)
+	}
+
+	if w != nil {
+		http.SetCookie(w, &http.Cookie{
+			Name:     sessionCookieName,
+			Value:    tokenStr,
+			Path:     "/",
+			HttpOnly: true,
+			Secure:   s.isSecureRequest(r),
+			SameSite: http.SameSiteLaxMode,
+			MaxAge:   30 * 86400,
+		})
+	}
+	return sessionUID, nil
+}
+
+func isPublicNoSessionRoute(path string) bool {
+	if path == "/healthz" || path == "/readyz" {
+		return true
+	}
+	if path == "/" || strings.HasPrefix(path, "/static/") || strings.HasSuffix(path, ".html") ||
+		strings.HasSuffix(path, ".css") || strings.HasSuffix(path, ".js") || strings.HasSuffix(path, ".woff2") ||
+		strings.HasSuffix(path, ".ico") || strings.HasSuffix(path, ".svg") || strings.HasSuffix(path, ".png") ||
+		strings.HasSuffix(path, ".jpg") {
+		return true
+	}
+	return false
+}
+
 func (s *Server) sessionMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -116,44 +185,49 @@ func (s *Server) sessionMiddleware(next http.Handler) http.Handler {
 			}
 		}
 
-		if sessionUID == "" {
-			raw := make([]byte, 32)
-			_, _ = rand.Read(raw)
-			tokenStr := base64.RawURLEncoding.EncodeToString(raw)
-			tokenHash := fmt.Sprintf("%x", sha256.Sum256([]byte(tokenStr)))
-
-			sessionUID = "usr_" + strings.ReplaceAll(uuid.NewString(), "-", "")[:24]
-			expiresAt := time.Now().Add(30 * 24 * time.Hour)
-			_ = s.store.CreateSession(ctx, tokenHash, sessionUID, expiresAt)
-
-			http.SetCookie(w, &http.Cookie{
-				Name:     sessionCookieName,
-				Value:    tokenStr,
-				Path:     "/",
-				HttpOnly: true,
-				SameSite: http.SameSiteLaxMode,
-				MaxAge:   30 * 86400,
-			})
+		if sessionUID == "" && !isPublicNoSessionRoute(r.URL.Path) {
+			if uid, err := s.issueUserSession(w, r); err == nil && uid != "" {
+				sessionUID = uid
+			}
 		}
 
-		ctx = context.WithValue(ctx, userContextKey, sessionUID)
+		if sessionUID != "" {
+			ctx = context.WithValue(ctx, userContextKey, sessionUID)
+		}
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-// resolveUser extracts the user ID from explicit input (if valid) or falls back to the session.
-func (s *Server) resolveUser(r *http.Request, explicit string) (string, bool) {
-	if explicit != "" {
-		if !userIDPattern.MatchString(explicit) {
-			return "", false
-		}
-		_ = s.store.CreateSession(r.Context(), "", explicit, time.Now().Add(30*24*time.Hour))
-		return explicit, true
-	}
+// resolveUser returns the authenticated user ID from context (injected by sessionMiddleware)
+// or lazily issues a new secure session cookie if the request requires user state.
+// User identity is NEVER derived from client query parameters or request body fields.
+func (s *Server) resolveUser(w http.ResponseWriter, r *http.Request) (string, error) {
 	if uid, ok := r.Context().Value(userContextKey).(string); ok && uid != "" {
-		return uid, true
+		return uid, nil
 	}
-	return defaultUserID, true
+	return s.issueUserSession(w, r)
+}
+
+func (s *Server) StartBackgroundWorkers(ctx context.Context) {
+	go func() {
+		ticker := time.NewTicker(1 * time.Hour)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				if s.store != nil {
+					n, err := s.store.PurgeExpiredSessions(context.Background())
+					if err != nil {
+						s.logger.Error("failed to purge expired sessions", slog.String("error", err.Error()))
+					} else if n > 0 {
+						s.logger.Info("purged expired sessions", slog.Int64("count", n))
+					}
+				}
+			}
+		}
+	}()
 }
 
 func (s *Server) registerRoutes() {
@@ -184,6 +258,7 @@ func (s *Server) registerRoutes() {
 
 	// Real-Data Recommendation Engine Endpoint
 	s.mux.HandleFunc("POST /api/v1/recommendations", s.handleRecommendations)
+	s.mux.HandleFunc("POST /api/v1/session/claim-legacy", s.handleClaimLegacySession)
 
 	// Progress, Bookmarks & Notes Persistence Endpoints
 	s.mux.HandleFunc("GET /api/v1/progress", s.handleGetProgress)
@@ -339,9 +414,9 @@ func (s *Server) handleVerifyExercise(w http.ResponseWriter, r *http.Request) {
 		WriteProblem(w, r, http.StatusBadRequest, "INVALID_PAYLOAD", "Bad Request", "exercise_id and code are required.")
 		return
 	}
-	uid, ok := s.resolveUser(r, req.UserID)
-	if !ok {
-		writeInvalidUser(w, r)
+	uid, err := s.resolveUser(w, r)
+	if err != nil {
+		s.writeDBError(w, r, err)
 		return
 	}
 	req.UserID = uid
@@ -358,9 +433,9 @@ func (s *Server) handleVerifyExercise(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleListExerciseAttempts(w http.ResponseWriter, r *http.Request) {
-	uid, ok := s.resolveUser(r, r.URL.Query().Get("user_id"))
-	if !ok {
-		writeInvalidUser(w, r)
+	uid, err := s.resolveUser(w, r)
+	if err != nil {
+		s.writeDBError(w, r, err)
 		return
 	}
 	list, err := s.exercisesSvc.ListAttempts(r.Context(), uid, r.URL.Query().Get("exercise_id"))
@@ -418,9 +493,9 @@ func (s *Server) handleGradeQuiz(w http.ResponseWriter, r *http.Request) {
 		writeDecodeError(w, r, err, "Body must be {\"answers\": [<option index per question>], \"user_id\": optional}.")
 		return
 	}
-	uid, ok := s.resolveUser(r, req.UserID)
-	if !ok {
-		writeInvalidUser(w, r)
+	uid, err := s.resolveUser(w, r)
+	if err != nil {
+		s.writeDBError(w, r, err)
 		return
 	}
 	res, err := s.assessmentsSvc.Grade(r.Context(), uid, r.PathValue("id"), req.Answers)
@@ -437,9 +512,9 @@ func (s *Server) handleGradeQuiz(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleListQuizAttempts(w http.ResponseWriter, r *http.Request) {
-	uid, ok := s.resolveUser(r, r.URL.Query().Get("user_id"))
-	if !ok {
-		writeInvalidUser(w, r)
+	uid, err := s.resolveUser(w, r)
+	if err != nil {
+		s.writeDBError(w, r, err)
 		return
 	}
 	list, err := s.assessmentsSvc.ListAttempts(r.Context(), uid, r.URL.Query().Get("quiz_id"))
@@ -502,6 +577,42 @@ func (s *Server) handleSQLPlaygroundExecute(w http.ResponseWriter, r *http.Reque
 
 // ---------- static frontend ----------
 
+func (s *Server) handleClaimLegacySession(w http.ResponseWriter, r *http.Request) {
+	var payload struct {
+		LegacyUserID string `json:"legacy_user_id"`
+	}
+	if err := s.decodeJSON(w, r, &payload); err != nil {
+		writeDecodeError(w, r, err, "Body must contain legacy_user_id.")
+		return
+	}
+	if !userIDPattern.MatchString(payload.LegacyUserID) {
+		WriteProblem(w, r, http.StatusBadRequest, "INVALID_LEGACY_USER_ID", "Invalid Legacy User ID", "The provided legacy_user_id format is invalid.")
+		return
+	}
+	currentUID, err := s.resolveUser(w, r)
+	if err != nil {
+		s.writeDBError(w, r, err)
+		return
+	}
+	if currentUID == payload.LegacyUserID {
+		WriteJSON(w, http.StatusOK, map[string]any{"claimed": true, "user_id": currentUID})
+		return
+	}
+	if err := s.store.ClaimLegacyUser(r.Context(), payload.LegacyUserID, currentUID); err != nil {
+		if errors.Is(err, database.ErrNotFound) {
+			WriteProblem(w, r, http.StatusNotFound, "LEGACY_USER_NOT_FOUND", "Legacy User Not Found", "No data exists for the provided legacy_user_id.")
+			return
+		}
+		if strings.Contains(err.Error(), "already contains learning progress") {
+			WriteProblem(w, r, http.StatusConflict, "CLAIM_CONFLICT", "Claim Conflict", "Current session already has learning progress; cannot claim legacy data.")
+			return
+		}
+		s.writeDBError(w, r, err)
+		return
+	}
+	WriteJSON(w, http.StatusOK, map[string]any{"claimed": true, "user_id": currentUID})
+}
+
 func (s *Server) handleStaticFrontend(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(r.URL.Path, "/api/") {
 		WriteProblem(w, r, http.StatusNotFound, "NOT_FOUND", "Resource Not Found", "The requested API endpoint does not exist.")
@@ -511,10 +622,12 @@ func (s *Server) handleStaticFrontend(w http.ResponseWriter, r *http.Request) {
 	rootAbs, err := filepath.Abs(s.cfg.WebStaticDir)
 	if err == nil {
 		cleanRel := filepath.Clean(strings.TrimPrefix(r.URL.Path, "/"))
-		for _, seg := range strings.Split(filepath.ToSlash(cleanRel), "/") {
-			if strings.HasPrefix(seg, ".") {
-				WriteProblem(w, r, http.StatusNotFound, "NOT_FOUND", "Resource Not Found", "The requested resource does not exist.")
-				return
+		if cleanRel != "." && cleanRel != "" {
+			for _, seg := range strings.Split(filepath.ToSlash(cleanRel), "/") {
+				if seg != "." && seg != ".." && strings.HasPrefix(seg, ".") {
+					WriteProblem(w, r, http.StatusNotFound, "NOT_FOUND", "Resource Not Found", "The requested resource does not exist.")
+					return
+				}
 			}
 		}
 		if cleanRel != "." && cleanRel != "" && !strings.HasPrefix(cleanRel, "..") {
@@ -577,9 +690,9 @@ func (s *Server) handleRecommendations(w http.ResponseWriter, r *http.Request) {
 // ---------- progress, bookmarks, notes ----------
 
 func (s *Server) handleGetProgress(w http.ResponseWriter, r *http.Request) {
-	userID, ok := s.resolveUser(r, r.URL.Query().Get("user_id"))
-	if !ok {
-		writeInvalidUser(w, r)
+	userID, err := s.resolveUser(w, r)
+	if err != nil {
+		s.writeDBError(w, r, err)
 		return
 	}
 	prog, err := s.store.GetUserProgress(r.Context(), userID)
@@ -587,7 +700,7 @@ func (s *Server) handleGetProgress(w http.ResponseWriter, r *http.Request) {
 		s.writeDBError(w, r, err)
 		return
 	}
-	WriteJSON(w, http.StatusOK, map[string]any{"user_id": userID, "progress": prog})
+	WriteJSON(w, http.StatusOK, map[string]any{"progress": prog})
 }
 
 func (s *Server) handleSaveProgress(w http.ResponseWriter, r *http.Request) {
@@ -604,9 +717,9 @@ func (s *Server) handleSaveProgress(w http.ResponseWriter, r *http.Request) {
 		WriteProblem(w, r, http.StatusBadRequest, "INVALID_PAYLOAD", "Bad Request", "lesson_id is required.")
 		return
 	}
-	uid, ok := s.resolveUser(r, payload.UserID)
-	if !ok {
-		writeInvalidUser(w, r)
+	uid, err := s.resolveUser(w, r)
+	if err != nil {
+		s.writeDBError(w, r, err)
 		return
 	}
 	if payload.Status == "" {
@@ -633,9 +746,9 @@ func (s *Server) handleSaveProgress(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleGetBookmarks(w http.ResponseWriter, r *http.Request) {
-	userID, ok := s.resolveUser(r, r.URL.Query().Get("user_id"))
-	if !ok {
-		writeInvalidUser(w, r)
+	userID, err := s.resolveUser(w, r)
+	if err != nil {
+		s.writeDBError(w, r, err)
 		return
 	}
 	list, err := s.store.ListBookmarks(r.Context(), userID)
@@ -661,9 +774,9 @@ func (s *Server) handleSaveBookmark(w http.ResponseWriter, r *http.Request) {
 		WriteProblem(w, r, http.StatusBadRequest, "INVALID_PAYLOAD", "Bad Request", "item_id is required (max 64 characters).")
 		return
 	}
-	uid, ok := s.resolveUser(r, payload.UserID)
-	if !ok {
-		writeInvalidUser(w, r)
+	uid, err := s.resolveUser(w, r)
+	if err != nil {
+		s.writeDBError(w, r, err)
 		return
 	}
 	if count, err := s.store.CountUserBookmarks(r.Context(), uid); err == nil && count >= 500 {
@@ -686,9 +799,9 @@ func (s *Server) handleSaveBookmark(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleGetNotes(w http.ResponseWriter, r *http.Request) {
-	userID, ok := s.resolveUser(r, r.URL.Query().Get("user_id"))
-	if !ok {
-		writeInvalidUser(w, r)
+	userID, err := s.resolveUser(w, r)
+	if err != nil {
+		s.writeDBError(w, r, err)
 		return
 	}
 	notes, err := s.store.GetNotes(r.Context(), userID)
@@ -717,9 +830,9 @@ func (s *Server) handleSaveNote(w http.ResponseWriter, r *http.Request) {
 		WriteProblem(w, r, http.StatusBadRequest, "PAYLOAD_TOO_LARGE", "Bad Request", "Note content exceeds maximum allowed size (64 KB).")
 		return
 	}
-	uid, ok := s.resolveUser(r, payload.UserID)
-	if !ok {
-		writeInvalidUser(w, r)
+	uid, err := s.resolveUser(w, r)
+	if err != nil {
+		s.writeDBError(w, r, err)
 		return
 	}
 	if count, err := s.store.CountUserNotes(r.Context(), uid); err == nil && count >= 200 {

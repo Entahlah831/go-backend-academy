@@ -4974,17 +4974,9 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
       }
     };
 
+    // Sesi pengguna dikelola sepenuhnya oleh cookie server-side gba_sid (HttpOnly, SameSite, Secure).
     function getActiveUserId() {
-      let uid = SafeStore.get('active_uid');
-      if (!uid) {
-        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-          uid = 'usr_' + crypto.randomUUID().replace(/-/g, '').slice(0, 32);
-        } else {
-          uid = 'usr_local_default';
-        }
-        SafeStore.set('active_uid', uid);
-      }
-      return uid;
+      return 'session_cookie_managed';
     }
     window.getActiveUserId = getActiveUserId;
 
@@ -6649,8 +6641,8 @@ func SafeSocketControl(network, address string, c syscall.RawConn) error {
               const res = await window.fetch(window.location.origin + ['/api', 'v1', 'quizzes', quizId, 'attempts'].join('/'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
                 body: JSON.stringify({
-                  user_id: (window.getActiveUserId ? window.getActiveUserId() : 'usr_local_default'),
                   answers: [optIdx]
                 })
               });
@@ -6880,7 +6872,8 @@ func SafeSocketControl(network, address string, c syscall.RawConn) error {
             window.fetch(window.location.origin + ['/api', 'v1', 'progress'].join('/'), {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ user_id: (window.getActiveUserId ? window.getActiveUserId() : 'usr_local_default'), lesson_id: id, status: 'completed' })
+              credentials: 'same-origin',
+              body: JSON.stringify({ lesson_id: id, status: 'completed' })
             }).catch(() => {});
           }
           const idx = PLATFORM_DATA.curriculum.findIndex(l => l.id === id);
@@ -6947,7 +6940,8 @@ func SafeSocketControl(network, address string, c syscall.RawConn) error {
           window.fetch(window.location.origin + ['/api', 'v1', 'progress'].join('/'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: (window.getActiveUserId ? window.getActiveUserId() : 'usr_local_default'), lesson_id: id, status: AppState.completedLessons[id] ? 'completed' : 'in_progress' })
+            credentials: 'same-origin',
+            body: JSON.stringify({ lesson_id: id, status: AppState.completedLessons[id] ? 'completed' : 'in_progress' })
           }).catch(() => {});
         }
         renderCurrentLesson();
@@ -7074,7 +7068,8 @@ func SafeSocketControl(network, address string, c syscall.RawConn) error {
           window.fetch(window.location.origin + ['/api', 'v1', 'notes'].join('/'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: (window.getActiveUserId ? window.getActiveUserId() : 'usr_local_default'), lesson_id: AppState.currentLessonId, content: AppState.personalNotes })
+            credentials: 'same-origin',
+            body: JSON.stringify({ lesson_id: AppState.currentLessonId, content: AppState.personalNotes })
           }).catch(() => {});
         }
         showToast('Engineering notes saved!');

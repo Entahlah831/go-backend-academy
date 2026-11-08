@@ -76,6 +76,7 @@ func main() {
 	}
 
 	srv := httpplatform.NewServer(cfg, log, store)
+	srv.StartBackgroundWorkers(ctx)
 
 	if cfg.AIProvider != "none" {
 		checkCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
