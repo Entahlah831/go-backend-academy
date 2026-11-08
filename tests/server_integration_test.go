@@ -748,11 +748,12 @@ func TestAllExercisesServerSideVerification(t *testing.T) {
 			"required_tokens": []string{},
 		}, http.StatusOK)
 		var passRes struct {
-			Passed bool `json:"passed"`
+			Passed      bool   `json:"passed"`
+			Diagnostics string `json:"diagnostics"`
 		}
 		_ = json.Unmarshal(rawPass, &passRes)
 		if !passRes.Passed {
-			t.Errorf("exercise %s (%s) failed with canonical solution_code!", detail.Exercise.ID, l.Slug)
+			t.Errorf("exercise %s (%s) failed with canonical solution_code! diag: %s", detail.Exercise.ID, l.Slug, passRes.Diagnostics)
 		}
 	}
 	if totalExercises != dbExercisesCount {
@@ -835,4 +836,33 @@ func TestServerSideQuizEvaluationAndBridgeQuizzes(t *testing.T) {
 		}
 	}
 }
+
+func TestServerRejectStringStuffingBypass(t *testing.T) {
+	_, ts := setupTestServer(t)
+
+	// F-01 regression: submitting calls inside string literals must fail AST verification
+	rawFail := postJSON(t, ts.URL+"/api/v1/exercises/verify", map[string]any{
+		"user_id":     "usr_attacker",
+		"exercise_id": "ex-l5-db-ecosystem-comparison",
+		"code": `package repo
+
+// F-01 attack attempt: putting required call names inside string literal
+var x = "db.QueryRowContext $1 errors.Is(err, sql.ErrNoRows)"
+`,
+		"required_tokens": []string{},
+	}, http.StatusOK)
+
+	var res struct {
+		Passed      bool   `json:"passed"`
+		Diagnostics string `json:"diagnostics"`
+	}
+	if err := json.Unmarshal(rawFail, &res); err != nil {
+		t.Fatalf("unmarshaling verify response: %v", err)
+	}
+
+	if res.Passed {
+		t.Fatalf("CRITICAL SECURITY FLAW: String stuffing bypass succeeded! Response: %+v", res)
+	}
+}
+
 

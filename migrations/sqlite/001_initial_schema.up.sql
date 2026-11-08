@@ -100,6 +100,19 @@ CREATE TABLE IF NOT EXISTS exercise_test_cases (
 
 CREATE INDEX IF NOT EXISTS idx_exercise_tests_ex ON exercise_test_cases(exercise_id, order_index);
 
+CREATE TABLE IF NOT EXISTS exercise_rules (
+    id VARCHAR(80) PRIMARY KEY,
+    exercise_id VARCHAR(80) NOT NULL REFERENCES exercises(id) ON DELETE CASCADE,
+    target_func VARCHAR(100) NOT NULL DEFAULT '',
+    must_call TEXT NOT NULL DEFAULT '[]',
+    no_call TEXT NOT NULL DEFAULT '[]',
+    must_import TEXT NOT NULL DEFAULT '[]',
+    must_contain TEXT NOT NULL DEFAULT '[]',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_exercise_rules_ex ON exercise_rules(exercise_id);
+
 CREATE TABLE IF NOT EXISTS exercise_attempts (
     id VARCHAR(64) PRIMARY KEY,
     user_id VARCHAR(64) NOT NULL REFERENCES users(id) ON DELETE CASCADE,

@@ -106,6 +106,37 @@ func (s *Store) ExerciseRequiredPatterns(ctx context.Context, exerciseID string)
 	return out, rows.Err()
 }
 
+type ExerciseRuleRecord struct {
+	ID          string   `json:"id"`
+	ExerciseID  string   `json:"exercise_id"`
+	TargetFunc  string   `json:"target_func"`
+	MustCall    []string `json:"must_call"`
+	NoCall      []string `json:"no_call"`
+	MustImport  []string `json:"must_import"`
+	MustContain []string `json:"must_contain"`
+}
+
+func (s *Store) GetExerciseRule(ctx context.Context, exerciseID string) (*ExerciseRuleRecord, error) {
+	var r ExerciseRuleRecord
+	var mustCallJSON, noCallJSON, mustImportJSON, mustContainJSON string
+	err := s.db.QueryRowContext(ctx, `
+		SELECT id, exercise_id, target_func, must_call, no_call, must_import, must_contain
+		FROM exercise_rules WHERE exercise_id = $1`, exerciseID).Scan(
+		&r.ID, &r.ExerciseID, &r.TargetFunc, &mustCallJSON, &noCallJSON, &mustImportJSON, &mustContainJSON,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("querying exercise_rules for %s: %w", exerciseID, err)
+	}
+	_ = json.Unmarshal([]byte(mustCallJSON), &r.MustCall)
+	_ = json.Unmarshal([]byte(noCallJSON), &r.NoCall)
+	_ = json.Unmarshal([]byte(mustImportJSON), &r.MustImport)
+	_ = json.Unmarshal([]byte(mustContainJSON), &r.MustContain)
+	return &r, nil
+}
+
 func (s *Store) ExerciseExists(ctx context.Context, id string) (bool, error) {
 	return s.exists(ctx, `SELECT 1 FROM exercises WHERE id = $1`, id)
 }

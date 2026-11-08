@@ -153,39 +153,100 @@ func (s *Service) VerifySubmission(ctx context.Context, req SubmissionRequest) (
 		return SubmissionResult{}, fmt.Errorf("%w: %s", ErrUnknownExercise, req.ExerciseID)
 	}
 
-	dbPatterns, err := s.store.ExerciseRequiredPatterns(ctx, canonicalExID)
+	// Tier B: AST Verification Engine
+	// Check syntax first
+	astCheck := CheckAST(req.Code, Rule{})
+	if !astCheck.ValidSyntax {
+		diag := "Kode belum valid secara sintaks Go: " + astCheck.SyntaxError
+		attemptID := s.nextAttemptID(canonicalExID)
+		_ = s.store.RecordExerciseAttempt(ctx, database.ExerciseAttemptRecord{
+			ID:          attemptID,
+			UserID:      req.UserID,
+			ExerciseID:  canonicalExID,
+			Code:        req.Code,
+			Passed:      false,
+			Diagnostics: diag,
+			ExecutionMs: 0,
+			CreatedAt:   time.Now().UTC(),
+		})
+		return SubmissionResult{
+			AttemptID:   attemptID,
+			ExerciseID:  req.ExerciseID,
+			Passed:      false,
+			Missing:     []string{"sintaks Go yang valid"},
+			Diagnostics: diag,
+		}, nil
+	}
+
+	// 1. Check if database has explicit AST rule
+	dbRule, err := s.store.GetExerciseRule(ctx, canonicalExID)
 	if err != nil {
 		return SubmissionResult{}, err
 	}
-	tokens := make([]string, 0, len(dbPatterns)+len(req.RequiredTokens))
-	seenTok := make(map[string]bool)
-	for _, list := range [][]string{dbPatterns, req.RequiredTokens} {
-		for _, tok := range list {
-			if tok != "" && !seenTok[tok] {
-				seenTok[tok] = true
-				tokens = append(tokens, tok)
+
+	var passed bool
+	var missing []string
+	var diag string
+
+	if dbRule != nil {
+		rule := Rule{
+			TargetFunc:  dbRule.TargetFunc,
+			MustCall:    dbRule.MustCall,
+			NoCall:      dbRule.NoCall,
+			MustImport:  dbRule.MustImport,
+			MustContain: append(dbRule.MustContain, req.RequiredTokens...),
+		}
+		res := CheckAST(req.Code, rule)
+		passed = res.Passed
+		diag = res.Diagnostics
+		missing = append(res.Missing, res.Violations...)
+	} else {
+		// Fallback: Dynamically separate required_pattern into AST calls vs tokens
+		dbPatterns, err := s.store.ExerciseRequiredPatterns(ctx, canonicalExID)
+		if err != nil {
+			return SubmissionResult{}, err
+		}
+
+		var mustCall []string
+		var mustContain []string
+		allToks := append(dbPatterns, req.RequiredTokens...)
+		for _, tok := range allToks {
+			tok = strings.TrimSpace(tok)
+			if tok == "" {
+				continue
+			}
+			if isFunctionCallToken(tok) {
+				mustCall = append(mustCall, tok)
+			} else {
+				mustContain = append(mustContain, tok)
 			}
 		}
-	}
 
-	uncommented := StripGoComments(req.Code)
-	var missing []string
-	for _, tok := range tokens {
-		if tok != "" && !strings.Contains(uncommented, tok) {
-			missing = append(missing, tok)
+		res := CheckAST(req.Code, Rule{
+			MustCall:    mustCall,
+			MustContain: mustContain,
+		})
+		passed = res.Passed
+		missing = append(res.Missing, res.Violations...)
+
+		// Verify unfinished STEP placeholder
+		if strings.Contains(req.Code, "// STEP:") {
+			passed = false
+			missing = append(missing, "unfinished // STEP: placeholder")
 		}
-	}
-	if strings.Contains(req.Code, "// STEP:") {
-		missing = append(missing, "unfinished // STEP: placeholder")
-	}
 
-	passed := len(missing) == 0 && len(strings.TrimSpace(uncommented)) > 10
-	diag := "All required invariants satisfied."
-	if !passed {
-		if len(missing) > 0 {
-			diag = "Missing required implementation patterns (outside comments): " + strings.Join(missing, ", ")
-		} else {
+		uncommented := StripGoComments(req.Code)
+		if len(strings.TrimSpace(uncommented)) <= 10 {
+			passed = false
 			diag = "Implementation body is empty or contains only comments."
+		} else if !passed {
+			if len(missing) > 0 {
+				diag = "Missing required implementation patterns (outside comments): " + strings.Join(missing, ", ")
+			} else {
+				diag = res.Diagnostics
+			}
+		} else {
+			diag = "All required invariants satisfied."
 		}
 	}
 
@@ -214,4 +275,36 @@ func (s *Service) VerifySubmission(ctx context.Context, req SubmissionRequest) (
 		Missing:     missing,
 		Diagnostics: diag,
 	}, nil
+}
+
+func isFunctionCallToken(tok string) bool {
+	tok = strings.TrimSpace(tok)
+	if !strings.Contains(tok, "(") {
+		return false
+	}
+	if strings.HasPrefix(tok, "func ") || strings.Contains(tok, ":=") || strings.Contains(tok, " = ") {
+		return false
+	}
+	if strings.Contains(tok, "if ") || strings.Contains(tok, "return ") || strings.Contains(tok, "for ") {
+		return false
+	}
+	if strings.Contains(tok, "*") || strings.Contains(tok, "/") || strings.Contains(tok, "<<") || strings.Contains(tok, ">>") {
+		return false
+	}
+	idx := strings.Index(tok, "(")
+	if idx <= 0 {
+		return false
+	}
+	pre := tok[idx-1]
+	isIdentChar := (pre >= 'a' && pre <= 'z') || (pre >= 'A' && pre <= 'Z') || (pre >= '0' && pre <= '9') || pre == '_'
+	if !isIdentChar {
+		return false
+	}
+	prefix := strings.TrimSpace(tok[:idx])
+	for _, r := range prefix {
+		if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '_' || r == '.') {
+			return false
+		}
+	}
+	return true
 }
