@@ -113,6 +113,16 @@ CREATE TABLE IF NOT EXISTS exercise_rules (
 
 CREATE INDEX IF NOT EXISTS idx_exercise_rules_ex ON exercise_rules(exercise_id);
 
+CREATE TABLE IF NOT EXISTS exercise_tests (
+    id VARCHAR(80) PRIMARY KEY,
+    exercise_id VARCHAR(80) NOT NULL REFERENCES exercises(id) ON DELETE CASCADE,
+    filename VARCHAR(100) NOT NULL DEFAULT 'main_test.go',
+    test_code TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_exercise_tests_fn ON exercise_tests(exercise_id, filename);
+
 CREATE TABLE IF NOT EXISTS exercise_attempts (
     id VARCHAR(64) PRIMARY KEY,
     user_id VARCHAR(64) NOT NULL REFERENCES users(id) ON DELETE CASCADE,

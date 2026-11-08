@@ -6,6 +6,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"go/parser"
+	"go/token"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -28,6 +30,13 @@ type SubmissionResult struct {
 	Passed      bool     `json:"passed"`
 	Missing     []string `json:"missing,omitempty"`
 	Diagnostics string   `json:"diagnostics"`
+}
+
+type ExercisePackage struct {
+	ExerciseID  string            `json:"exercise_id"`
+	Title       string            `json:"title"`
+	Description string            `json:"description"`
+	Files       map[string]string `json:"files"`
 }
 
 type Service struct {
@@ -60,6 +69,87 @@ func (s *Service) ListAttempts(ctx context.Context, userID, exerciseID string) (
 		exerciseID = "ex-" + strings.TrimPrefix(strings.TrimSpace(exerciseID), "ex-")
 	}
 	return s.store.ListExerciseAttempts(ctx, userID, exerciseID, 50)
+}
+
+// FetchPackage bundles starter code, verification test, go.mod and instructions for local offline practice.
+func (s *Service) FetchPackage(ctx context.Context, exerciseID string) (*ExercisePackage, error) {
+	canonicalExID, ok, err := s.NormalizeExerciseID(ctx, exerciseID)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, fmt.Errorf("%w: %s", ErrUnknownExercise, exerciseID)
+	}
+
+	ex, err := s.store.GetExercise(ctx, canonicalExID)
+	if err != nil {
+		return nil, err
+	}
+	if ex == nil {
+		return nil, fmt.Errorf("%w: %s", ErrUnknownExercise, canonicalExID)
+	}
+
+	testRec, err := s.store.GetExerciseTest(ctx, canonicalExID)
+	if err != nil {
+		return nil, err
+	}
+
+	pkgName := extractPackageName(ex.StarterCode)
+	if pkgName == "" {
+		pkgName = "main"
+	}
+
+	testFilename := "main_test.go"
+	testCode := ""
+	if testRec != nil && strings.TrimSpace(testRec.TestCode) != "" {
+		if testRec.Filename != "" {
+			testFilename = testRec.Filename
+		}
+		testCode = testRec.TestCode
+	} else {
+		testCode = fmt.Sprintf("package %s\n\nimport \"testing\"\n\nfunc TestVerification(t *testing.T) {\n\tt.Log(\"Verifikasi lokal untuk latihan: %s\")\n}\n", pkgName, ex.Title)
+	}
+
+	moduleName := "exercise"
+	if pkgName != "main" && pkgName != "" {
+		moduleName = pkgName
+	}
+	goMod := fmt.Sprintf("module %s\n\ngo 1.23\n", moduleName)
+
+	readme := fmt.Sprintf("# %s (%s)\n\n## Deskripsi Tugas\n%s\n\n## Petunjuk Menjalankan Tes\nLatihan ini dapat diuji secara lokal menggunakan Go toolchain resmi Anda:\n```bash\ngo test -v ./...\n```\n\nJika semua tes PASS, Anda siap untuk menyalin kode Anda kembali ke Go Backend Academy atau menyimpannya di portofolio lokal Anda.\n", ex.Title, ex.ID, ex.TaskDescription)
+
+	files := map[string]string{
+		"main.go":    ex.StarterCode,
+		testFilename: testCode,
+		"go.mod":     goMod,
+		"README.md":  readme,
+	}
+
+	return &ExercisePackage{
+		ExerciseID:  canonicalExID,
+		Title:       ex.Title,
+		Description: ex.TaskDescription,
+		Files:       files,
+	}, nil
+}
+
+func extractPackageName(src string) string {
+	fset := token.NewFileSet()
+	f, err := parser.ParseFile(fset, "temp.go", src, parser.PackageClauseOnly)
+	if err == nil && f.Name != nil {
+		return f.Name.Name
+	}
+	lines := strings.Split(src, "\n")
+	for _, l := range lines {
+		trimmed := strings.TrimSpace(l)
+		if strings.HasPrefix(trimmed, "package ") {
+			parts := strings.Fields(trimmed)
+			if len(parts) >= 2 {
+				return parts[1]
+			}
+		}
+	}
+	return "main"
 }
 
 func (s *Service) nextAttemptID(exerciseID string) string {

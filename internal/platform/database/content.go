@@ -137,6 +137,44 @@ func (s *Store) GetExerciseRule(ctx context.Context, exerciseID string) (*Exerci
 	return &r, nil
 }
 
+type ExerciseTestRecord struct {
+	ID         string `json:"id"`
+	ExerciseID string `json:"exercise_id"`
+	Filename   string `json:"filename"`
+	TestCode   string `json:"test_code"`
+}
+
+func (s *Store) GetExerciseTest(ctx context.Context, exerciseID string) (*ExerciseTestRecord, error) {
+	var r ExerciseTestRecord
+	err := s.db.QueryRowContext(ctx, `
+		SELECT id, exercise_id, filename, test_code
+		FROM exercise_tests WHERE exercise_id = $1 LIMIT 1`, exerciseID).Scan(
+		&r.ID, &r.ExerciseID, &r.Filename, &r.TestCode,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("querying exercise_tests for %s: %w", exerciseID, err)
+	}
+	return &r, nil
+}
+
+func (s *Store) GetExercise(ctx context.Context, id string) (*shared.ExerciseDetail, error) {
+	var ex shared.ExerciseDetail
+	err := s.db.QueryRowContext(ctx, `
+		SELECT id, lesson_id, title, task_description, starter_code, expected_output, solution_code, solution_explanation, additional_challenge
+		FROM exercises WHERE id = $1 OR lesson_id = $1`, id).
+		Scan(&ex.ID, &ex.LessonID, &ex.Title, &ex.TaskDescription, &ex.StarterCode, &ex.ExpectedOutput, &ex.SolutionCode, &ex.SolutionExplanation, &ex.AdditionalChallenge)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("querying exercise %s: %w", id, err)
+	}
+	return &ex, nil
+}
+
 func (s *Store) ExerciseExists(ctx context.Context, id string) (bool, error) {
 	return s.exists(ctx, `SELECT 1 FROM exercises WHERE id = $1`, id)
 }

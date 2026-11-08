@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -864,5 +865,93 @@ var x = "db.QueryRowContext $1 errors.Is(err, sql.ErrNoRows)"
 		t.Fatalf("CRITICAL SECURITY FLAW: String stuffing bypass succeeded! Response: %+v", res)
 	}
 }
+
+func TestExercisePackageAndLocalExecution(t *testing.T) {
+	_, ts := setupTestServer(t)
+
+	// 1. Fetch exercise package via REST API
+	resp, err := http.Get(ts.URL + "/api/v1/exercises/ex-l0-stage-a-what-is-backend/package")
+	if err != nil {
+		t.Fatalf("GET /package failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200 OK, got %d", resp.StatusCode)
+	}
+
+	var pkg struct {
+		ExerciseID  string            `json:"exercise_id"`
+		Title       string            `json:"title"`
+		Description string            `json:"description"`
+		Files       map[string]string `json:"files"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&pkg); err != nil {
+		t.Fatalf("decoding package: %v", err)
+	}
+
+	if pkg.ExerciseID != "ex-l0-stage-a-what-is-backend" {
+		t.Errorf("expected ex-l0-stage-a-what-is-backend, got %s", pkg.ExerciseID)
+	}
+
+	for _, reqFile := range []string{"main.go", "main_test.go", "go.mod", "README.md"} {
+		if _, ok := pkg.Files[reqFile]; !ok {
+			t.Errorf("missing expected package file: %s", reqFile)
+		}
+	}
+
+	// 2. Write package to a clean temp directory and run real go test toolchain
+	workDir := filepath.Join(t.TempDir(), "local-exercise")
+	if err := os.MkdirAll(workDir, 0755); err != nil {
+		t.Fatalf("mkdir workDir: %v", err)
+	}
+
+	for fn, content := range pkg.Files {
+		if err := os.WriteFile(filepath.Join(workDir, fn), []byte(content), 0644); err != nil {
+			t.Fatalf("writing %s: %v", fn, err)
+		}
+	}
+
+	// Verify starter code fails the real unit test
+	cmdFail := exec.Command("go", "test", "-v", "./...")
+	cmdFail.Dir = workDir
+	outFail, errFail := cmdFail.CombinedOutput()
+	if errFail == nil {
+		t.Fatalf("expected starter code to FAIL unit test, but it passed:\n%s", string(outFail))
+	}
+
+	// 3. Write solution code and verify it PASSES the real unit test
+	solutionCode := `package main
+
+func DefaultPort() string {
+	return ":8080"
+}
+`
+	if err := os.WriteFile(filepath.Join(workDir, "main.go"), []byte(solutionCode), 0644); err != nil {
+		t.Fatalf("writing solution main.go: %v", err)
+	}
+
+	cmdPass := exec.Command("go", "test", "-v", "./...")
+	cmdPass.Dir = workDir
+	outPass, errPass := cmdPass.CombinedOutput()
+	if errPass != nil {
+		t.Fatalf("expected solution code to PASS unit test, but failed: %v\nOutput:\n%s", errPass, string(outPass))
+	}
+
+	if !strings.Contains(string(outPass), "PASS") {
+		t.Errorf("expected output to contain PASS, got:\n%s", string(outPass))
+	}
+
+	// 4. Verify alias /tests endpoint
+	respAlias, err := http.Get(ts.URL + "/api/v1/exercises/ex-l0-stage-a-what-is-backend/tests")
+	if err != nil {
+		t.Fatalf("GET /tests failed: %v", err)
+	}
+	_ = respAlias.Body.Close()
+	if respAlias.StatusCode != http.StatusOK {
+		t.Errorf("expected 200 OK on alias /tests, got %d", respAlias.StatusCode)
+	}
+}
+
 
 

@@ -1321,3 +1321,257 @@ UPDATE exercise_test_cases SET required_pattern = 'if a == nil || b == nil|if a.
 UPDATE exercise_test_cases SET required_pattern = 'currentState == "HALF_OPEN" && consecutiveFailures >= 1|consecutiveFailures >= threshold|return currentState' WHERE exercise_id = 'ex-l9-caching-queues-outbox-sagas';
 UPDATE exercise_test_cases SET required_pattern = 'len(parts) != 4|parts[0] != "00"|0000000000000000' WHERE exercise_id = 'ex-l9-grpc-websockets-otel-tracing';
 UPDATE exercise_test_cases SET required_pattern = 'if attempt < 1|delay := baseMs << (attempt - 1)|if delay > maxMs' WHERE exercise_id = 'ex-l9-stage-i-redis-cache-aside-backoff';
+
+-- Starter verification test suites for offline CLI practice (v2.6)
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
+('test-ex-l0-stage-a-what-is-backend', 'ex-l0-stage-a-what-is-backend', 'main_test.go', 'package main
+
+import "testing"
+
+func TestDefaultPort(t *testing.T) {
+	if got := DefaultPort(); got != ":8080" {
+		t.Fatalf("DefaultPort() = %q, want %q", got, ":8080")
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
+('test-ex-l0-stage-a-git-go-workspace', 'ex-l0-stage-a-git-go-workspace', 'main_test.go', 'package main
+
+import "testing"
+
+func TestGreeting(t *testing.T) {
+	if got := Greeting(""); got != "Hello, Backend Engineer!" {
+		t.Fatalf("Greeting(\"\") = %q, want \"Hello, Backend Engineer!\"", got)
+	}
+	if got := Greeting("Nadia"); got != "Hello, Nadia!" {
+		t.Fatalf("Greeting(\"Nadia\") = %q, want \"Hello, Nadia!\"", got)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
+('test-ex-l1-stage-b-variables-types-zerovalues', 'ex-l1-stage-b-variables-types-zerovalues', 'main_test.go', 'package billing
+
+import "testing"
+
+func TestComputeInvoiceCents(t *testing.T) {
+	if got := ComputeInvoiceCents(1000, 2, 500); got != 1500 {
+		t.Fatalf("ComputeInvoiceCents(1000, 2, 500) = %d, want 1500", got)
+	}
+	if got := ComputeInvoiceCents(1000, 0, 500); got != 0 {
+		t.Fatalf("ComputeInvoiceCents(1000, 0, 500) = %d, want 0", got)
+	}
+	if got := ComputeInvoiceCents(1000, 1, 1500); got != 0 {
+		t.Fatalf("ComputeInvoiceCents(1000, 1, 1500) = %d, want 0", got)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
+('test-ex-l1-stage-b-control-flow-loops-functions', 'ex-l1-stage-b-control-flow-loops-functions', 'main_test.go', 'package auth
+
+import "testing"
+
+func TestValidateAccountAge(t *testing.T) {
+	if _, err := ValidateAccountAge(-1); err == nil {
+		t.Fatal("expected error for age -1, got nil")
+	}
+	if _, err := ValidateAccountAge(131); err == nil {
+		t.Fatal("expected error for age 131, got nil")
+	}
+	ok, err := ValidateAccountAge(16)
+	if err != nil || ok {
+		t.Fatalf("ValidateAccountAge(16) = (%v, %v), want (false, nil)", ok, err)
+	}
+	ok, err = ValidateAccountAge(25)
+	if err != nil || !ok {
+		t.Fatalf("ValidateAccountAge(25) = (%v, %v), want (true, nil)", ok, err)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
+('test-ex-l1-stage-b-slices-maps-iteration', 'ex-l1-stage-b-slices-maps-iteration', 'main_test.go', 'package stats
+
+import "testing"
+
+func TestCountStatuses(t *testing.T) {
+	input := []string{"ok", "err", "ok", "", "err", "ok"}
+	counts := CountStatuses(input)
+	if counts["ok"] != 3 {
+		t.Fatalf("counts[\"ok\"] = %d, want 3", counts["ok"])
+	}
+	if counts["err"] != 2 {
+		t.Fatalf("counts[\"err\"] = %d, want 2", counts["err"])
+	}
+	if _, exists := counts[""]; exists {
+		t.Fatal("expected empty string \"\" not to be in map")
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
+('test-ex-l2-stage-c-goroutines-channels-waitgroup', 'ex-l2-stage-c-goroutines-channels-waitgroup', 'main_test.go', 'package conc
+
+import "testing"
+
+func TestSumSquaresSafe(t *testing.T) {
+	nums := []int{1, 2, 3, 4}
+	want := 1 + 4 + 9 + 16
+	if got := SumSquaresSafe(nums); got != want {
+		t.Fatalf("SumSquaresSafe(%v) = %d, want %d", nums, got, want)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
+('test-ex-l3-stage-d-first-http-server-crud', 'ex-l3-stage-d-first-http-server-crud', 'main_test.go', 'package api
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+)
+
+func TestWriteJSONResponse(t *testing.T) {
+	rec := httptest.NewRecorder()
+	payload := map[string]string{"message": "hello"}
+	WriteJSONResponse(rec, http.StatusCreated, payload)
+
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusCreated)
+	}
+	ct := rec.Header().Get("Content-Type")
+	if !strings.HasPrefix(ct, "application/json") {
+		t.Fatalf("Content-Type = %q, want application/json", ct)
+	}
+	body := strings.TrimSpace(rec.Body.String())
+	if !strings.Contains(body, "\"hello\"") {
+		t.Fatalf("body = %q, want to contain \"hello\"", body)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
+('test-ex-l4-stage-e-sql-relational-fundamentals', 'ex-l4-stage-e-sql-relational-fundamentals', 'main_test.go', 'package sqlutil
+
+import "testing"
+
+func TestClampPageLimit(t *testing.T) {
+	l, o := ClampPageLimit(0, -5)
+	if l != 20 || o != 0 {
+		t.Fatalf("ClampPageLimit(0, -5) = (%d, %d), want (20, 0)", l, o)
+	}
+	l, o = ClampPageLimit(500, 40)
+	if l != 100 || o != 40 {
+		t.Fatalf("ClampPageLimit(500, 40) = (%d, %d), want (100, 40)", l, o)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
+('test-ex-l6-stage-f-password-hashing-bearer-auth', 'ex-l6-stage-f-password-hashing-bearer-auth', 'main_test.go', 'package auth
+
+import "testing"
+
+func TestExtractBearerToken(t *testing.T) {
+	tok, ok := ExtractBearerToken("Bearer secret-token-123")
+	if !ok || tok != "secret-token-123" {
+		t.Fatalf("ExtractBearerToken = (%q, %v), want (\"secret-token-123\", true)", tok, ok)
+	}
+	_, ok = ExtractBearerToken("Basic user:pass")
+	if ok {
+		t.Fatal("expected false for Basic auth header")
+	}
+	_, ok = ExtractBearerToken("Bearer ")
+	if ok {
+		t.Fatal("expected false for empty token")
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
+('test-ex-l7-stage-g-table-driven-tests-httptest', 'ex-l7-stage-g-table-driven-tests-httptest', 'main_test.go', 'package slug
+
+import "testing"
+
+func TestSlugifyTitle(t *testing.T) {
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{"Hello World", "hello-world"},
+		{"  Go   Backend   Academy  ", "go-backend-academy"},
+		{"API Design 101", "api-design-101"},
+	}
+	for _, tc := range tests {
+		got := SlugifyTitle(tc.input)
+		if got != tc.want {
+			t.Errorf("SlugifyTitle(%q) = %q, want %q", tc.input, got, tc.want)
+		}
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
+('test-ex-l8-stage-h-handler-service-repo-layers', 'ex-l8-stage-h-handler-service-repo-layers', 'main_test.go', 'package money
+
+import "testing"
+
+func TestAddMoney(t *testing.T) {
+	a := &Money{Cents: 500, Currency: "USD"}
+	b := &Money{Cents: 750, Currency: "USD"}
+	c, err := AddMoney(a, b)
+	if err != nil || c.Cents != 1250 || c.Currency != "USD" {
+		t.Fatalf("AddMoney(500, 750) = (%+v, %v), want ({1250, USD}, nil)", c, err)
+	}
+	if _, err := AddMoney(nil, b); err == nil {
+		t.Fatal("expected error when a is nil")
+	}
+	diff := &Money{Cents: 100, Currency: "EUR"}
+	if _, err := AddMoney(a, diff); err == nil {
+		t.Fatal("expected error when currencies differ")
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
+('test-ex-l9-stage-i-redis-cache-aside-backoff', 'ex-l9-stage-i-redis-cache-aside-backoff', 'main_test.go', 'package retry
+
+import "testing"
+
+func TestComputeBackoffMs(t *testing.T) {
+	if got := ComputeBackoffMs(100, 1000, 1); got != 100 {
+		t.Fatalf("attempt 1 = %d, want 100", got)
+	}
+	if got := ComputeBackoffMs(100, 1000, 3); got != 400 {
+		t.Fatalf("attempt 3 = %d, want 400", got)
+	}
+	if got := ComputeBackoffMs(100, 1000, 5); got != 1000 {
+		t.Fatalf("attempt 5 = %d, want 1000 (capped)", got)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
+('test-ex-l10-stage-j-capstone-production-blueprint', 'ex-l10-stage-j-capstone-production-blueprint', 'main_test.go', 'package capstone
+
+import "testing"
+
+func TestEvaluateCapstoneReadiness(t *testing.T) {
+	code, err := EvaluateCapstoneReadiness(ReadinessGate{ShuttingDown: false, DBConnected: true, MigrationsUp: true})
+	if err != nil || code != 200 {
+		t.Fatalf("ready gate = (%d, %v), want (200, nil)", code, err)
+	}
+	code, err = EvaluateCapstoneReadiness(ReadinessGate{ShuttingDown: true, DBConnected: true, MigrationsUp: true})
+	if err == nil || code != 503 {
+		t.Fatalf("shutting down gate = (%d, %v), want (503, error)", code, err)
+	}
+	code, err = EvaluateCapstoneReadiness(ReadinessGate{ShuttingDown: false, DBConnected: false, MigrationsUp: true})
+	if err == nil || code != 503 {
+		t.Fatalf("db disconnected gate = (%d, %v), want (503, error)", code, err)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;

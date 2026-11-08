@@ -98,6 +98,8 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("GET /api/v1/lessons/{id}", s.handleGetLesson)
 	s.mux.HandleFunc("POST /api/v1/exercises/verify", s.handleVerifyExercise)
 	s.mux.HandleFunc("GET /api/v1/exercises/attempts", s.handleListExerciseAttempts)
+	s.mux.HandleFunc("GET /api/v1/exercises/{id}/package", s.handleGetExercisePackage)
+	s.mux.HandleFunc("GET /api/v1/exercises/{id}/tests", s.handleGetExercisePackage)
 	s.mux.HandleFunc("GET /api/v1/quizzes", s.handleListQuizzes)
 	s.mux.HandleFunc("GET /api/v1/quizzes/{id}", s.handleGetQuiz)
 	s.mux.HandleFunc("POST /api/v1/quizzes/{id}/attempts", s.handleGradeQuiz)
@@ -298,6 +300,20 @@ func (s *Server) handleListExerciseAttempts(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	WriteJSON(w, http.StatusOK, map[string]any{"user_id": uid, "attempts": list})
+}
+
+func (s *Server) handleGetExercisePackage(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	pkg, err := s.exercisesSvc.FetchPackage(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, exercises.ErrUnknownExercise) {
+			WriteProblem(w, r, http.StatusNotFound, "NOT_FOUND", "Exercise Not Found", err.Error())
+			return
+		}
+		s.writeDBError(w, r, err)
+		return
+	}
+	WriteJSON(w, http.StatusOK, pkg)
 }
 
 // ---------- quizzes ----------

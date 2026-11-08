@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS quiz_attempts;
 DROP TABLE IF EXISTS quiz_questions;
 DROP TABLE IF EXISTS quizzes;
 DROP TABLE IF EXISTS exercise_attempts;
+DROP TABLE IF EXISTS exercise_tests;
 DROP TABLE IF EXISTS exercise_rules;
 DROP TABLE IF EXISTS exercise_test_cases;
 DROP TABLE IF EXISTS exercises;
