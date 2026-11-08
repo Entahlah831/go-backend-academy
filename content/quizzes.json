@@ -1,0 +1,172 @@
+{
+  "quiz_questions": [
+    {
+      "correct_index": 1,
+      "explanation": "Externalizing configuration via environment variables decouples the artifact from the deployment environment and keeps secrets out of version control.",
+      "id": "qz-0-foundations-q1",
+      "options_json": "[\"Because Go refuses to compile constants containing port numbers\", \"So the exact same compiled binary can run across local, staging, and production environments without modifying code or committing secrets to Git\", \"Because environment variables automatically encrypt network traffic\", \"Because os.Getenv makes HTTP handlers run faster\"]",
+      "order_index": 1,
+      "question_text": "Why should a backend server read its listening port and database credentials from environment variables (or .env) instead of hardcoding them in Go source files?",
+      "quiz_id": "qz-0-foundations"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "Menurut RFC 9110, GET adalah safe \u0026 idempotent method yang tidak boleh mengubah state server. POST digunakan untuk pemrosesan yang non-idempotent seperti membuat record baru di database.",
+      "id": "qz-0-foundations-q2",
+      "options_json": "[\"GET hanya untuk data JSON, sedangkan POST untuk data HTML form\", \"GET harus bersifat safe dan idempotent (tidak mengubah state server dan hasil berulang konsisten), sedangkan POST tidak idempotent dan memicu pemrosesan/pembuatan resource baru\", \"GET dan POST sepenuhnya identik di protokol TCP/IP tanpa aturan semantik\", \"POST selalu lebih aman daripada GET karena otomatis mengenkripsi payload tanpa TLS\"]",
+      "order_index": 2,
+      "question_text": "Dalam arsitektur backend HTTP, apa perbedaan mendasar antara HTTP method GET dan POST terkait efek samping (idempotensi)?",
+      "quiz_id": "qz-0-foundations"
+    },
+    {
+      "correct_index": 2,
+      "explanation": "Tanpa ReadHeaderTimeout, klien jahat dapat mengirim 1 byte setiap 10 detik tanpa menyelesaikan HTTP header, menghabiskan batas file descriptor dan goroutine worker (Slowloris DoS attack).",
+      "id": "qz-0-foundations-q3",
+      "options_json": "[\"Untuk mempercepat kompilasi binary Go\", \"Agar server otomatis mendeteksi format data JSON\", \"Untuk mencegah serangan Slowloris di mana penyerang membuka ribuan koneksi lambat dan menahan file descriptor OS tanpa batas waktu\", \"Untuk memaksa semua request memakai HTTP/3\"]",
+      "order_index": 3,
+      "question_text": "Mengapa server backend produksi harus selalu menyetel ReadHeaderTimeout pada http.Server?",
+      "quiz_id": "qz-0-foundations"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "In Go, an interface value (`runtime.iface`) consists of two words: `(itab, data)`. It equals `nil` only when both words are zero. Returning a typed nil pointer sets `itab = *ValidationError` and `data = 0x0`, so `err != nil` evaluates to `true`!",
+      "id": "qz-1-q1",
+      "options_json": "[\"false, because the pointer value is nil\", \"true, because the returned error interface has a non-nil type descriptor (*itab) pointing to *ValidationError\", \"Compile-time error: cannot return *ValidationError as error\", \"Runtime panic: nil pointer dereference\"]",
+      "order_index": 1,
+      "question_text": "A function declares `var err *ValidationError = nil` and returns `err` as an `error` return type. What does `if err := fn(); err != nil` evaluate to in the caller?",
+      "quiz_id": "qz-1"
+    },
+    {
+      "correct_index": 2,
+      "explanation": "In Go, the zero value of a map is nil. Reading from a nil map returns the value type zero value, but assigning to a nil map panics at runtime. Always initialize writable maps with make(map[K]V) or a literal.",
+      "id": "qz-1-go-basics-q1",
+      "options_json": "[\"Go automatically initializes the map and sets counts[\\\"ok\\\"] = 1\", \"It returns a compile-time syntax error\", \"Reading from a nil map returns the zero value (0), but writing to a nil map triggers a runtime panic\", \"It silently ignores the write\"]",
+      "order_index": 1,
+      "question_text": "What happens if you declare `var counts map[string]int` (without `make` or a map literal) and immediately execute `counts[\"ok\"]++`?",
+      "quiz_id": "qz-1-go-basics"
+    },
+    {
+      "correct_index": 0,
+      "explanation": "Slice di Go adalah struct header 3 kata: pointer ke underlying array, length, dan capacity. Melewatkan slice menyalin header by-value: mutasi elemen mengubah underlying array yang sama, tetapi append memperbarui length lokal arr tanpa mengubah length pada s pemanggil.",
+      "id": "qz-1-go-basics-q2",
+      "options_json": "[\"s bernilai [99, 0] karena slice header dilewatkan by-value sehingga modifikasi elemen terlihat pada underlying array, tetapi mutasi length dari append tidak mengubah slice header pemanggil\", \"s bernilai [99, 0, 100] karena slice selalu pass-by-reference\", \"s bernilai [0, 0] karena modifikasi fungsi lokal diisolasi total\", \"Program menghasilkan compile error\"]",
+      "order_index": 2,
+      "question_text": "Sebuah slice s := make([]int, 2, 4) dilewatkan ke fungsi func modify(arr []int) { arr[0] = 99; arr = append(arr, 100) }. Setelah fungsi dipanggil, apa isi dari s di pemanggil?",
+      "quiz_id": "qz-1-go-basics"
+    },
+    {
+      "correct_index": 0,
+      "explanation": "Di Go, error adalah value (error interface). Tidak adanya unchecked exceptions membuat alur kontrol program transparan, mudah diuji, dan mencegah error tersembunyi yang meledak tanpa penanganan di tingkat runtime.",
+      "id": "qz-1-go-basics-q3",
+      "options_json": "[\"Karena Go tidak memiliki kata kunci throw sehingga error diperlakukan sebagai nilai biasa yang memaksa developer menangani kemungkinan kegagalan secara eksplisit di call stack\", \"Karena try-catch dilarang oleh sistem operasi Linux\", \"Karena if err != nil otomatis memperbaiki koneksi database yang putus\", \"Karena Go mengompilasi error menjadi instruksi GPU\"]",
+      "order_index": 3,
+      "question_text": "Mengapa idiom penanganan error di Go if err != nil lebih diutamakan daripada mekanisme exception try-catch di bahasa lain?",
+      "quiz_id": "qz-1-go-basics"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "A buffered channel of size 1 (`make(chan Result, 1)`) allows the child goroutine to deposit its single result and exit immediately even if the parent handler already exited via `\u003c-r.Context().Done()`.",
+      "id": "qz-2-q1",
+      "options_json": "[\"Call runtime.GC() inside the handler's defer block\", \"Create `ch := make(chan Result, 1)` (buffered size 1) and pass `r.Context()` to the downstream call\", \"Use an unbuffered channel `make(chan Result)` and close it from the receiver\", \"Increase GOMAXPROCS to match concurrent requests\"]",
+      "order_index": 1,
+      "question_text": "In a Go HTTP handler that spawns a worker goroutine to fetch data while waiting on `select { case res := \u003c-ch: ... case \u003c-r.Context().Done(): ... }`, how do you prevent a goroutine leak if the client disconnects early?",
+      "quiz_id": "qz-2"
+    },
+    {
+      "correct_index": 2,
+      "explanation": "Composite B-Tree indexes are sorted lexicographically by the leading column (`tenant_id`) first. A query that omits `tenant_id` and filters only on `status` cannot jump directly to a contiguous range in the B-Tree (tanpa skip scan).",
+      "id": "qz-3-q1",
+      "options_json": "[\"SELECT * FROM orders WHERE tenant_id = $1 AND status = 'PAID' ORDER BY created_at DESC LIMIT 20\", \"SELECT * FROM orders WHERE tenant_id = $1\", \"SELECT * FROM orders WHERE status = 'PENDING' ORDER BY created_at DESC\", \"SELECT * FROM orders WHERE tenant_id = $1 AND status = 'SHIPPED'\"]",
+      "order_index": 1,
+      "question_text": "You have a composite B-Tree index in PostgreSQL on `orders (tenant_id, status, created_at DESC)`. Which of the following queries CANNOT use this index as a primary leftmost B-Tree range seek?",
+      "quiz_id": "qz-3"
+    },
+    {
+      "correct_index": 2,
+      "explanation": "Checking the hostname before `http.Client.Do` is vulnerable to DNS rebinding (TOCTOU). Inspecting the resolved IP inside `net.Dialer.Control` verifies the exact socket address used by the OS kernel `connect()` syscall.",
+      "id": "qz-4-q1",
+      "options_json": "[\"Regex matching on the URL string before calling http.NewRequest\", \"Calling net.LookupIP(host) once before passing the URL to http.Get(url)\", \"Inside `net.Dialer.Control` attached to `http.Transport`, inspecting the resolved `netip.Addr` right before socket connection\", \"Setting `http.Client{Timeout: 5 * time.Second}`\"]",
+      "order_index": 1,
+      "question_text": "Where must IP address validation happen in Go to completely block Server-Side Request Forgery (SSRF) including DNS Rebinding attacks?",
+      "quiz_id": "qz-4"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "Parameter binding ($1) separates the compiled SQL AST from untrusted parameter values at the wire protocol level, preventing attackers from injecting SQL commands.",
+      "id": "qz-4-sql-basics-q1",
+      "options_json": "[\"Because fmt.Sprintf is not part of the Go standard library\", \"Parameterized placeholders ($1) send the SQL command structure and the user data separately over the database protocol, making SQL injection impossible\", \"Because database/sql only supports integer columns with fmt.Sprintf\", \"Because $1 automatically creates a B-Tree index\"]",
+      "order_index": 1,
+      "question_text": "In Go `database/sql`, why must you write `db.QueryRowContext(ctx, \"SELECT id FROM users WHERE email = $1\", email)` instead of `fmt.Sprintf(\"SELECT id FROM users WHERE email = ''%s''\", email)`?",
+      "quiz_id": "qz-4-sql-basics"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "Koneksi database dari pool tetap terkunci selama rows cursor belum ditutup. Jika fungsi keluar lebih awal karena error atau return, koneksi bocor (leak). Pemeriksaan rows.Err() wajib karena rows.Next() mengembalikan false baik saat baris habis normal MAUPUN saat terjadi error I/O atau network timeout.",
+      "id": "qz-4-sql-basics-q2",
+      "options_json": "[\"Hanya untuk memenuhi format standar compiler Go\", \"rows.Close() mengembalikan koneksi yang tertahan ke pool agar tidak terjadi connection starvation, sedangkan rows.Err() menangani error jaringan atau decoding yang terjadi di tengah proses iterasi\", \"rows.Close() otomatis melakukan rollback transaksi SQL\", \"rows.Err() otomatis membuat indeks B-Tree baru\"]",
+      "order_index": 2,
+      "question_text": "Setelah mengeksekusi rows, err := db.QueryContext(ctx, query, args...), mengapa memanggil defer rows.Close() dan memeriksa rows.Err() setelah loop rows.Next() adalah wajib?",
+      "quiz_id": "qz-4-sql-basics"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "Transaksi menjamin prinsip ACID Atomicity. Jika transfer dana memotong saldo pengirim namun gagal menambah saldo penerima, pemanggilan tx.Rollback() membatalkan seluruh mutasi sehingga saldo tidak hilang di tengah jalan.",
+      "id": "qz-4-sql-basics-q3",
+      "options_json": "[\"Mempercepat transfer HTTP ke klien\", \"Menjamin prinsip Atomicity: rangkaian beberapa operasi mutasi database berhasil seluruhnya, atau jika satu operasi gagal maka seluruh perubahan sebelumnya dibatalkan total tanpa merusak integritas data\", \"Menghapus data lama secara otomatis setiap tengah malam\", \"Mengubah database SQLite menjadi PostgreSQL\"]",
+      "order_index": 3,
+      "question_text": "Apa fungsi utama dari transaksi database (tx, err := db.BeginTx(ctx, opts)) yang diakhiri dengan tx.Commit() atau tx.Rollback()?",
+      "quiz_id": "qz-4-sql-basics"
+    },
+    {
+      "correct_index": 1,
+      "explanation": "Per the official Go GC Guide, `GOMEMLIMIT` should leave 10–15% headroom below the container's hard cgroup limit to account for non-Go-heap memory (goroutine stacks, binary text, OS buffers).",
+      "id": "qz-5-q1",
+      "options_json": "[\"GOMEMLIMIT=512MiB so Go uses 100% of the container limit for heap objects\", \"GOMEMLIMIT=435MiB (~85% of 512Mi) so the Go GC reclaims heap memory before total RSS (heap + stacks + runtime overhead) triggers the Linux OOM killer\", \"Disable GC with GOGC=off and rely on Kubernetes liveness restarts\", \"GOMEMLIMIT=2048MiB to prevent GC CPU spikes\"]",
+      "order_index": 1,
+      "question_text": "Your Go pod in Kubernetes has `resources.limits.memory: 512Mi`. What is the recommended `GOMEMLIMIT` configuration and why?",
+      "quiz_id": "qz-5"
+    }
+  ],
+  "quizzes": [
+    {
+      "id": "qz-0-foundations",
+      "level_id": 1,
+      "title": "Stage A \u0026 C Orientation \u0026 HTTP Foundations Quiz"
+    },
+    {
+      "id": "qz-1",
+      "level_id": 2,
+      "title": "Level 1 Diagnostic Quiz"
+    },
+    {
+      "id": "qz-1-go-basics",
+      "level_id": 2,
+      "title": "Stage B Go Programming Fundamentals Quiz"
+    },
+    {
+      "id": "qz-2",
+      "level_id": 3,
+      "title": "Level 2 Diagnostic Quiz"
+    },
+    {
+      "id": "qz-3",
+      "level_id": 5,
+      "title": "Level 4 Diagnostic Quiz"
+    },
+    {
+      "id": "qz-4-sql-basics",
+      "level_id": 5,
+      "title": "Stage E Relational SQL \u0026 database/sql Fundamentals Quiz"
+    },
+    {
+      "id": "qz-4",
+      "level_id": 7,
+      "title": "Level 6 Diagnostic Quiz"
+    },
+    {
+      "id": "qz-5",
+      "level_id": 11,
+      "title": "Level 10 Diagnostic Quiz"
+    }
+  ]
+}

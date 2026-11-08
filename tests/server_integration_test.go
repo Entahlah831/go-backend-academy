@@ -1116,5 +1116,30 @@ func TestUniqueOrderIndexAndLessonListingOrder(t *testing.T) {
 	}
 }
 
+func TestContentSingleSourceAndSeedSync(t *testing.T) {
+	manifestPath := filepath.Join("..", "content", "manifest.json")
+	manifestData, err := os.ReadFile(manifestPath)
+	if err != nil {
+		t.Fatalf("reading content manifest: %v", err)
+	}
+
+	var manifest map[string]string
+	if err := json.Unmarshal(manifestData, &manifest); err != nil {
+		t.Fatalf("parsing manifest: %v", err)
+	}
+
+	for filename, expectedHash := range manifest {
+		p := filepath.Join("..", "content", filename)
+		data, err := os.ReadFile(p)
+		if err != nil {
+			t.Fatalf("missing content file %s: %v", p, err)
+		}
+		actualHash := fmt.Sprintf("%x", sha256.Sum256(data))
+		if actualHash != expectedHash {
+			t.Errorf("content drift detected in %s: hash mismatch (run go run ./tools/gen-content -export)", filename)
+		}
+	}
+}
+
 
 

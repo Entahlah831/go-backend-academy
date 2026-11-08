@@ -1,0 +1,1083 @@
+{
+  "exercise_rules": null,
+  "exercise_test_cases": [
+    {
+      "description": "Verify srv.ReadHeaderTimeout == 5*time.Second and srv.ReadTimeout == 10*time.Second",
+      "exercise_id": "ex-l0-backend-http-lifecycle",
+      "id": "ex-l0-backend-http-lifecycle-tc-1",
+      "order_index": 1,
+      "required_pattern": "http.MaxBytesReader(w, r.Body|dec.DisallowUnknownFields()|ReadHeaderTimeout:"
+    },
+    {
+      "description": "Verify POST /api/v1/echo with \u003e64KB payload returns 400 Bad Request",
+      "exercise_id": "ex-l0-backend-http-lifecycle",
+      "id": "ex-l0-backend-http-lifecycle-tc-2",
+      "order_index": 2,
+      "required_pattern": "http.MaxBytesReader(w, r.Body|dec.DisallowUnknownFields()|ReadHeaderTimeout:"
+    },
+    {
+      "description": "Verify POST /api/v1/echo with unknown JSON field returns 400 Bad Request",
+      "exercise_id": "ex-l0-backend-http-lifecycle",
+      "id": "ex-l0-backend-http-lifecycle-tc-3",
+      "order_index": 3,
+      "required_pattern": "http.MaxBytesReader(w, r.Body|dec.DisallowUnknownFields()|ReadHeaderTimeout:"
+    },
+    {
+      "description": "MergeSettings(25, true, nil, nil) == (25, true)",
+      "exercise_id": "ex-l0-rest-json-api-contracts",
+      "id": "ex-l0-rest-json-api-contracts-tc-1",
+      "order_index": 1,
+      "required_pattern": "*patchMaxConns|*patchTLS|patchMaxConns != nil"
+    },
+    {
+      "description": "MergeSettings(25, true, nil, ptrBool(false)) == (25, false)",
+      "exercise_id": "ex-l0-rest-json-api-contracts",
+      "id": "ex-l0-rest-json-api-contracts-tc-2",
+      "order_index": 2,
+      "required_pattern": "*patchMaxConns|*patchTLS|patchMaxConns != nil"
+    },
+    {
+      "description": "Verify Greeting(\"\") == \"Hello, Backend Engineer!\"; Verify Greeting(\"Nadia\") == \"Hello, Nadia!\"",
+      "exercise_id": "ex-l0-stage-a-git-go-workspace",
+      "id": "ex-l0-stage-a-git-go-workspace-tc-1",
+      "order_index": 1,
+      "required_pattern": "if name == \"\"|name = \"Backend Engineer\"|fmt.Sprintf(\"Hello, %s!\", name)"
+    },
+    {
+      "description": "Verify DefaultPort returns \":8080\"",
+      "exercise_id": "ex-l0-stage-a-what-is-backend",
+      "id": "ex-l0-stage-a-what-is-backend-tc-1",
+      "order_index": 1,
+      "required_pattern": "func DefaultPort() string|return \":8080\""
+    },
+    {
+      "description": "CanAccessDocument('u1', 'member', 'u1') == true",
+      "exercise_id": "ex-l0-stateless-vs-stateful-arch",
+      "id": "ex-l0-stateless-vs-stateful-arch-tc-1",
+      "order_index": 1,
+      "required_pattern": "actorUserID == \"\"|docOwnerID == \"\"|actorRole == \"admin\""
+    },
+    {
+      "description": "CanAccessDocument('u1', 'member', 'u2') == false",
+      "exercise_id": "ex-l0-stateless-vs-stateful-arch",
+      "id": "ex-l0-stateless-vs-stateful-arch-tc-2",
+      "order_index": 2,
+      "required_pattern": "actorUserID == \"\"|docOwnerID == \"\"|actorRole == \"admin\""
+    },
+    {
+      "description": "CanAccessDocument('u1', 'admin', 'u2') == true",
+      "exercise_id": "ex-l0-stateless-vs-stateful-arch",
+      "id": "ex-l0-stateless-vs-stateful-arch-tc-3",
+      "order_index": 3,
+      "required_pattern": "actorUserID == \"\"|docOwnerID == \"\"|actorRole == \"admin\""
+    },
+    {
+      "description": "CanAccessDocument('', 'admin', '') == false",
+      "exercise_id": "ex-l0-stateless-vs-stateful-arch",
+      "id": "ex-l0-stateless-vs-stateful-arch-tc-4",
+      "order_index": 4,
+      "required_pattern": "actorUserID == \"\"|docOwnerID == \"\"|actorRole == \"admin\""
+    },
+    {
+      "description": "ClassifyRepositoryError(fmt.Errorf('db: %w', ErrRecordNotFound)) == 404",
+      "exercise_id": "ex-l1-interfaces-errors-generics",
+      "id": "ex-l1-interfaces-errors-generics-tc-1",
+      "order_index": 1,
+      "required_pattern": "errors.Is(err, ErrRecordNotFound)|errors.As(err, \u0026qErr)|return 429"
+    },
+    {
+      "description": "ClassifyRepositoryError(fmt.Errorf('rate: %w', \u0026QuotaExceededError{Limit: 10})) == 429",
+      "exercise_id": "ex-l1-interfaces-errors-generics",
+      "id": "ex-l1-interfaces-errors-generics-tc-2",
+      "order_index": 2,
+      "required_pattern": "errors.Is(err, ErrRecordNotFound)|errors.As(err, \u0026qErr)|return 429"
+    },
+    {
+      "description": "Appending to SafePrefix(src, 2) must not modify src[2]",
+      "exercise_id": "ex-l1-memory-slices-maps-escape",
+      "id": "ex-l1-memory-slices-maps-escape-tc-1",
+      "order_index": 1,
+      "required_pattern": "make([]int, n)|copy(out, src[:n])|n \u003e len(src)"
+    },
+    {
+      "description": "cap(SafePrefix(src, 2)) must equal 2, not cap(src)",
+      "exercise_id": "ex-l1-memory-slices-maps-escape",
+      "id": "ex-l1-memory-slices-maps-escape-tc-2",
+      "order_index": 2,
+      "required_pattern": "make([]int, n)|copy(out, src[:n])|n \u003e len(src)"
+    },
+    {
+      "description": "Verify ValidateAccountAge(-1) returns non-nil error; Verify ValidateAccountAge(16) returns (false, nil) and ValidateAccountAge(21) returns (true, nil)",
+      "exercise_id": "ex-l1-stage-b-control-flow-loops-functions",
+      "id": "ex-l1-stage-b-control-flow-loops-functions-tc-1",
+      "order_index": 1,
+      "required_pattern": "age \u003c 0 || age \u003e 130|errors.New(|return true, nil"
+    },
+    {
+      "description": "Verify empty orderID returns ErrEmptyOrderID; Verify non-nil cause is wrapped with %w so errors.Is matches",
+      "exercise_id": "ex-l1-stage-b-interfaces-errors-fundamentals",
+      "id": "ex-l1-stage-b-interfaces-errors-fundamentals-tc-1",
+      "order_index": 1,
+      "required_pattern": "fmt.Errorf(|return ErrEmptyOrderID|cause != nil"
+    },
+    {
+      "description": "Verify valid JSON returns populated CreateTaskInput; Verify empty title or invalid JSON returns a non-nil error",
+      "exercise_id": "ex-l1-stage-b-json-files-unit-testing",
+      "id": "ex-l1-stage-b-json-files-unit-testing-tc-1",
+      "order_index": 1,
+      "required_pattern": "json.Unmarshal(raw, \u0026in)|in.Title == \"\"|return in, nil"
+    },
+    {
+      "description": "Verify CountStatuses([]string{\"paid\", \"\", \"paid\"})[\"paid\"] == 2; Verify CountStatuses(nil) returns a non-nil empty map",
+      "exercise_id": "ex-l1-stage-b-slices-maps-iteration",
+      "id": "ex-l1-stage-b-slices-maps-iteration-tc-1",
+      "order_index": 1,
+      "required_pattern": "make(map[string]int|for _, s := range items|counts[s]++"
+    },
+    {
+      "description": "Verify w.Deposit(500) updates w.BalanceCents to 500; Verify nil receiver and amountCents \u003c= 0 return non-nil errors",
+      "exercise_id": "ex-l1-stage-b-structs-methods-pointers",
+      "id": "ex-l1-stage-b-structs-methods-pointers-tc-1",
+      "order_index": 1,
+      "required_pattern": "if w == nil|amountCents \u003c= 0|w.BalanceCents += amountCents"
+    },
+    {
+      "description": "Verify ComputeInvoiceCents(1500, 3, 500) == 4000; Verify ComputeInvoiceCents(-10, 2, 0) == 0 and discount \u003e subtotal returns 0",
+      "exercise_id": "ex-l1-stage-b-variables-types-zerovalues",
+      "id": "ex-l1-stage-b-variables-types-zerovalues-tc-1",
+      "order_index": 1,
+      "required_pattern": "unitPriceCents \u003c= 0|discountCents \u003e subtotal|subtotal - discountCents"
+    },
+    {
+      "description": "IsExportedIdentifier('Server') == true",
+      "exercise_id": "ex-l1-toolchain-modules-packages",
+      "id": "ex-l1-toolchain-modules-packages-tc-1",
+      "order_index": 1,
+      "required_pattern": "utf8.DecodeRuneInString(name)|unicode.IsUpper(r)|if name == \"\""
+    },
+    {
+      "description": "IsExportedIdentifier('server') == false",
+      "exercise_id": "ex-l1-toolchain-modules-packages",
+      "id": "ex-l1-toolchain-modules-packages-tc-2",
+      "order_index": 2,
+      "required_pattern": "utf8.DecodeRuneInString(name)|unicode.IsUpper(r)|if name == \"\""
+    },
+    {
+      "description": "IsExportedIdentifier('') == false",
+      "exercise_id": "ex-l1-toolchain-modules-packages",
+      "id": "ex-l1-toolchain-modules-packages-tc-3",
+      "order_index": 3,
+      "required_pattern": "utf8.DecodeRuneInString(name)|unicode.IsUpper(r)|if name == \"\""
+    },
+    {
+      "description": "RecommendGoMemLimitMiB(1024) == 870",
+      "exercise_id": "ex-l10-devops-docker-k8s-production",
+      "id": "ex-l10-devops-docker-k8s-production-tc-1",
+      "order_index": 1,
+      "required_pattern": "(containerLimitMiB * 85) / 100|isShuttingDown || !dbHealthy|return 503"
+    },
+    {
+      "description": "EvaluateReadiness(false, true) == 200",
+      "exercise_id": "ex-l10-devops-docker-k8s-production",
+      "id": "ex-l10-devops-docker-k8s-production-tc-2",
+      "order_index": 2,
+      "required_pattern": "(containerLimitMiB * 85) / 100|isShuttingDown || !dbHealthy|return 503"
+    },
+    {
+      "description": "EvaluateReadiness(true, true) == 503",
+      "exercise_id": "ex-l10-devops-docker-k8s-production",
+      "id": "ex-l10-devops-docker-k8s-production-tc-3",
+      "order_index": 3,
+      "required_pattern": "(containerLimitMiB * 85) / 100|isShuttingDown || !dbHealthy|return 503"
+    },
+    {
+      "description": "EvaluateReadiness(false, false) == 503",
+      "exercise_id": "ex-l10-devops-docker-k8s-production",
+      "id": "ex-l10-devops-docker-k8s-production-tc-4",
+      "order_index": 4,
+      "required_pattern": "(containerLimitMiB * 85) / 100|isShuttingDown || !dbHealthy|return 503"
+    },
+    {
+      "description": "ResolveClientIP('127.0.0.1', '1.1.1.1, 203.0.113.50', true) == '203.0.113.50'",
+      "exercise_id": "ex-l10-reverse-proxy-cicd-rollback-dr",
+      "id": "ex-l10-reverse-proxy-cicd-rollback-dr-tc-1",
+      "order_index": 1,
+      "required_pattern": "strings.Split(xff, \",\")|parts[len(parts)-1]|!isTrustedPeer"
+    },
+    {
+      "description": "ResolveClientIP('198.51.100.7', '1.1.1.1', false) == '198.51.100.7'",
+      "exercise_id": "ex-l10-reverse-proxy-cicd-rollback-dr",
+      "id": "ex-l10-reverse-proxy-cicd-rollback-dr-tc-2",
+      "order_index": 2,
+      "required_pattern": "strings.Split(xff, \",\")|parts[len(parts)-1]|!isTrustedPeer"
+    },
+    {
+      "description": "Verify healthy ReadinessGate returns (200, nil); Verify ShuttingDown, !DBConnected, or !MigrationsUp returns 503 and non-nil error",
+      "exercise_id": "ex-l10-stage-j-capstone-production-blueprint",
+      "id": "ex-l10-stage-j-capstone-production-blueprint-tc-1",
+      "order_index": 1,
+      "required_pattern": "if g.ShuttingDown|!g.DBConnected || !g.MigrationsUp|return 200, nil"
+    },
+    {
+      "description": "Active concurrent workers never exceed maxWorkers",
+      "exercise_id": "ex-l2-gmp-channels-context-workers",
+      "id": "ex-l2-gmp-channels-context-workers-tc-1",
+      "order_index": 1,
+      "required_pattern": "context.WithCancel(ctx)|wg.Add(1)|wg.Wait()"
+    },
+    {
+      "description": "Returning an error from fn cancels remaining queued jobs and returns that error",
+      "exercise_id": "ex-l2-gmp-channels-context-workers",
+      "id": "ex-l2-gmp-channels-context-workers-tc-2",
+      "order_index": 2,
+      "required_pattern": "context.WithCancel(ctx)|wg.Add(1)|wg.Wait()"
+    },
+    {
+      "description": "ShouldReturnBufferToPool(4096, 65536) == true",
+      "exercise_id": "ex-l2-profiling-pprof-benchmarks",
+      "id": "ex-l2-profiling-pprof-benchmarks-tc-1",
+      "order_index": 1,
+      "required_pattern": "return bufCap \u003e 0 \u0026\u0026 bufCap \u003c= maxPooledCap"
+    },
+    {
+      "description": "ShouldReturnBufferToPool(1048576, 65536) == false",
+      "exercise_id": "ex-l2-profiling-pprof-benchmarks",
+      "id": "ex-l2-profiling-pprof-benchmarks-tc-2",
+      "order_index": 2,
+      "required_pattern": "return bufCap \u003e 0 \u0026\u0026 bufCap \u003c= maxPooledCap"
+    },
+    {
+      "description": "Verify empty slice returns 0; Verify [2, 3, 4] returns 4 + 9 + 16 = 29",
+      "exercise_id": "ex-l2-stage-c-goroutines-channels-waitgroup",
+      "id": "ex-l2-stage-c-goroutines-channels-waitgroup-tc-1",
+      "order_index": 1,
+      "required_pattern": "for _, n := range nums|sum += n * n|return sum"
+    },
+    {
+      "description": "Downstream panic returns HTTP 500 instead of crashing the test runner",
+      "exercise_id": "ex-l3-net-http-routers",
+      "id": "ex-l3-net-http-routers-tc-1",
+      "order_index": 1,
+      "required_pattern": "w.Header().Set(\"X-Request-ID\"|recover()|http.StatusInternalServerError"
+    },
+    {
+      "description": "Response always contains non-empty X-Request-ID header",
+      "exercise_id": "ex-l3-net-http-routers",
+      "id": "ex-l3-net-http-routers-tc-2",
+      "order_index": 2,
+      "required_pattern": "w.Header().Set(\"X-Request-ID\"|recover()|http.StatusInternalServerError"
+    },
+    {
+      "description": "Verify Content-Type header is set before WriteHeader(status); Verify json.NewEncoder(w).Encode(payload) writes the JSON body",
+      "exercise_id": "ex-l3-stage-d-first-http-server-crud",
+      "id": "ex-l3-stage-d-first-http-server-crud-tc-1",
+      "order_index": 1,
+      "required_pattern": "w.Header().Set(\"Content-Type\"|w.WriteHeader(status)|json.NewEncoder(w).Encode(payload)"
+    },
+    {
+      "description": "ComputeAvailableTokens(5, 10, 20, 1.0) == 15",
+      "exercise_id": "ex-l3-validation-openapi-ratelimit",
+      "id": "ex-l3-validation-openapi-ratelimit-tc-1",
+      "order_index": 1,
+      "required_pattern": "currentTokens += elapsedSec * ratePerSec|if currentTokens \u003e burstMax|return burstMax"
+    },
+    {
+      "description": "ComputeAvailableTokens(15, 10, 20, 2.0) == 20",
+      "exercise_id": "ex-l3-validation-openapi-ratelimit",
+      "id": "ex-l3-validation-openapi-ratelimit-tc-2",
+      "order_index": 2,
+      "required_pattern": "currentTokens += elapsedSec * ratePerSec|if currentTokens \u003e burstMax|return burstMax"
+    },
+    {
+      "description": "LockOrder('acct_b', 'acct_a') == ('acct_a', 'acct_b')",
+      "exercise_id": "ex-l4-acid-isolation-mvcc",
+      "id": "ex-l4-acid-isolation-mvcc-tc-1",
+      "order_index": 1,
+      "required_pattern": "if fromAccountID \u003c toAccountID|return fromAccountID, toAccountID|return toAccountID, fromAccountID"
+    },
+    {
+      "description": "LockOrder('acct_a', 'acct_b') == ('acct_a', 'acct_b')",
+      "exercise_id": "ex-l4-acid-isolation-mvcc",
+      "id": "ex-l4-acid-isolation-mvcc-tc-2",
+      "order_index": 2,
+      "required_pattern": "if fromAccountID \u003c toAccountID|return fromAccountID, toAccountID|return toAccountID, fromAccountID"
+    },
+    {
+      "description": "ChoosePool(true, 5000, 1000) == 'primary'",
+      "exercise_id": "ex-l4-partitioning-replication-sharding",
+      "id": "ex-l4-partitioning-replication-sharding-tc-1",
+      "order_index": 1,
+      "required_pattern": "msSinceLastUserWrite \u003e= 0|msSinceLastUserWrite \u003c= maxReplicaLagMs|return \"replica\""
+    },
+    {
+      "description": "ChoosePool(false, 250, 1000) == 'primary'",
+      "exercise_id": "ex-l4-partitioning-replication-sharding",
+      "id": "ex-l4-partitioning-replication-sharding-tc-2",
+      "order_index": 2,
+      "required_pattern": "msSinceLastUserWrite \u003e= 0|msSinceLastUserWrite \u003c= maxReplicaLagMs|return \"replica\""
+    },
+    {
+      "description": "ChoosePool(false, 2500, 1000) == 'replica'",
+      "exercise_id": "ex-l4-partitioning-replication-sharding",
+      "id": "ex-l4-partitioning-replication-sharding-tc-3",
+      "order_index": 3,
+      "required_pattern": "msSinceLastUserWrite \u003e= 0|msSinceLastUserWrite \u003c= maxReplicaLagMs|return \"replica\""
+    },
+    {
+      "description": "Verify ClampPageLimit(0, -5) returns (20, 0); Verify ClampPageLimit(500, 40) returns (100, 40)",
+      "exercise_id": "ex-l4-stage-e-sql-relational-fundamentals",
+      "id": "ex-l4-stage-e-sql-relational-fundamentals-tc-1",
+      "order_index": 1,
+      "required_pattern": "if limit \u003c= 0|limit = 20|return limit, offset"
+    },
+    {
+      "description": "ComputePoolLimits(200, 20, 6) == (30, 15)",
+      "exercise_id": "ex-l5-db-ecosystem-comparison",
+      "id": "ex-l5-db-ecosystem-comparison-tc-1",
+      "order_index": 1,
+      "required_pattern": "avail := pgMaxConns - reservedSuperuserConns|avail / replicaCount|maxOpen / 2"
+    },
+    {
+      "description": "ComputePoolLimits(100, 10, 10) == (9, 4)",
+      "exercise_id": "ex-l5-db-ecosystem-comparison",
+      "id": "ex-l5-db-ecosystem-comparison-tc-2",
+      "order_index": 2,
+      "required_pattern": "avail := pgMaxConns - reservedSuperuserConns|avail / replicaCount|maxOpen / 2"
+    },
+    {
+      "description": "IsSafeProductionDDL('CREATE INDEX idx_a ON users(email);') == false",
+      "exercise_id": "ex-l5-migrations-transactions-prepared",
+      "id": "ex-l5-migrations-transactions-prepared-tc-1",
+      "order_index": 1,
+      "required_pattern": "strings.Contains(upper, \"CREATE INDEX\")|!strings.Contains(upper, \"CONCURRENTLY\")|!strings.Contains(upper, \"LOCK_TIMEOUT\")"
+    },
+    {
+      "description": "IsSafeProductionDDL('CREATE INDEX CONCURRENTLY idx_a ON users(email);') == true",
+      "exercise_id": "ex-l5-migrations-transactions-prepared",
+      "id": "ex-l5-migrations-transactions-prepared-tc-2",
+      "order_index": 2,
+      "required_pattern": "strings.Contains(upper, \"CREATE INDEX\")|!strings.Contains(upper, \"CONCURRENTLY\")|!strings.Contains(upper, \"LOCK_TIMEOUT\")"
+    },
+    {
+      "description": "Verify QueryRowContext uses $1 placeholder and Scan(\u0026id); Verify sql.ErrNoRows is translated to ErrUserNotFound",
+      "exercise_id": "ex-l5-stage-e-database-sql-crud-basics",
+      "id": "ex-l5-stage-e-database-sql-crud-basics-tc-1",
+      "order_index": 1,
+      "required_pattern": "db.QueryRowContext(ctx|errors.Is(err, sql.ErrNoRows)|return \"\", ErrUserNotFound"
+    },
+    {
+      "description": "HasRBACPermission('editor', 'articles:write', matrix) == true",
+      "exercise_id": "ex-l6-oauth2-oidc-rbac-abac",
+      "id": "ex-l6-oauth2-oidc-rbac-abac-tc-1",
+      "order_index": 1,
+      "required_pattern": "roleMatrix[role]|if p == requiredPerm|return true"
+    },
+    {
+      "description": "HasRBACPermission('viewer', 'articles:delete', matrix) == false",
+      "exercise_id": "ex-l6-oauth2-oidc-rbac-abac",
+      "id": "ex-l6-oauth2-oidc-rbac-abac-tc-2",
+      "order_index": 2,
+      "required_pattern": "roleMatrix[role]|if p == requiredPerm|return true"
+    },
+    {
+      "description": "ValidateWebhookIP('169.254.169.254') != nil",
+      "exercise_id": "ex-l6-security-auth-owasp",
+      "id": "ex-l6-security-auth-owasp-tc-1",
+      "order_index": 1,
+      "required_pattern": "netip.ParseAddr(ip)|addr.IsLoopback()|subtle.ConstantTimeCompare("
+    },
+    {
+      "description": "ValidateWebhookIP('10.0.0.15') != nil",
+      "exercise_id": "ex-l6-security-auth-owasp",
+      "id": "ex-l6-security-auth-owasp-tc-2",
+      "order_index": 2,
+      "required_pattern": "netip.ParseAddr(ip)|addr.IsLoopback()|subtle.ConstantTimeCompare("
+    },
+    {
+      "description": "ValidateWebhookIP('93.184.216.34') == nil",
+      "exercise_id": "ex-l6-security-auth-owasp",
+      "id": "ex-l6-security-auth-owasp-tc-3",
+      "order_index": 3,
+      "required_pattern": "netip.ParseAddr(ip)|addr.IsLoopback()|subtle.ConstantTimeCompare("
+    },
+    {
+      "description": "VerifyAPIKey('sk_live_abc', 'sk_live_abc') == true",
+      "exercise_id": "ex-l6-security-auth-owasp",
+      "id": "ex-l6-security-auth-owasp-tc-4",
+      "order_index": 4,
+      "required_pattern": "netip.ParseAddr(ip)|addr.IsLoopback()|subtle.ConstantTimeCompare("
+    },
+    {
+      "description": "Verify \"Bearer secret123\" returns (\"secret123\", true); Verify \"Basic xyz\" or \"Bearer   \" returns (\"\", false)",
+      "exercise_id": "ex-l6-stage-f-password-hashing-bearer-auth",
+      "id": "ex-l6-stage-f-password-hashing-bearer-auth-tc-1",
+      "order_index": 1,
+      "required_pattern": "strings.HasPrefix(authHeader, prefix)|strings.TrimSpace(strings.TrimPrefix(authHeader, prefix))"
+    },
+    {
+      "description": "PutAndGetFake(map[string]int{}, 'user_1', 42) == (42, true)",
+      "exercise_id": "ex-l7-integration-testcontainers-ci",
+      "id": "ex-l7-integration-testcontainers-ci-tc-1",
+      "order_index": 1,
+      "required_pattern": "items[key] = val|v, ok := items[key]|return v, ok"
+    },
+    {
+      "description": "PutAndGetFake(nil, 'user_1', 42) == (0, false)",
+      "exercise_id": "ex-l7-integration-testcontainers-ci",
+      "id": "ex-l7-integration-testcontainers-ci-tc-2",
+      "order_index": 2,
+      "required_pattern": "items[key] = val|v, ok := items[key]|return v, ok"
+    },
+    {
+      "description": "Verify \"  Go   Backend Academy \" returns \"go-backend-academy\"; Verify \"   \" returns \"\"",
+      "exercise_id": "ex-l7-stage-g-table-driven-tests-httptest",
+      "id": "ex-l7-stage-g-table-driven-tests-httptest-tc-1",
+      "order_index": 1,
+      "required_pattern": "strings.Fields(strings.ToLower(title))|strings.Join(words, \"-\")"
+    },
+    {
+      "description": "SafeTruncateRunes('Go🚀Backend', 3) == 'Go🚀'",
+      "exercise_id": "ex-l7-testing-fuzzing-benchmarks",
+      "id": "ex-l7-testing-fuzzing-benchmarks-tc-1",
+      "order_index": 1,
+      "required_pattern": "for byteIdx := range s|if count == maxRunes|return s[:byteIdx]"
+    },
+    {
+      "description": "SafeTruncateRunes('hello', -1) == ''",
+      "exercise_id": "ex-l7-testing-fuzzing-benchmarks",
+      "id": "ex-l7-testing-fuzzing-benchmarks-tc-2",
+      "order_index": 2,
+      "required_pattern": "for byteIdx := range s|if count == maxRunes|return s[:byteIdx]"
+    },
+    {
+      "description": "utf8.ValidString(SafeTruncateRunes(anyValidUTF8, n)) == true",
+      "exercise_id": "ex-l7-testing-fuzzing-benchmarks",
+      "id": "ex-l7-testing-fuzzing-benchmarks-tc-3",
+      "order_index": 3,
+      "required_pattern": "for byteIdx := range s|if count == maxRunes|return s[:byteIdx]"
+    },
+    {
+      "description": "ComputeFinalInvoiceCents(10000, 1500, 1000) == 9350",
+      "exercise_id": "ex-l8-clean-hexagonal-ddd",
+      "id": "ex-l8-clean-hexagonal-ddd-tc-1",
+      "order_index": 1,
+      "required_pattern": "(subtotalCents * couponBasisPoints) / 10000|(discounted * taxBasisPoints) / 10000|return discounted + tax, nil"
+    },
+    {
+      "description": "ComputeFinalInvoiceCents(10000, 12000, 0) returns error",
+      "exercise_id": "ex-l8-clean-hexagonal-ddd",
+      "id": "ex-l8-clean-hexagonal-ddd-tc-2",
+      "order_index": 2,
+      "required_pattern": "(subtotalCents * couponBasisPoints) / 10000|(discounted * taxBasisPoints) / 10000|return discounted + tax, nil"
+    },
+    {
+      "description": "ViolatesModuleTableBoundary('orders', 'orders_items') == false",
+      "exercise_id": "ex-l8-modular-monolith-cqrs-boundaries",
+      "id": "ex-l8-modular-monolith-cqrs-boundaries-tc-1",
+      "order_index": 1,
+      "required_pattern": "!strings.HasPrefix(referencedTable, moduleName+\"_\")"
+    },
+    {
+      "description": "ViolatesModuleTableBoundary('orders', 'billing_invoices') == true",
+      "exercise_id": "ex-l8-modular-monolith-cqrs-boundaries",
+      "id": "ex-l8-modular-monolith-cqrs-boundaries-tc-2",
+      "order_index": 2,
+      "required_pattern": "!strings.HasPrefix(referencedTable, moduleName+\"_\")"
+    },
+    {
+      "description": "Verify 500 USD + 300 USD returns 800 USD; Verify USD + EUR or nil operand returns non-nil error",
+      "exercise_id": "ex-l8-stage-h-handler-service-repo-layers",
+      "id": "ex-l8-stage-h-handler-service-repo-layers-tc-1",
+      "order_index": 1,
+      "required_pattern": "if a == nil || b == nil|if a.Currency != b.Currency|Cents: a.Cents + b.Cents"
+    },
+    {
+      "description": "ShouldTripBreaker(5, 5, 'CLOSED') == 'OPEN'",
+      "exercise_id": "ex-l9-caching-queues-outbox-sagas",
+      "id": "ex-l9-caching-queues-outbox-sagas-tc-1",
+      "order_index": 1,
+      "required_pattern": "currentState == \"HALF_OPEN\" \u0026\u0026 consecutiveFailures \u003e= 1|consecutiveFailures \u003e= threshold|return currentState"
+    },
+    {
+      "description": "ShouldTripBreaker(1, 5, 'HALF_OPEN') == 'OPEN'",
+      "exercise_id": "ex-l9-caching-queues-outbox-sagas",
+      "id": "ex-l9-caching-queues-outbox-sagas-tc-2",
+      "order_index": 2,
+      "required_pattern": "currentState == \"HALF_OPEN\" \u0026\u0026 consecutiveFailures \u003e= 1|consecutiveFailures \u003e= threshold|return currentState"
+    },
+    {
+      "description": "ShouldTripBreaker(3, 5, 'CLOSED') == 'CLOSED'",
+      "exercise_id": "ex-l9-caching-queues-outbox-sagas",
+      "id": "ex-l9-caching-queues-outbox-sagas-tc-3",
+      "order_index": 3,
+      "required_pattern": "currentState == \"HALF_OPEN\" \u0026\u0026 consecutiveFailures \u003e= 1|consecutiveFailures \u003e= threshold|return currentState"
+    },
+    {
+      "description": "IsValidW3CTraceparent('00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01') == true",
+      "exercise_id": "ex-l9-grpc-websockets-otel-tracing",
+      "id": "ex-l9-grpc-websockets-otel-tracing-tc-1",
+      "order_index": 1,
+      "required_pattern": "len(parts) != 4|parts[0] != \"00\"|0000000000000000"
+    },
+    {
+      "description": "IsValidW3CTraceparent('00-00000000000000000000000000000000-00f067aa0ba902b7-01') == false",
+      "exercise_id": "ex-l9-grpc-websockets-otel-tracing",
+      "id": "ex-l9-grpc-websockets-otel-tracing-tc-2",
+      "order_index": 2,
+      "required_pattern": "len(parts) != 4|parts[0] != \"00\"|0000000000000000"
+    },
+    {
+      "description": "Verify attempt 1..3 with base 100ms returns 100, 200, 400; Verify attempt 10 with max 1000ms returns 1000",
+      "exercise_id": "ex-l9-stage-i-redis-cache-aside-backoff",
+      "id": "ex-l9-stage-i-redis-cache-aside-backoff-tc-1",
+      "order_index": 1,
+      "required_pattern": "if attempt \u003c 1|delay := baseMs \u003c\u003c (attempt - 1)|if delay \u003e maxMs"
+    }
+  ],
+  "exercise_tests": [
+    {
+      "created_at": "2026-11-08T04:08:15Z",
+      "exercise_id": "ex-l0-stage-a-git-go-workspace",
+      "filename": "main_test.go",
+      "id": "test-ex-l0-stage-a-git-go-workspace",
+      "test_code": "package main\n\nimport \"testing\"\n\nfunc TestGreeting(t *testing.T) {\n\tif got := Greeting(\"\"); got != \"Hello, Backend Engineer!\" {\n\t\tt.Fatalf(\"Greeting(\\\"\\\") = %q, want \\\"Hello, Backend Engineer!\\\"\", got)\n\t}\n\tif got := Greeting(\"Nadia\"); got != \"Hello, Nadia!\" {\n\t\tt.Fatalf(\"Greeting(\\\"Nadia\\\") = %q, want \\\"Hello, Nadia!\\\"\", got)\n\t}\n}\n"
+    },
+    {
+      "created_at": "2026-11-08T04:08:15Z",
+      "exercise_id": "ex-l0-stage-a-what-is-backend",
+      "filename": "main_test.go",
+      "id": "test-ex-l0-stage-a-what-is-backend",
+      "test_code": "package main\n\nimport \"testing\"\n\nfunc TestDefaultPort(t *testing.T) {\n\tif got := DefaultPort(); got != \":8080\" {\n\t\tt.Fatalf(\"DefaultPort() = %q, want %q\", got, \":8080\")\n\t}\n}\n"
+    },
+    {
+      "created_at": "2026-11-08T04:08:15Z",
+      "exercise_id": "ex-l1-stage-b-control-flow-loops-functions",
+      "filename": "main_test.go",
+      "id": "test-ex-l1-stage-b-control-flow-loops-functions",
+      "test_code": "package auth\n\nimport \"testing\"\n\nfunc TestValidateAccountAge(t *testing.T) {\n\tif _, err := ValidateAccountAge(-1); err == nil {\n\t\tt.Fatal(\"expected error for age -1, got nil\")\n\t}\n\tif _, err := ValidateAccountAge(131); err == nil {\n\t\tt.Fatal(\"expected error for age 131, got nil\")\n\t}\n\tok, err := ValidateAccountAge(16)\n\tif err != nil || ok {\n\t\tt.Fatalf(\"ValidateAccountAge(16) = (%v, %v), want (false, nil)\", ok, err)\n\t}\n\tok, err = ValidateAccountAge(25)\n\tif err != nil || !ok {\n\t\tt.Fatalf(\"ValidateAccountAge(25) = (%v, %v), want (true, nil)\", ok, err)\n\t}\n}\n"
+    },
+    {
+      "created_at": "2026-11-08T04:08:15Z",
+      "exercise_id": "ex-l1-stage-b-slices-maps-iteration",
+      "filename": "main_test.go",
+      "id": "test-ex-l1-stage-b-slices-maps-iteration",
+      "test_code": "package stats\n\nimport \"testing\"\n\nfunc TestCountStatuses(t *testing.T) {\n\tinput := []string{\"ok\", \"err\", \"ok\", \"\", \"err\", \"ok\"}\n\tcounts := CountStatuses(input)\n\tif counts[\"ok\"] != 3 {\n\t\tt.Fatalf(\"counts[\\\"ok\\\"] = %d, want 3\", counts[\"ok\"])\n\t}\n\tif counts[\"err\"] != 2 {\n\t\tt.Fatalf(\"counts[\\\"err\\\"] = %d, want 2\", counts[\"err\"])\n\t}\n\tif _, exists := counts[\"\"]; exists {\n\t\tt.Fatal(\"expected empty string \\\"\\\" not to be in map\")\n\t}\n}\n"
+    },
+    {
+      "created_at": "2026-11-08T04:08:15Z",
+      "exercise_id": "ex-l1-stage-b-variables-types-zerovalues",
+      "filename": "main_test.go",
+      "id": "test-ex-l1-stage-b-variables-types-zerovalues",
+      "test_code": "package billing\n\nimport \"testing\"\n\nfunc TestComputeInvoiceCents(t *testing.T) {\n\tif got := ComputeInvoiceCents(1000, 2, 500); got != 1500 {\n\t\tt.Fatalf(\"ComputeInvoiceCents(1000, 2, 500) = %d, want 1500\", got)\n\t}\n\tif got := ComputeInvoiceCents(1000, 0, 500); got != 0 {\n\t\tt.Fatalf(\"ComputeInvoiceCents(1000, 0, 500) = %d, want 0\", got)\n\t}\n\tif got := ComputeInvoiceCents(1000, 1, 1500); got != 0 {\n\t\tt.Fatalf(\"ComputeInvoiceCents(1000, 1, 1500) = %d, want 0\", got)\n\t}\n}\n"
+    },
+    {
+      "created_at": "2026-11-08T04:08:15Z",
+      "exercise_id": "ex-l10-stage-j-capstone-production-blueprint",
+      "filename": "main_test.go",
+      "id": "test-ex-l10-stage-j-capstone-production-blueprint",
+      "test_code": "package capstone\n\nimport \"testing\"\n\nfunc TestEvaluateCapstoneReadiness(t *testing.T) {\n\tcode, err := EvaluateCapstoneReadiness(ReadinessGate{ShuttingDown: false, DBConnected: true, MigrationsUp: true})\n\tif err != nil || code != 200 {\n\t\tt.Fatalf(\"ready gate = (%d, %v), want (200, nil)\", code, err)\n\t}\n\tcode, err = EvaluateCapstoneReadiness(ReadinessGate{ShuttingDown: true, DBConnected: true, MigrationsUp: true})\n\tif err == nil || code != 503 {\n\t\tt.Fatalf(\"shutting down gate = (%d, %v), want (503, error)\", code, err)\n\t}\n\tcode, err = EvaluateCapstoneReadiness(ReadinessGate{ShuttingDown: false, DBConnected: false, MigrationsUp: true})\n\tif err == nil || code != 503 {\n\t\tt.Fatalf(\"db disconnected gate = (%d, %v), want (503, error)\", code, err)\n\t}\n}\n"
+    },
+    {
+      "created_at": "2026-11-08T04:08:15Z",
+      "exercise_id": "ex-l2-stage-c-goroutines-channels-waitgroup",
+      "filename": "main_test.go",
+      "id": "test-ex-l2-stage-c-goroutines-channels-waitgroup",
+      "test_code": "package conc\n\nimport \"testing\"\n\nfunc TestSumSquaresSafe(t *testing.T) {\n\tnums := []int{1, 2, 3, 4}\n\twant := 1 + 4 + 9 + 16\n\tif got := SumSquaresSafe(nums); got != want {\n\t\tt.Fatalf(\"SumSquaresSafe(%v) = %d, want %d\", nums, got, want)\n\t}\n}\n"
+    },
+    {
+      "created_at": "2026-11-08T04:08:15Z",
+      "exercise_id": "ex-l3-stage-d-first-http-server-crud",
+      "filename": "main_test.go",
+      "id": "test-ex-l3-stage-d-first-http-server-crud",
+      "test_code": "package api\n\nimport (\n\t\"net/http\"\n\t\"net/http/httptest\"\n\t\"strings\"\n\t\"testing\"\n)\n\nfunc TestWriteJSONResponse(t *testing.T) {\n\trec := httptest.NewRecorder()\n\tpayload := map[string]string{\"message\": \"hello\"}\n\tWriteJSONResponse(rec, http.StatusCreated, payload)\n\n\tif rec.Code != http.StatusCreated {\n\t\tt.Fatalf(\"status = %d, want %d\", rec.Code, http.StatusCreated)\n\t}\n\tct := rec.Header().Get(\"Content-Type\")\n\tif !strings.HasPrefix(ct, \"application/json\") {\n\t\tt.Fatalf(\"Content-Type = %q, want application/json\", ct)\n\t}\n\tbody := strings.TrimSpace(rec.Body.String())\n\tif !strings.Contains(body, \"\\\"hello\\\"\") {\n\t\tt.Fatalf(\"body = %q, want to contain \\\"hello\\\"\", body)\n\t}\n}\n"
+    },
+    {
+      "created_at": "2026-11-08T04:08:15Z",
+      "exercise_id": "ex-l4-stage-e-sql-relational-fundamentals",
+      "filename": "main_test.go",
+      "id": "test-ex-l4-stage-e-sql-relational-fundamentals",
+      "test_code": "package sqlutil\n\nimport \"testing\"\n\nfunc TestClampPageLimit(t *testing.T) {\n\tl, o := ClampPageLimit(0, -5)\n\tif l != 20 || o != 0 {\n\t\tt.Fatalf(\"ClampPageLimit(0, -5) = (%d, %d), want (20, 0)\", l, o)\n\t}\n\tl, o = ClampPageLimit(500, 40)\n\tif l != 100 || o != 40 {\n\t\tt.Fatalf(\"ClampPageLimit(500, 40) = (%d, %d), want (100, 40)\", l, o)\n\t}\n}\n"
+    },
+    {
+      "created_at": "2026-11-08T04:08:15Z",
+      "exercise_id": "ex-l6-stage-f-password-hashing-bearer-auth",
+      "filename": "main_test.go",
+      "id": "test-ex-l6-stage-f-password-hashing-bearer-auth",
+      "test_code": "package auth\n\nimport \"testing\"\n\nfunc TestExtractBearerToken(t *testing.T) {\n\ttok, ok := ExtractBearerToken(\"Bearer secret-token-123\")\n\tif !ok || tok != \"secret-token-123\" {\n\t\tt.Fatalf(\"ExtractBearerToken = (%q, %v), want (\\\"secret-token-123\\\", true)\", tok, ok)\n\t}\n\t_, ok = ExtractBearerToken(\"Basic user:pass\")\n\tif ok {\n\t\tt.Fatal(\"expected false for Basic auth header\")\n\t}\n\t_, ok = ExtractBearerToken(\"Bearer \")\n\tif ok {\n\t\tt.Fatal(\"expected false for empty token\")\n\t}\n}\n"
+    },
+    {
+      "created_at": "2026-11-08T04:08:15Z",
+      "exercise_id": "ex-l7-stage-g-table-driven-tests-httptest",
+      "filename": "main_test.go",
+      "id": "test-ex-l7-stage-g-table-driven-tests-httptest",
+      "test_code": "package slug\n\nimport \"testing\"\n\nfunc TestSlugifyTitle(t *testing.T) {\n\ttests := []struct {\n\t\tinput string\n\t\twant  string\n\t}{\n\t\t{\"Hello World\", \"hello-world\"},\n\t\t{\"  Go   Backend   Academy  \", \"go-backend-academy\"},\n\t\t{\"API Design 101\", \"api-design-101\"},\n\t}\n\tfor _, tc := range tests {\n\t\tgot := SlugifyTitle(tc.input)\n\t\tif got != tc.want {\n\t\t\tt.Errorf(\"SlugifyTitle(%q) = %q, want %q\", tc.input, got, tc.want)\n\t\t}\n\t}\n}\n"
+    },
+    {
+      "created_at": "2026-11-08T04:08:15Z",
+      "exercise_id": "ex-l8-stage-h-handler-service-repo-layers",
+      "filename": "main_test.go",
+      "id": "test-ex-l8-stage-h-handler-service-repo-layers",
+      "test_code": "package money\n\nimport \"testing\"\n\nfunc TestAddMoney(t *testing.T) {\n\ta := \u0026Money{Cents: 500, Currency: \"USD\"}\n\tb := \u0026Money{Cents: 750, Currency: \"USD\"}\n\tc, err := AddMoney(a, b)\n\tif err != nil || c.Cents != 1250 || c.Currency != \"USD\" {\n\t\tt.Fatalf(\"AddMoney(500, 750) = (%+v, %v), want ({1250, USD}, nil)\", c, err)\n\t}\n\tif _, err := AddMoney(nil, b); err == nil {\n\t\tt.Fatal(\"expected error when a is nil\")\n\t}\n\tdiff := \u0026Money{Cents: 100, Currency: \"EUR\"}\n\tif _, err := AddMoney(a, diff); err == nil {\n\t\tt.Fatal(\"expected error when currencies differ\")\n\t}\n}\n"
+    },
+    {
+      "created_at": "2026-11-08T04:08:15Z",
+      "exercise_id": "ex-l9-stage-i-redis-cache-aside-backoff",
+      "filename": "main_test.go",
+      "id": "test-ex-l9-stage-i-redis-cache-aside-backoff",
+      "test_code": "package retry\n\nimport \"testing\"\n\nfunc TestComputeBackoffMs(t *testing.T) {\n\tif got := ComputeBackoffMs(100, 1000, 1); got != 100 {\n\t\tt.Fatalf(\"attempt 1 = %d, want 100\", got)\n\t}\n\tif got := ComputeBackoffMs(100, 1000, 3); got != 400 {\n\t\tt.Fatalf(\"attempt 3 = %d, want 400\", got)\n\t}\n\tif got := ComputeBackoffMs(100, 1000, 5); got != 1000 {\n\t\tt.Fatalf(\"attempt 5 = %d, want 1000 (capped)\", got)\n\t}\n}\n"
+    }
+  ],
+  "exercises": [
+    {
+      "additional_challenge": "Add an Idempotency-Key request header check so retrying a POST request with the same UUID returns the cached response instead of re-executing.",
+      "expected_output": "Invarian: Hardened Server Timeouts\nInvarian: Echo Max Bytes Limit\nInvarian: Echo Rejects Unknown Fields\nStatus: 200 OK | Content-Type: application/json",
+      "id": "ex-l0-backend-http-lifecycle",
+      "lesson_id": "l0-backend-http-lifecycle",
+      "solution_code": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"time\"\n)\n\nfunc NewHardenedServer(addr string) *http.Server {\n\tmux := http.NewServeMux()\n\tmux.HandleFunc(\"POST /api/v1/echo\", func(w http.ResponseWriter, r *http.Request) {\n\t\tr.Body = http.MaxBytesReader(w, r.Body, 64\u003c\u003c10)\n\t\tdefer r.Body.Close()\n\n\t\tvar payload struct {\n\t\t\tMessage string `json:\"message\"`\n\t\t}\n\t\tdec := json.NewDecoder(r.Body)\n\t\tdec.DisallowUnknownFields()\n\t\tif err := dec.Decode(\u0026payload); err != nil {\n\t\t\thttp.Error(w, `{\"error\":\"invalid payload\"}`, http.StatusBadRequest)\n\t\t\treturn\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(http.StatusOK)\n\t\t_ = json.NewEncoder(w).Encode(payload)\n\t})\n\n\treturn \u0026http.Server{\n\t\tAddr:              addr,\n\t\tHandler:           mux,\n\t\tReadHeaderTimeout: 5 * time.Second,\n\t\tReadTimeout:       10 * time.Second,\n\t\tWriteTimeout:      15 * time.Second,\n\t\tIdleTimeout:       60 * time.Second,\n\t}\n}",
+      "solution_explanation": "Setting ReadHeaderTimeout protects the server during the initial header read phase, while http.MaxBytesReader wraps the underlying io.ReadCloser so that reading past 65,536 bytes immediately halts and closes the connection.",
+      "starter_code": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"time\"\n)\n\nfunc NewHardenedServer(addr string) *http.Server {\n\tmux := http.NewServeMux()\n\tmux.HandleFunc(\"POST /api/v1/echo\", func(w http.ResponseWriter, r *http.Request) {\n\t\t// STEP: Limit r.Body to 64KB (64 \u003c\u003c 10) using http.MaxBytesReader\n\t\t// STEP: Decode JSON with DisallowUnknownFields() and return 200 OK JSON\n\t})\n\n\treturn \u0026http.Server{\n\t\tAddr:    addr,\n\t\tHandler: mux,\n\t\t// STEP: Set ReadHeaderTimeout (5s), ReadTimeout (10s), WriteTimeout (15s), IdleTimeout (60s)\n\t}\n}",
+      "task_description": "Configure an http.Server with a 5-second ReadHeaderTimeout, 10-second ReadTimeout, and a POST /api/v1/echo handler that rejects payloads larger than 64KB using http.MaxBytesReader.",
+      "title": "Build a Contract-Validated Health \u0026 Echo Endpoint with Slowloris Protection"
+    },
+    {
+      "additional_challenge": "Show how `json.Decoder.UseNumber()` preserves 64-bit integer precision when decoding into `map[string]any`.",
+      "expected_output": "Invarian: Merge Settings Preserves Omitted Fields\nInvarian: Merge Settings Applies Explicit False",
+      "id": "ex-l0-rest-json-api-contracts",
+      "lesson_id": "l0-rest-json-api-contracts",
+      "solution_code": "package api\n\nfunc MergeSettings(currentMaxConns int, currentTLS bool, patchMaxConns *int, patchTLS *bool) (int, bool) {\n\tif patchMaxConns != nil {\n\t\tcurrentMaxConns = *patchMaxConns\n\t}\n\tif patchTLS != nil {\n\t\tcurrentTLS = *patchTLS\n\t}\n\treturn currentMaxConns, currentTLS\n}",
+      "solution_explanation": "Checking `!= nil` before dereferencing allows a `PATCH` endpoint to distinguish omitted JSON properties from explicit `0` or `false` values.",
+      "starter_code": "package api\n\nfunc MergeSettings(currentMaxConns int, currentTLS bool, patchMaxConns *int, patchTLS *bool) (int, bool) {\n\t// STEP: Only update currentMaxConns if patchMaxConns != nil\n\t// STEP: Only update currentTLS if patchTLS != nil\n\treturn currentMaxConns, currentTLS\n}",
+      "task_description": "Complete MergeSettings(currentMaxConns int, currentTLS bool, patchMaxConns *int, patchTLS *bool) (int, bool) so only non-nil patch fields overwrite current settings.",
+      "title": "Implement Safe Partial PATCH Merging with Pointer DTO Fields"
+    },
+    {
+      "additional_challenge": "Create a Git commit (`git add . \u0026\u0026 git commit -m \"feat: add greeting\"`) in your local practice repo.",
+      "expected_output": "Invarian: Greeting Default\nInvarian: Greeting Custom Name",
+      "id": "ex-l0-stage-a-git-go-workspace",
+      "lesson_id": "l0-stage-a-git-go-workspace",
+      "solution_code": "package main\n\nimport \"fmt\"\n\nfunc Greeting(name string) string {\n\tif name == \"\" {\n\t\tname = \"Backend Engineer\"\n\t}\n\treturn fmt.Sprintf(\"Hello, %s!\", name)\n}",
+      "solution_explanation": "fmt.Sprintf formats and returns a string without printing to stdout, making it deterministic to test.",
+      "starter_code": "package main\n\nimport \"fmt\"\n\nfunc Greeting(name string) string {\n\t// STEP: Default empty name to \"Backend Engineer\" and format with fmt.Sprintf(\"Hello, %s!\", name)\n\treturn \"\"\n}",
+      "task_description": "Implement Greeting(name string) string using fmt.Sprintf so that an empty name defaults to \"Backend Engineer\" and returns \"Hello, \u003cname\u003e!\".",
+      "title": "Write Your First Testable Greeting Function in package main"
+    },
+    {
+      "additional_challenge": "Di pelajaran berikutnya (Level 1.0B), kita akan meningkatkan fungsi ini dengan ResolvePort(envVal string) menggunakan os.Getenv dan percabangan if/else!",
+      "expected_output": "Invarian: DefaultPort mengembalikan ':8080' sebagai alamat listen port server.",
+      "id": "ex-l0-stage-a-what-is-backend",
+      "lesson_id": "l0-stage-a-what-is-backend",
+      "solution_code": "package main\n\n// DefaultPort mengembalikan alamat listen port default untuk server HTTP\nfunc DefaultPort() string {\n\treturn \":8080\"\n}",
+      "solution_explanation": "Fungsi DefaultPort mengembalikan port default tanpa memerlukan pembacaan environment atau branching yang rumit di hari pertama.",
+      "starter_code": "package main\n\n// DefaultPort mengembalikan alamat listen port default untuk server HTTP\nfunc DefaultPort() string {\n\t// STEP: Kembalikan string \":8080\"\n\treturn \"\"\n}",
+      "task_description": "Implementasikan fungsi DefaultPort() string yang mengembalikan alamat port default \":8080\" untuk server HTTP.",
+      "title": "Konfigurasi Alamat Listen Port Default Server HTTP"
+    },
+    {
+      "additional_challenge": "Extend the check to support multi-tenant isolation by verifying actorTenantID == docTenantID even for tenant admins.",
+      "expected_output": "Invarian: Owner Can Access\nInvarian: Non Owner Rejected\nInvarian: Admin Can Access\nInvarian: Empty I Ds Rejected",
+      "id": "ex-l0-stateless-vs-stateful-arch",
+      "lesson_id": "l0-stateless-vs-stateful-arch",
+      "solution_code": "package security\n\nfunc CanAccessDocument(actorUserID, actorRole, docOwnerID string) bool {\n\tif actorUserID == \"\" || docOwnerID == \"\" {\n\t\treturn false\n\t}\n\treturn actorUserID == docOwnerID || actorRole == \"admin\"\n}",
+      "solution_explanation": "Failing closed when identifiers are empty prevents zero-value string matching bugs ('' == '') in Go structs.",
+      "starter_code": "package security\n\nfunc CanAccessDocument(actorUserID, actorRole, docOwnerID string) bool {\n\t// STEP: Return false if actorUserID or docOwnerID is empty\n\t// STEP: Return true if actorUserID == docOwnerID or actorRole == \"admin\"\n\treturn false\n}",
+      "task_description": "Complete CanAccessDocument(actorUserID, actorRole, docOwnerID string) bool so that access is granted only if the actor is the document owner or has the 'admin' role, rejecting empty IDs.",
+      "title": "Enforce Object-Level Authorization (BOLA Prevention) in an HTTP Handler"
+    },
+    {
+      "additional_challenge": "Write a generic PaginatedResponse[T any] struct that wraps []T items with TotalCount and NextCursor.",
+      "expected_output": "Invarian: Wrapped Not Found Returns404\nInvarian: Wrapped Quota Exceeded Returns429\nInvarian: Nil Error Returns200",
+      "id": "ex-l1-interfaces-errors-generics",
+      "lesson_id": "l1-interfaces-errors-generics",
+      "solution_code": "package domain\n\nimport \"errors\"\n\nvar ErrRecordNotFound = errors.New(\"record not found\")\n\ntype QuotaExceededError struct {\n\tLimit int\n}\n\nfunc (e *QuotaExceededError) Error() string { return \"quota exceeded\" }\n\nfunc ClassifyRepositoryError(err error) int {\n\tif err == nil {\n\t\treturn 200\n\t}\n\tif errors.Is(err, ErrRecordNotFound) {\n\t\treturn 404\n\t}\n\tvar qErr *QuotaExceededError\n\tif errors.As(err, \u0026qErr) {\n\t\treturn 429\n\t}\n\treturn 500\n}",
+      "solution_explanation": "errors.Is checks value identity across wrapped error chains, while errors.As extracts a pointer to a specific concrete error struct from anywhere in the chain.",
+      "starter_code": "package domain\n\nimport \"errors\"\n\nvar ErrRecordNotFound = errors.New(\"record not found\")\n\ntype QuotaExceededError struct {\n\tLimit int\n}\n\nfunc (e *QuotaExceededError) Error() string { return \"quota exceeded\" }\n\nfunc ClassifyRepositoryError(err error) int {\n\tif err == nil {\n\t\treturn 200\n\t}\n\t// STEP: Use errors.Is for ErrRecordNotFound -\u003e 404\n\t// STEP: Use errors.As for *QuotaExceededError -\u003e 429\n\treturn 500\n}",
+      "task_description": "Implement ClassifyRepositoryError(err error) int that maps wrapped ErrRecordNotFound to HTTP 404 (404), wrapped *QuotaExceededError to HTTP 429 (429), and any other non-nil error to HTTP 500 (500).",
+      "title": "Wrap Domain Errors and Classify with errors.Is \u0026 errors.As"
+    },
+    {
+      "additional_challenge": "Show how a 3-index slice expression src[:n:n] restricts capacity without copying when you only want to prevent append overwrites (not memory retention).",
+      "expected_output": "Invarian: Safe Prefix Detaches Backing Array\nInvarian: Safe Prefix Append Does Not Overwrite Original\nAllocations: 1 allocs/op",
+      "id": "ex-l1-memory-slices-maps-escape",
+      "lesson_id": "l1-memory-slices-maps-escape",
+      "solution_code": "package memory\n\nfunc SafePrefix(src []int, n int) []int {\n\tif n \u003c= 0 || len(src) == 0 {\n\t\treturn nil\n\t}\n\tif n \u003e len(src) {\n\t\tn = len(src)\n\t}\n\tout := make([]int, n)\n\tcopy(out, src[:n])\n\treturn out\n}",
+      "solution_explanation": "By allocating make([]int, n) and copying, cap(out) == len(out) == n, completely decoupling out from src's backing array.",
+      "starter_code": "package memory\n\nfunc SafePrefix(src []int, n int) []int {\n\t// STEP: Bounds check n against len(src)\n\t// STEP: Allocate a detached slice of length n and copy elements\n\treturn nil\n}",
+      "task_description": "Implement SafePrefix(src []int, n int) []int that returns the first n elements in a detached backing array so that appending to the returned slice never mutates src and never pins src's tail in memory.",
+      "title": "Fix Sub-Slice Memory Retention \u0026 Side-Effect Mutation"
+    },
+    {
+      "additional_challenge": "Write a loop that validates a slice of ages and stops on the first error.",
+      "expected_output": "Invarian: Validate Account Age Bounds\nInvarian: Validate Account Age Adult",
+      "id": "ex-l1-stage-b-control-flow-loops-functions",
+      "lesson_id": "l1-stage-b-control-flow-loops-functions",
+      "solution_code": "package auth\n\nimport \"errors\"\n\nfunc ValidateAccountAge(age int) (bool, error) {\n\tif age \u003c 0 || age \u003e 130 {\n\t\treturn false, errors.New(\"age out of realistic bounds\")\n\t}\n\tif age \u003c 18 {\n\t\treturn false, nil\n\t}\n\treturn true, nil\n}",
+      "solution_explanation": "Multiple return values cleanly separate domain outcomes from validation errors.",
+      "starter_code": "package auth\n\nimport \"errors\"\n\nfunc ValidateAccountAge(age int) (bool, error) {\n\t// STEP: Return error if age \u003c 0 || age \u003e 130, (false, nil) if age \u003c 18, else (true, nil)\n\treturn false, nil\n}",
+      "task_description": "Implement ValidateAccountAge(age int) (bool, error) returning an error when age \u003c 0 || age \u003e 130, (false, nil) when age \u003c 18, and (true, nil) otherwise.",
+      "title": "Guard Clauses \u0026 Multiple Return Values"
+    },
+    {
+      "additional_challenge": "Define a custom struct error `type ValidationError struct { Field string }` implementing `Error() string` and match it with `errors.As`.",
+      "expected_output": "Invarian: Validate And Wrap Order Sentinel\nInvarian: Validate And Wrap Order Unwrap",
+      "id": "ex-l1-stage-b-interfaces-errors-fundamentals",
+      "lesson_id": "l1-stage-b-interfaces-errors-fundamentals",
+      "solution_code": "package service\n\nimport (\n\t\"errors\"\n\t\"fmt\"\n)\n\nvar ErrEmptyOrderID = errors.New(\"empty order id\")\n\nfunc ValidateAndWrapOrder(orderID string, cause error) error {\n\tif orderID == \"\" {\n\t\treturn ErrEmptyOrderID\n\t}\n\tif cause != nil {\n\t\treturn fmt.Errorf(\"processing order %s: %w\", orderID, cause)\n\t}\n\treturn nil\n}",
+      "solution_explanation": "%w wraps the underlying error so errors.Is and errors.As can inspect it.",
+      "starter_code": "package service\n\nimport (\n\t\"errors\"\n\t\"fmt\"\n)\n\nvar ErrEmptyOrderID = errors.New(\"empty order id\")\n\nfunc ValidateAndWrapOrder(orderID string, cause error) error {\n\t// STEP: Return ErrEmptyOrderID if orderID == \"\", and wrap non-nil cause with %w\n\treturn nil\n}",
+      "task_description": "Implement ValidateAndWrapOrder(orderID string, cause error) error returning ErrEmptyOrderID when orderID == \"\" and wrapping non-nil cause with fmt.Errorf(\"...: %w\", cause).",
+      "title": "Sentinel Error Checking \u0026 Error Chain Wrapping with %w"
+    },
+    {
+      "additional_challenge": "Write a unit test using `t.Run` subtests for valid JSON, missing title, and invalid syntax.",
+      "expected_output": "Invarian: Parse Task J S O N Valid\nInvarian: Parse Task J S O N Missing Title",
+      "id": "ex-l1-stage-b-json-files-unit-testing",
+      "lesson_id": "l1-stage-b-json-files-unit-testing",
+      "solution_code": "package dto\n\nimport (\n\t\"encoding/json\"\n\t\"errors\"\n)\n\ntype CreateTaskInput struct {\n\tTitle string `json:\"title\"`\n\tDone  bool   `json:\"done\"`\n}\n\nfunc ParseTaskJSON(raw []byte) (CreateTaskInput, error) {\n\tvar in CreateTaskInput\n\tif err := json.Unmarshal(raw, \u0026in); err != nil {\n\t\treturn CreateTaskInput{}, err\n\t}\n\tif in.Title == \"\" {\n\t\treturn CreateTaskInput{}, errors.New(\"title is required\")\n\t}\n\treturn in, nil\n}",
+      "solution_explanation": "Passing \u0026in allows json.Unmarshal to mutate the struct and populate its exported fields.",
+      "starter_code": "package dto\n\nimport (\n\t\"encoding/json\"\n\t\"errors\"\n)\n\ntype CreateTaskInput struct {\n\tTitle string `json:\"title\"`\n\tDone  bool   `json:\"done\"`\n}\n\nfunc ParseTaskJSON(raw []byte) (CreateTaskInput, error) {\n\t// STEP: Unmarshal raw into CreateTaskInput and verify in.Title != \"\"\n\treturn CreateTaskInput{}, nil\n}",
+      "task_description": "Implement ParseTaskJSON(raw []byte) (CreateTaskInput, error) using json.Unmarshal(raw, \u0026in) and return an error if in.Title == \"\".",
+      "title": "Unmarshal JSON into Exported Struct Fields \u0026 Validate Required Title"
+    },
+    {
+      "additional_challenge": "Return both the frequency map and a slice of unique statuses in the order they first appeared.",
+      "expected_output": "Invarian: Count Statuses Non Nil Map\nInvarian: Count Statuses Skips Empty",
+      "id": "ex-l1-stage-b-slices-maps-iteration",
+      "lesson_id": "l1-stage-b-slices-maps-iteration",
+      "solution_code": "package stats\n\nfunc CountStatuses(items []string) map[string]int {\n\tcounts := make(map[string]int, len(items))\n\tfor _, s := range items {\n\t\tif s == \"\" {\n\t\t\tcontinue\n\t\t}\n\t\tcounts[s]++\n\t}\n\treturn counts\n}",
+      "solution_explanation": "make() allocates the underlying hash buckets so writes never panic.",
+      "starter_code": "package stats\n\nfunc CountStatuses(items []string) map[string]int {\n\t// STEP: Initialize map with make(map[string]int), loop with range, skip \"\", increment counts[s]++\n\treturn nil\n}",
+      "task_description": "Implement CountStatuses(items []string) map[string]int that allocates a map using make(map[string]int), skips empty strings \"\", and increments counts[s]++.",
+      "title": "Initialize a Map with make() and Count Non-Empty Statuses"
+    },
+    {
+      "additional_challenge": "Implement `(w *Wallet) Withdraw(amountCents int64) error` that rejects overdrafts (`amountCents \u003e w.BalanceCents`).",
+      "expected_output": "Invarian: Wallet Deposit Mutates Balance\nInvarian: Wallet Deposit Nil And Negative Guards",
+      "id": "ex-l1-stage-b-structs-methods-pointers",
+      "lesson_id": "l1-stage-b-structs-methods-pointers",
+      "solution_code": "package wallet\n\nimport \"errors\"\n\ntype Wallet struct {\n\tBalanceCents int64\n}\n\nfunc (w *Wallet) Deposit(amountCents int64) error {\n\tif w == nil {\n\t\treturn errors.New(\"wallet pointer is nil\")\n\t}\n\tif amountCents \u003c= 0 {\n\t\treturn errors.New(\"deposit amount must be positive\")\n\t}\n\tw.BalanceCents += amountCents\n\treturn nil\n}",
+      "solution_explanation": "Pointer receivers mutate the underlying struct and can safely check for a nil receiver.",
+      "starter_code": "package wallet\n\nimport \"errors\"\n\ntype Wallet struct {\n\tBalanceCents int64\n}\n\nfunc (w *Wallet) Deposit(amountCents int64) error {\n\t// STEP: Guard w == nil and amountCents \u003c= 0, then add to w.BalanceCents\n\treturn nil\n}",
+      "task_description": "Implement (w *Wallet) Deposit(amountCents int64) error so that it checks w == nil and amountCents \u003c= 0 before adding amountCents to w.BalanceCents.",
+      "title": "Pointer Receiver Mutation with Nil \u0026 Positive Amount Guards"
+    },
+    {
+      "additional_challenge": "Format the integer cents as a display string like \"$40.00\" using fmt.Sprintf(\"$%d.%02d\", cents/100, cents%100).",
+      "expected_output": "Invarian: Compute Invoice Cents\nInvarian: Compute Invoice Zero And Clamp",
+      "id": "ex-l1-stage-b-variables-types-zerovalues",
+      "lesson_id": "l1-stage-b-variables-types-zerovalues",
+      "solution_code": "package billing\n\nfunc ComputeInvoiceCents(unitPriceCents int64, quantity int64, discountCents int64) int64 {\n\tif unitPriceCents \u003c= 0 || quantity \u003c= 0 {\n\t\treturn 0\n\t}\n\tsubtotal := unitPriceCents * quantity\n\tif discountCents \u003e subtotal {\n\t\treturn 0\n\t}\n\treturn subtotal - discountCents\n}",
+      "solution_explanation": "Integer arithmetic in int64 cents is deterministic and exact.",
+      "starter_code": "package billing\n\nfunc ComputeInvoiceCents(unitPriceCents int64, quantity int64, discountCents int64) int64 {\n\t// STEP: Guard \u003c= 0 inputs, compute subtotal := unitPriceCents * quantity, and subtract discountCents safely\n\treturn 0\n}",
+      "task_description": "Implement ComputeInvoiceCents(unitPriceCents int64, quantity int64, discountCents int64) int64. Return 0 if unitPriceCents \u003c= 0 or quantity \u003c= 0, and clamp to 0 if discountCents \u003e subtotal.",
+      "title": "Exact Invoice Calculation in Integer Cents"
+    },
+    {
+      "additional_challenge": "Check `unsafe.Sizeof(MetricPoint{})` before and after reordering struct fields.",
+      "expected_output": "Invarian: Is Exported Identifier",
+      "id": "ex-l1-toolchain-modules-packages",
+      "lesson_id": "l1-toolchain-modules-packages",
+      "solution_code": "package goast\n\nimport (\n\t\"unicode\"\n\t\"unicode/utf8\"\n)\n\nfunc IsExportedIdentifier(name string) bool {\n\tif name == \"\" {\n\t\treturn false\n\t}\n\tr, _ := utf8.DecodeRuneInString(name)\n\treturn unicode.IsUpper(r)\n}",
+      "solution_explanation": "According to the Go Language Specification, an identifier is exported if its first character is a Unicode uppercase letter (`Unicode class Lu`).",
+      "starter_code": "package goast\n\nimport (\n\t\"unicode\"\n\t\"unicode/utf8\"\n)\n\nfunc IsExportedIdentifier(name string) bool {\n\t// STEP: Decode first rune with utf8.DecodeRuneInString and check unicode.IsUpper\n\treturn false\n}",
+      "task_description": "Implement IsExportedIdentifier(name string) bool that returns true if name is non-empty and its first rune is an uppercase letter.",
+      "title": "Validate Module Path \u0026 Exported Identifier Rules"
+    },
+    {
+      "additional_challenge": "Write a Caddyfile snippet that reverse-proxies `api.example.com` to `localhost:8080` with automatic TLS and structured access logs.",
+      "expected_output": "Invarian: Recommend Go Mem Limit Mi B -\u003e 1024 MiB container =\u003e GOMEMLIMIT=870MiB\nInvarian: Evaluate Readiness",
+      "id": "ex-l10-devops-docker-k8s-production",
+      "lesson_id": "l10-devops-docker-k8s-production",
+      "solution_code": "package ops\n\nfunc RecommendGoMemLimitMiB(containerLimitMiB int) int {\n\tlimit := (containerLimitMiB * 85) / 100\n\tif limit \u003c 64 {\n\t\treturn 64\n\t}\n\treturn limit\n}\n\nfunc EvaluateReadiness(isShuttingDown, dbHealthy bool) int {\n\tif isShuttingDown || !dbHealthy {\n\t\treturn 503\n\t}\n\treturn 200\n}",
+      "solution_explanation": "Reserving 15% headroom between `GOMEMLIMIT` and the container's hard cgroup memory limit accommodates non-heap memory (goroutine stacks, runtime metadata, OS buffers).",
+      "starter_code": "package ops\n\nfunc RecommendGoMemLimitMiB(containerLimitMiB int) int {\n\t// STEP: Return 85% of containerLimitMiB (minimum 64 MiB)\n\treturn 0\n}\n\nfunc EvaluateReadiness(isShuttingDown, dbHealthy bool) int {\n\t// STEP: Return 200 OK or 503 Service Unavailable\n\treturn 503\n}",
+      "task_description": "Implement RecommendGoMemLimitMiB(containerLimitMiB int) int (returning 85% of containerLimitMiB) and EvaluateReadiness(isShuttingDown, dbHealthy bool) int (returning 200 only when not shutting down and DB is healthy, else 503).",
+      "title": "Calculate Safe GOMEMLIMIT \u0026 Evaluate Readiness State"
+    },
+    {
+      "additional_challenge": "Extend the function to strip multiple hops of internal load balancers using a `map[string]bool` of trusted proxy IPs.",
+      "expected_output": "Invarian: Resolve Client I P Blocks Spoofed Leftmost\nInvarian: Untrusted Peer Ignores X F F",
+      "id": "ex-l10-reverse-proxy-cicd-rollback-dr",
+      "lesson_id": "l10-reverse-proxy-cicd-rollback-dr",
+      "solution_code": "package proxy\n\nimport \"strings\"\n\nfunc ResolveClientIP(remoteIP, xff string, isTrustedPeer bool) string {\n\tif !isTrustedPeer || strings.TrimSpace(xff) == \"\" {\n\t\treturn remoteIP\n\t}\n\tparts := strings.Split(xff, \",\")\n\treturn strings.TrimSpace(parts[len(parts)-1])\n}",
+      "solution_explanation": "When a single trusted reverse proxy sits in front of Go, the proxy appends the true client socket IP as the final (rightmost) entry in `X-Forwarded-For`.",
+      "starter_code": "package proxy\n\nimport \"strings\"\n\nfunc ResolveClientIP(remoteIP, xff string, isTrustedPeer bool) string {\n\t// STEP: If !isTrustedPeer or strings.TrimSpace(xff) == \"\", return remoteIP\n\t// STEP: Split xff by \",\" and return strings.TrimSpace of the last (rightmost) element\n\treturn remoteIP\n}",
+      "task_description": "Complete ResolveClientIP(remoteIP, xff string, isTrustedPeer bool) string that returns remoteIP if !isTrustedPeer or xff is empty, and otherwise returns the rightmost comma-separated IP in xff.",
+      "title": "Implement Spoof-Resistant Right-to-Left X-Forwarded-For Extraction"
+    },
+    {
+      "additional_challenge": "Explore all 14 Production Case Studies in the Projects \u0026 Case Studies view to see complete schemas, APIs, and failure drills.",
+      "expected_output": "Invarian: Evaluate Capstone Readiness200\nInvarian: Evaluate Capstone Readiness503 On Shutdown Or D B Down",
+      "id": "ex-l10-stage-j-capstone-production-blueprint",
+      "lesson_id": "l10-stage-j-capstone-production-blueprint",
+      "solution_code": "package capstone\n\nimport \"errors\"\n\ntype ReadinessGate struct {\n\tDBConnected  bool\n\tMigrationsUp bool\n\tShuttingDown bool\n}\n\nfunc EvaluateCapstoneReadiness(g ReadinessGate) (int, error) {\n\tif g.ShuttingDown {\n\t\treturn 503, errors.New(\"server is draining connections\")\n\t}\n\tif !g.DBConnected || !g.MigrationsUp {\n\t\treturn 503, errors.New(\"database or migrations not ready\")\n\t}\n\treturn 200, nil\n}",
+      "solution_explanation": "Readiness probes protect traffic routing during startup, DB outages, and graceful shutdown.",
+      "starter_code": "package capstone\n\nimport \"errors\"\n\ntype ReadinessGate struct {\n\tDBConnected  bool\n\tMigrationsUp bool\n\tShuttingDown bool\n}\n\nfunc EvaluateCapstoneReadiness(g ReadinessGate) (int, error) {\n\t// STEP: Return 503 if ShuttingDown, !DBConnected, or !MigrationsUp; otherwise return 200, nil\n\treturn 0, nil\n}",
+      "task_description": "Implement EvaluateCapstoneReadiness(g ReadinessGate) (int, error) returning 503 when g.ShuttingDown || !g.DBConnected || !g.MigrationsUp, and (200, nil) when ready.",
+      "title": "Evaluate Capstone Readiness Gate (DB, Migrations \u0026 Graceful Shutdown)"
+    },
+    {
+      "additional_challenge": "Replace manual channel coordination with `golang.org/x/sync/errgroup` (`g.SetLimit(maxWorkers)`) and compare readability.",
+      "expected_output": "Invarian: Bounded Pool Respects Max Workers\nInvarian: Bounded Pool Cancels On Error\nInvarian: Zero Goroutine Leaks",
+      "id": "ex-l2-gmp-channels-context-workers",
+      "lesson_id": "l2-gmp-channels-context-workers",
+      "solution_code": "package concurrency\n\nimport (\n\t\"context\"\n\t\"sync\"\n)\n\nfunc RunBoundedPool(ctx context.Context, maxWorkers int, jobs []int, fn func(context.Context, int) error) error {\n\tif maxWorkers \u003c= 0 {\n\t\tmaxWorkers = 1\n\t}\n\tctx, cancel := context.WithCancel(ctx)\n\tdefer cancel()\n\n\tjobCh := make(chan int)\n\tvar (\n\t\twg       sync.WaitGroup\n\t\tfirstErr error\n\t\terrOnce  sync.Once\n\t)\n\n\tfor i := 0; i \u003c maxWorkers; i++ {\n\t\twg.Add(1)\n\t\tgo func() {\n\t\t\tdefer wg.Done()\n\t\t\tfor job := range jobCh {\n\t\t\t\tif err := fn(ctx, job); err != nil {\n\t\t\t\t\terrOnce.Do(func() {\n\t\t\t\t\t\tfirstErr = err\n\t\t\t\t\t\tcancel()\n\t\t\t\t\t})\n\t\t\t\t\treturn\n\t\t\t\t}\n\t\t\t}\n\t\t}()\n\t}\n\n\tfor _, job := range jobs {\n\t\tif ctx.Err() != nil {\n\t\t\tbreak\n\t\t}\n\t\tselect {\n\t\tcase \u003c-ctx.Done():\n\t\tcase jobCh \u003c- job:\n\t\t}\n\t}\n\tclose(jobCh)\n\twg.Wait()\n\n\tif firstErr != nil {\n\t\treturn firstErr\n\t}\n\treturn ctx.Err()\n}",
+      "solution_explanation": "Combining a derived `context.WithCancel`, `sync.Once` to capture the first error, and `sync.WaitGroup` guarantees bounded concurrency and deterministic worker cleanup before the function returns.",
+      "starter_code": "package concurrency\n\nimport (\n\t\"context\"\n\t\"sync\"\n)\n\nfunc RunBoundedPool(ctx context.Context, maxWorkers int, jobs []int, fn func(context.Context, int) error) error {\n\t// STEP: Create a jobs channel and error channel\n\t// STEP: Spawn maxWorkers goroutines tracked by sync.WaitGroup\n\t// STEP: Respect ctx.Done() so workers don't leak on cancellation\n\treturn nil\n}",
+      "task_description": "Write RunBoundedPool(ctx context.Context, maxWorkers int, jobs []int, fn func(context.Context, int) error) error that processes jobs concurrently using at most maxWorkers goroutines and halts early if ctx is canceled.",
+      "title": "Implement a Context-Cancelable Bounded Worker Pool"
+    },
+    {
+      "additional_challenge": "Run `go test -bench=. -benchmem` comparing `fmt.Sprintf` vs `strconv.Itoa` in a tight loop.",
+      "expected_output": "Invarian: Should Return Buffer To Pool",
+      "id": "ex-l2-profiling-pprof-benchmarks",
+      "lesson_id": "l2-profiling-pprof-benchmarks",
+      "solution_code": "package poolutil\n\nfunc ShouldReturnBufferToPool(bufCap, maxPooledCap int) bool {\n\treturn bufCap \u003e 0 \u0026\u0026 bufCap \u003c= maxPooledCap\n}",
+      "solution_explanation": "Refusing to return buffers larger than 64KB (`65536`) to `sync.Pool` prevents rare multi-megabyte requests from permanently inflating memory footprint (documented in Go standard library `fmt` and `encoding/json` pools).",
+      "starter_code": "package poolutil\n\nfunc ShouldReturnBufferToPool(bufCap, maxPooledCap int) bool {\n\t// STEP: Return true only if bufCap \u003e 0 and bufCap \u003c= maxPooledCap\n\treturn false\n}",
+      "task_description": "Implement ShouldReturnBufferToPool(bufCap, maxPooledCap int) bool that returns true only when bufCap \u003e 0 and bufCap \u003c= maxPooledCap so oversized buffers are not pinned in sync.Pool.",
+      "title": "Safely Recycle a Pooled Buffer with Size Cap Guard"
+    },
+    {
+      "additional_challenge": "Open the Concurrency Lab to simulate how buffered vs unbuffered channels behave when worker count changes!",
+      "expected_output": "Invarian: Sum Squares Safe Empty\nInvarian: Sum Squares Safe Values",
+      "id": "ex-l2-stage-c-goroutines-channels-waitgroup",
+      "lesson_id": "l2-stage-c-goroutines-channels-waitgroup",
+      "solution_code": "package conc\n\nfunc SumSquaresSafe(nums []int) int {\n\tsum := 0\n\tfor _, n := range nums {\n\t\tsum += n * n\n\t}\n\treturn sum\n}",
+      "solution_explanation": "Mastering deterministic loop reduction and race-free state ownership prepares you for Lesson 2.1 (Bounded Worker Pools \u0026 GMP Scheduler).",
+      "starter_code": "package conc\n\nfunc SumSquaresSafe(nums []int) int {\n\tsum := 0\n\t// STEP: Loop over nums with range, accumulate n * n into sum, and return sum\n\treturn 0\n}",
+      "task_description": "Implement SumSquaresSafe(nums []int) int by iterating over nums with a range loop, adding n * n to sum, and returning sum.",
+      "title": "Compute Deterministic Sum of Squares Before Scaling to Worker Pools"
+    },
+    {
+      "additional_challenge": "Inject the request ID into `r.Context()` using an unexported key type `type ctxKeyRequestID struct{}` so `log/slog` handlers can log it automatically.",
+      "expected_output": "Invarian: Middleware Preserves Request I D\nInvarian: Middleware Recovers Panic With500",
+      "id": "ex-l3-net-http-routers",
+      "lesson_id": "l3-net-http-routers",
+      "solution_code": "package middleware\n\nimport \"net/http\"\n\nfunc WithRecoveryAndRequestID(next http.Handler) http.Handler {\n\treturn http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {\n\t\treqID := r.Header.Get(\"X-Request-ID\")\n\t\tif reqID == \"\" {\n\t\t\treqID = \"req-generated\"\n\t\t}\n\t\tw.Header().Set(\"X-Request-ID\", reqID)\n\n\t\tdefer func() {\n\t\t\tif rec := recover(); rec != nil {\n\t\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\t\tw.WriteHeader(http.StatusInternalServerError)\n\t\t\t\t_, _ = w.Write([]byte(`{\"error\":\"internal server error\"}`))\n\t\t\t}\n\t\t}()\n\n\t\tnext.ServeHTTP(w, r)\n\t})\n}",
+      "solution_explanation": "By registering `defer` before calling `next.ServeHTTP`, any panic inside the handler stack is isolated to the current request goroutine and translated into a clean 500 response.",
+      "starter_code": "package middleware\n\nimport \"net/http\"\n\nfunc WithRecoveryAndRequestID(next http.Handler) http.Handler {\n\treturn http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {\n\t\t// STEP: Set X-Request-ID header on w\n\t\t// STEP: Defer recover() and return 500 JSON if next.ServeHTTP panics\n\t\tnext.ServeHTTP(w, r)\n\t})\n}",
+      "task_description": "Implement WithRecoveryAndRequestID(next http.Handler) http.Handler that sets an X-Request-ID response header (reusing the incoming header or defaulting to 'req-generated') and recovers from any downstream panic by returning HTTP 500 JSON.",
+      "title": "Build a Composable Request-ID \u0026 Panic-Recovery Middleware Chain"
+    },
+    {
+      "additional_challenge": "Register a `GET /api/v1/items/{id}` route on `http.NewServeMux()` that reads `r.PathValue(\"id\")` and responds with `WriteJSONResponse`.",
+      "expected_output": "Invarian: Write J S O N Response Header And Status Order",
+      "id": "ex-l3-stage-d-first-http-server-crud",
+      "lesson_id": "l3-stage-d-first-http-server-crud",
+      "solution_code": "package api\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n)\n\nfunc WriteJSONResponse(w http.ResponseWriter, status int, payload any) {\n\tw.Header().Set(\"Content-Type\", \"application/json; charset=utf-8\")\n\tw.WriteHeader(status)\n\t_ = json.NewEncoder(w).Encode(payload)\n}",
+      "solution_explanation": "Headers must be populated before WriteHeader flushes the HTTP response header block.",
+      "starter_code": "package api\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n)\n\nfunc WriteJSONResponse(w http.ResponseWriter, status int, payload any) {\n\t// STEP: Set Content-Type header, call w.WriteHeader(status), and encode payload as JSON\n}",
+      "task_description": "Implement WriteJSONResponse(w http.ResponseWriter, status int, payload any) so it sets Content-Type to application/json, calls w.WriteHeader(status), and encodes payload with json.NewEncoder(w).Encode(payload).",
+      "title": "Write a Standard net/http JSON Response Helper in Correct Header Order"
+    },
+    {
+      "additional_challenge": "Compare memory usage of lazy time-delta token buckets against `golang.org/x/time/rate.Limiter`.",
+      "expected_output": "Invarian: Compute Available Tokens",
+      "id": "ex-l3-validation-openapi-ratelimit",
+      "lesson_id": "l3-validation-openapi-ratelimit",
+      "solution_code": "package ratelimit\n\nfunc ComputeAvailableTokens(currentTokens, ratePerSec, burstMax, elapsedSec float64) float64 {\n\tif elapsedSec \u003e 0 {\n\t\tcurrentTokens += elapsedSec * ratePerSec\n\t}\n\tif currentTokens \u003e burstMax {\n\t\treturn burstMax\n\t}\n\treturn currentTokens\n}",
+      "solution_explanation": "Continuous time-delta token refill avoids background timer goroutines for every single bucket—refill is calculated lazily on request arrival.",
+      "starter_code": "package ratelimit\n\nfunc ComputeAvailableTokens(currentTokens, ratePerSec, burstMax, elapsedSec float64) float64 {\n\t// STEP: If elapsedSec \u003e 0, add elapsedSec * ratePerSec to currentTokens\n\t// STEP: Clamp result so it never exceeds burstMax\n\treturn currentTokens\n}",
+      "task_description": "Complete ComputeAvailableTokens(currentTokens, ratePerSec, burstMax, elapsedSec float64) float64 so that it adds elapsedSec * ratePerSec and caps the result at burstMax.",
+      "title": "Implement an Origin Allowlist Checker \u0026 Token Bucket Refill Calculation"
+    },
+    {
+      "additional_challenge": "Write the PostgreSQL `CREATE INDEX` statement using `INCLUDE (amount)` to satisfy `SELECT amount FROM transfers WHERE sender_id = $1 AND created_at \u003e $2` via an Index-Only Scan.",
+      "expected_output": "Invarian: Lock Order Prevents A B  B A  Deadlock\nLock Order for ('acc_99', 'acc_01') -\u003e ('acc_01', 'acc_99')",
+      "id": "ex-l4-acid-isolation-mvcc",
+      "lesson_id": "l4-acid-isolation-mvcc",
+      "solution_code": "package ledger\n\nfunc LockOrder(fromAccountID, toAccountID string) (string, string) {\n\tif fromAccountID \u003c toAccountID {\n\t\treturn fromAccountID, toAccountID\n\t}\n\treturn toAccountID, fromAccountID\n}",
+      "solution_explanation": "Enforcing a global total ordering when acquiring row locks (`SELECT id FROM accounts WHERE id IN ($1, $2) ORDER BY id ASC FOR UPDATE`) eliminates the circular-wait condition required for a deadlock.",
+      "starter_code": "package ledger\n\nfunc LockOrder(fromAccountID, toAccountID string) (string, string) {\n\t// STEP: Return the two account IDs in ascending lexicographical order\n\treturn fromAccountID, toAccountID\n}",
+      "task_description": "Implement LockOrder(fromAccountID, toAccountID string) (firstID, secondID string) that returns account IDs in deterministic lexicographical order before running SELECT ... FOR UPDATE so two concurrent transfers (A-\u003eB and B-\u003eA) can never deadlock.",
+      "title": "Design a Covering Composite Index \u0026 Prevent Deadlocks on Multi-Account Transfers"
+    },
+    {
+      "additional_challenge": "Write the PostgreSQL SQL query to check replication lag in bytes using `pg_wal_lsn_diff(pg_current_wal_lsn(), replay_lsn)` from `pg_stat_replication`.",
+      "expected_output": "Invarian: Choose Pool Causal Consistency",
+      "id": "ex-l4-partitioning-replication-sharding",
+      "lesson_id": "l4-partitioning-replication-sharding",
+      "solution_code": "package routing\n\nfunc ChoosePool(isMutation bool, msSinceLastUserWrite int, maxReplicaLagMs int) string {\n\tif isMutation || (msSinceLastUserWrite \u003e= 0 \u0026\u0026 msSinceLastUserWrite \u003c= maxReplicaLagMs) {\n\t\treturn \"primary\"\n\t}\n\treturn \"replica\"\n}",
+      "solution_explanation": "Causal read routing eliminates the most jarring UX bug of read-replica architectures without sacrificing read scalability.",
+      "starter_code": "package routing\n\nfunc ChoosePool(isMutation bool, msSinceLastUserWrite int, maxReplicaLagMs int) string {\n\t// STEP: Return \"primary\" if isMutation is true or msSinceLastUserWrite \u003c= maxReplicaLagMs\n\treturn \"replica\"\n}",
+      "task_description": "Implement ChoosePool(isMutation bool, msSinceLastUserWrite int, maxReplicaLagMs int) string returning 'primary' for mutations or when msSinceLastUserWrite \u003c= maxReplicaLagMs, and 'replica' otherwise.",
+      "title": "Route Reads Safely Using Causal Write-Window Stickiness"
+    },
+    {
+      "additional_challenge": "Open the Database Comparison Lab \u0026 SQL Playground and execute a live `SELECT ... LEFT JOIN ... GROUP BY` query against the sandbox!",
+      "expected_output": "Invarian: Clamp Page Limit Defaults And Bounds",
+      "id": "ex-l4-stage-e-sql-relational-fundamentals",
+      "lesson_id": "l4-stage-e-sql-relational-fundamentals",
+      "solution_code": "package sqlutil\n\nfunc ClampPageLimit(limit, offset int) (int, int) {\n\tif limit \u003c= 0 {\n\t\tlimit = 20\n\t}\n\tif limit \u003e 100 {\n\t\tlimit = 100\n\t}\n\tif offset \u003c 0 {\n\t\toffset = 0\n\t}\n\treturn limit, offset\n}",
+      "solution_explanation": "Clamping pagination parameters protects the database from unbounded result sets.",
+      "starter_code": "package sqlutil\n\nfunc ClampPageLimit(limit, offset int) (int, int) {\n\t// STEP: Default non-positive limit to 20, cap limit above 100 at 100, and clamp negative offset to 0\n\treturn 0, 0\n}",
+      "task_description": "Implement ClampPageLimit(limit, offset int) (int, int) so that limit \u003c= 0 defaults to 20, limit \u003e 100 is capped at 100, and offset \u003c 0 is clamped to 0.",
+      "title": "Build a Safe SQL Pagination Clause Builder with Bounded Limit"
+    },
+    {
+      "additional_challenge": "Explain when you should place PgBouncer in transaction-pooling mode in front of PostgreSQL when running 50+ serverless or microservice replicas.",
+      "expected_output": "Invarian: Compute Pool Limits\nPostgres max_connections=200, reserved=20, replicas=6 -\u003e MaxOpenConns=30, MaxIdleConns=15",
+      "id": "ex-l5-db-ecosystem-comparison",
+      "lesson_id": "l5-db-ecosystem-comparison",
+      "solution_code": "package dbpool\n\nfunc ComputePoolLimits(pgMaxConns, reservedSuperuserConns, replicaCount int) (maxOpen, maxIdle int) {\n\tif replicaCount \u003c= 0 {\n\t\treplicaCount = 1\n\t}\n\tavail := pgMaxConns - reservedSuperuserConns\n\tif avail \u003c replicaCount {\n\t\treturn 1, 1\n\t}\n\tmaxOpen = avail / replicaCount\n\tmaxIdle = maxOpen / 2\n\tif maxIdle \u003c 1 {\n\t\tmaxIdle = 1\n\t}\n\treturn maxOpen, maxIdle\n}",
+      "solution_explanation": "Sizing `MaxOpenConns` across all deployed Kubernetes pods so that `sum(MaxOpenConns * replicas) + reserved \u003c= max_connections` prevents `FATAL: sorry, too many clients already` errors during traffic spikes.",
+      "starter_code": "package dbpool\n\nfunc ComputePoolLimits(pgMaxConns, reservedSuperuserConns, replicaCount int) (maxOpen, maxIdle int) {\n\t// STEP: Subtract reservedSuperuserConns from pgMaxConns\n\t// STEP: Divide evenly across replicaCount (guarding replicaCount \u003c= 0)\n\t// STEP: Set maxIdle to maxOpen / 2 (minimum 1)\n\treturn 0, 0\n}",
+      "task_description": "Implement ComputePoolLimits(pgMaxConns, reservedSuperuserConns, replicaCount int) (maxOpen, maxIdle int) that divides available PostgreSQL connections safely across replicas with a 50% idle ratio.",
+      "title": "Calculate Optimal Connection Pool Bounds per Service Replica"
+    },
+    {
+      "additional_challenge": "Explain why PgBouncer in `transaction` pooling mode requires `default_query_exec_mode=simple_protocol` or PgBouncer 1.21+ `max_prepared_statements` support when using `pgx/v5`.",
+      "expected_output": "Invarian: Is Safe Production D D L",
+      "id": "ex-l5-migrations-transactions-prepared",
+      "lesson_id": "l5-migrations-transactions-prepared",
+      "solution_code": "package migrator\n\nimport \"strings\"\n\nfunc IsSafeProductionDDL(sqlStmt string) bool {\n\tupper := strings.ToUpper(sqlStmt)\n\tif strings.Contains(upper, \"CREATE INDEX\") \u0026\u0026 !strings.Contains(upper, \"CONCURRENTLY\") {\n\t\treturn false\n\t}\n\tif strings.Contains(upper, \"ALTER TABLE\") \u0026\u0026 !strings.Contains(upper, \"LOCK_TIMEOUT\") {\n\t\treturn false\n\t}\n\treturn true\n}",
+      "solution_explanation": "Automated lint rules on `migrations/*.sql` in CI catch table-locking DDL statements before they ever reach production.",
+      "starter_code": "package migrator\n\nimport \"strings\"\n\nfunc IsSafeProductionDDL(sqlStmt string) bool {\n\tupper := strings.ToUpper(sqlStmt)\n\t// STEP: If upper contains \"CREATE INDEX\" and not \"CONCURRENTLY\", return false\n\t// STEP: If upper contains \"ALTER TABLE\" and not \"LOCK_TIMEOUT\", return false\n\treturn true\n}",
+      "task_description": "Implement IsSafeProductionDDL(sqlStmt string) bool that returns false if sqlStmt contains CREATE INDEX without CONCURRENTLY or ALTER TABLE without lock_timeout.",
+      "title": "Verify Safe Zero-Downtime PostgreSQL DDL Migration Guards"
+    },
+    {
+      "additional_challenge": "Paste the anti-pattern snippet into the Offline Code Review \u0026 Diagnostics Lab to see rules GO-SEC-001 and GO-DB-001 trigger!",
+      "expected_output": "Invarian: Find User I D By Email Parameterized\nInvarian: Find User I D By Email No Rows",
+      "id": "ex-l5-stage-e-database-sql-crud-basics",
+      "lesson_id": "l5-stage-e-database-sql-crud-basics",
+      "solution_code": "package repo\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"errors\"\n)\n\nvar ErrUserNotFound = errors.New(\"user not found\")\n\nfunc FindUserIDByEmail(ctx context.Context, db *sql.DB, email string) (string, error) {\n\tvar id string\n\terr := db.QueryRowContext(ctx, \"SELECT id FROM users WHERE email = $1\", email).Scan(\u0026id)\n\tif errors.Is(err, sql.ErrNoRows) {\n\t\treturn \"\", ErrUserNotFound\n\t}\n\tif err != nil {\n\t\treturn \"\", err\n\t}\n\treturn id, nil\n}",
+      "solution_explanation": "Parameterized QueryRowContext prevents SQLi and automatically closes the underlying cursor on Scan.",
+      "starter_code": "package repo\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"errors\"\n)\n\nvar ErrUserNotFound = errors.New(\"user not found\")\n\nfunc FindUserIDByEmail(ctx context.Context, db *sql.DB, email string) (string, error) {\n\t// STEP: Call db.QueryRowContext with $1, Scan(\u0026id), and check errors.Is(err, sql.ErrNoRows)\n\treturn \"\", nil\n}",
+      "task_description": "Implement FindUserIDByEmail(ctx context.Context, db *sql.DB, email string) (string, error) using db.QueryRowContext with a $1 placeholder and translate sql.ErrNoRows to ErrUserNotFound.",
+      "title": "Query Single Row with Parameter Placeholder \u0026 Handle sql.ErrNoRows"
+    },
+    {
+      "additional_challenge": "Add Key Ring lookup `GetVerificationKey(kid string, activeKeys map[string][]byte) ([]byte, error)` that supports zero-downtime key rotation.",
+      "expected_output": "Invarian: Has R B A C Permission",
+      "id": "ex-l6-oauth2-oidc-rbac-abac",
+      "lesson_id": "l6-oauth2-oidc-rbac-abac",
+      "solution_code": "package rbac\n\nfunc HasRBACPermission(role string, requiredPerm string, roleMatrix map[string][]string) bool {\n\tif role == \"\" || requiredPerm == \"\" || roleMatrix == nil {\n\t\treturn false\n\t}\n\tfor _, p := range roleMatrix[role] {\n\t\tif p == requiredPerm {\n\t\t\treturn true\n\t\t}\n\t}\n\treturn false\n}",
+      "solution_explanation": "Failing closed on empty roles or nil maps guarantees least-privilege enforcement.",
+      "starter_code": "package rbac\n\nfunc HasRBACPermission(role string, requiredPerm string, roleMatrix map[string][]string) bool {\n\t// STEP: Look up permissions slice for role in roleMatrix\n\t// STEP: Return true if requiredPerm is in the slice, false otherwise\n\treturn false\n}",
+      "task_description": "Complete HasRBACPermission(role string, requiredPerm string, roleMatrix map[string][]string) bool so that it returns true only when requiredPerm is present in roleMatrix[role].",
+      "title": "Implement Multi-Key Rotation Lookup \u0026 RBAC Permission Evaluation"
+    },
+    {
+      "additional_challenge": "Add JWT header algorithm verification that explicitly rejects `alg: none` and `alg: HS256` when verifying an `EdDSA` public key.",
+      "expected_output": "Invarian: Blocks Cloud Metadata I P 169 254 169 254\nInvarian: Blocks Loopback And R F C1918\nInvarian: Allows Public I P\nInvarian: Constant Time A P I Key",
+      "id": "ex-l6-security-auth-owasp",
+      "lesson_id": "l6-security-auth-owasp",
+      "solution_code": "package secguard\n\nimport (\n\t\"crypto/subtle\"\n\t\"errors\"\n\t\"net/netip\"\n)\n\nfunc ValidateWebhookIP(ip string) error {\n\taddr, err := netip.ParseAddr(ip)\n\tif err != nil {\n\t\treturn errors.New(\"invalid IP address\")\n\t}\n\taddr = addr.Unmap()\n\tif addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() ||\n\t\taddr.IsLinkLocalMulticast() || addr.IsMulticast() || addr.IsUnspecified() {\n\t\treturn errors.New(\"blocked internal or link-local IP address\")\n\t}\n\treturn nil\n}\n\nfunc VerifyAPIKey(provided, expected string) bool {\n\tif provided == \"\" || expected == \"\" {\n\t\treturn false\n\t}\n\treturn subtle.ConstantTimeCompare([]byte(provided), []byte(expected)) == 1\n}",
+      "solution_explanation": "`netip.Addr` performs zero-allocation IP classification, and `subtle.ConstantTimeCompare` prevents byte-by-byte timing side-channel attacks on secret tokens.",
+      "starter_code": "package secguard\n\nimport (\n\t\"crypto/subtle\"\n\t\"errors\"\n\t\"net/netip\"\n)\n\nfunc ValidateWebhookIP(ip string) error {\n\t// STEP: Parse ip with netip.ParseAddr and reject loopback, private, link-local, or unspecified IPs\n\treturn nil\n}\n\nfunc VerifyAPIKey(provided, expected string) bool {\n\t// STEP: Reject empty keys and compare in constant time using subtle.ConstantTimeCompare\n\treturn false\n}",
+      "task_description": "Complete ValidateWebhookIP(ip string) error and VerifyAPIKey(provided, expected string) bool using net/netip and crypto/subtle.ConstantTimeCompare.",
+      "title": "Implement an SSRF-Safe IP Validator \u0026 Constant-Time API Key Verifier"
+    },
+    {
+      "additional_challenge": "Next, proceed to Lesson 6.1 to see how API keys are compared in constant time using subtle.ConstantTimeCompare!",
+      "expected_output": "Invarian: Extract Bearer Token Valid\nInvarian: Extract Bearer Token Rejects Malformed",
+      "id": "ex-l6-stage-f-password-hashing-bearer-auth",
+      "lesson_id": "l6-stage-f-password-hashing-bearer-auth",
+      "solution_code": "package auth\n\nimport \"strings\"\n\nfunc ExtractBearerToken(authHeader string) (string, bool) {\n\tconst prefix = \"Bearer \"\n\tif !strings.HasPrefix(authHeader, prefix) {\n\t\treturn \"\", false\n\t}\n\ttok := strings.TrimSpace(strings.TrimPrefix(authHeader, prefix))\n\tif tok == \"\" {\n\t\treturn \"\", false\n\t}\n\treturn tok, true\n}",
+      "solution_explanation": "Safe header parsing is the first line of defense in every authentication middleware before cryptographic verification in Lesson 6.1.",
+      "starter_code": "package auth\n\nimport \"strings\"\n\nfunc ExtractBearerToken(authHeader string) (string, bool) {\n\tconst prefix = \"Bearer \"\n\t// STEP: Check strings.HasPrefix(authHeader, prefix), trim prefix and spaces, and reject empty tokens\n\treturn \"\", false\n}",
+      "task_description": "Implement ExtractBearerToken(authHeader string) (string, bool) using strings.HasPrefix(authHeader, prefix) and strings.TrimSpace(strings.TrimPrefix(authHeader, prefix)).",
+      "title": "Extract Bearer Token Safely Without Slice Bounds Panics"
+    },
+    {
+      "additional_challenge": "Wrap the map in a struct with `sync.RWMutex` so concurrent goroutines inside a single test can call `Put` and `Get` under `go test -race`.",
+      "expected_output": "Invarian: Put And Get Fake",
+      "id": "ex-l7-integration-testcontainers-ci",
+      "lesson_id": "l7-integration-testcontainers-ci",
+      "solution_code": "package testfake\n\nfunc PutAndGetFake(items map[string]int, key string, val int) (int, bool) {\n\tif items == nil || key == \"\" {\n\t\treturn 0, false\n\t}\n\titems[key] = val\n\tv, ok := items[key]\n\treturn v, ok\n}",
+      "solution_explanation": "Guarding against `nil` map panics (`assignment to entry in nil map`) and empty keys keeps test fakes predictable.",
+      "starter_code": "package testfake\n\nfunc PutAndGetFake(items map[string]int, key string, val int) (int, bool) {\n\t// STEP: If items == nil or key == \"\", return 0, false\n\t// STEP: Store items[key] = val and return val, true\n\treturn 0, false\n}",
+      "task_description": "Complete PutAndGetFake(items map[string]int, key string, val int) (int, bool) that stores val at key (initializing behavior safely if items is non-nil) and retrieves it.",
+      "title": "Build a Thread-Safe In-Memory Fake Repository for Unit Testing"
+    },
+    {
+      "additional_challenge": "Write a 4-row table-driven test in your local editor covering empty string, single word, multiple spaces, and mixed case!",
+      "expected_output": "PASS: TestSlugifyTitleTableDriven/normal_title (0.00s)\nPASS: TestSlugifyTitleTableDriven/extra_whitespace (0.00s)",
+      "id": "ex-l7-stage-g-table-driven-tests-httptest",
+      "lesson_id": "l7-stage-g-table-driven-tests-httptest",
+      "solution_code": "package slug\n\nimport \"strings\"\n\nfunc SlugifyTitle(title string) string {\n\twords := strings.Fields(strings.ToLower(title))\n\treturn strings.Join(words, \"-\")\n}",
+      "solution_explanation": "Clean, deterministic string normalization makes table-driven unit tests in Level 7 effortless to write and maintain.",
+      "starter_code": "package slug\n\nimport \"strings\"\n\nfunc SlugifyTitle(title string) string {\n\t// STEP: Tokenize lowercase title with strings.Fields(strings.ToLower(title)) and join with \"-\"\n\treturn \"\"\n}",
+      "task_description": "Implement SlugifyTitle(title string) string using strings.Fields(strings.ToLower(title)) and strings.Join(words, \"-\").",
+      "title": "Implement Deterministic URL Slug Generator for Table-Driven Testing"
+    },
+    {
+      "additional_challenge": "Benchmark the zero-allocation `range s` implementation against `string([]rune(s)[:maxRunes])` using `b.ReportAllocs()`.",
+      "expected_output": "Invarian: Safe Truncate Runes  U T F8\nPASS: FuzzSafeTruncateRunes (10,000 inputs tested, 0 panics, valid UTF-8 preserved)",
+      "id": "ex-l7-testing-fuzzing-benchmarks",
+      "lesson_id": "l7-testing-fuzzing-benchmarks",
+      "solution_code": "package textutil\n\nfunc SafeTruncateRunes(s string, maxRunes int) string {\n\tif maxRunes \u003c= 0 || s == \"\" {\n\t\treturn \"\"\n\t}\n\tcount := 0\n\tfor byteIdx := range s {\n\t\tif count == maxRunes {\n\t\t\treturn s[:byteIdx]\n\t\t}\n\t\tcount++\n\t}\n\treturn s\n}",
+      "solution_explanation": "Iterating `for byteIdx := range s` steps rune-by-rune with zero heap allocation and slices `s[:byteIdx]` at an exact rune boundary.",
+      "starter_code": "package textutil\n\nfunc SafeTruncateRunes(s string, maxRunes int) string {\n\t// STEP: If maxRunes \u003c= 0, return \"\"\n\t// STEP: Convert or iterate runes safely so multi-byte UTF-8 characters are never split mid-byte\n\treturn s\n}",
+      "task_description": "Implement SafeTruncateRunes(s string, maxRunes int) string so that it truncates by Unicode code points (runes) rather than raw bytes, never panics on negative maxRunes, and never corrupts multi-byte UTF-8 strings.",
+      "title": "Fix a Byte-Slicing UTF-8 Bug Discovered by Go Fuzzing"
+    },
+    {
+      "additional_challenge": "Implement banker's rounding (round half to even) when dividing integer basis points.",
+      "expected_output": "Invarian: Compute Final Invoice Cents  Exact Integer Math\nSubtotal $100.00 (10000c), 15% coupon (1500 bps), 10% tax (1000 bps) -\u003e 9350 cents ($93.50)",
+      "id": "ex-l8-clean-hexagonal-ddd",
+      "lesson_id": "l8-clean-hexagonal-ddd",
+      "solution_code": "package billing\n\nimport \"errors\"\n\nfunc ComputeFinalInvoiceCents(subtotalCents, couponBasisPoints, taxBasisPoints int64) (int64, error) {\n\tif subtotalCents \u003c 0 || couponBasisPoints \u003c 0 || couponBasisPoints \u003e 10000 || taxBasisPoints \u003c 0 {\n\t\treturn 0, errors.New(\"invalid billing parameters\")\n\t}\n\tdiscount := (subtotalCents * couponBasisPoints) / 10000\n\tdiscounted := subtotalCents - discount\n\ttax := (discounted * taxBasisPoints) / 10000\n\treturn discounted + tax, nil\n}",
+      "solution_explanation": "Representing currency in smallest integer units (cents) and percentages in basis points (1/100th of 1%) eliminates IEEE-754 floating-point rounding drift in financial domain models.",
+      "starter_code": "package billing\n\nimport \"errors\"\n\nfunc ComputeFinalInvoiceCents(subtotalCents, couponBasisPoints, taxBasisPoints int64) (int64, error) {\n\t// STEP: Reject negative inputs or couponBasisPoints \u003e 10000\n\t// STEP: Compute discounted = subtotalCents - (subtotalCents * couponBasisPoints) / 10000\n\t// STEP: Compute final = discounted + (discounted * taxBasisPoints) / 10000\n\treturn 0, nil\n}",
+      "task_description": "Implement ComputeFinalInvoiceCents(subtotalCents int64, couponBasisPoints int64, taxBasisPoints int64) (int64, error) using exact integer basis-point math (100 bps = 1%, 10000 bps = 100%) instead of lossy float64 arithmetic.",
+      "title": "Refactor a Coupled Service to Use Consumer-Defined Ports \u0026 Integer Money Math"
+    },
+    {
+      "additional_challenge": "Show how a PostgreSQL `MATERIALIZED VIEW` can serve a CQRS read model refreshed via `REFRESH MATERIALIZED VIEW CONCURRENTLY`.",
+      "expected_output": "Invarian: Violates Module Table Boundary",
+      "id": "ex-l8-modular-monolith-cqrs-boundaries",
+      "lesson_id": "l8-modular-monolith-cqrs-boundaries",
+      "solution_code": "package archlint\n\nimport \"strings\"\n\nfunc ViolatesModuleTableBoundary(moduleName string, referencedTable string) bool {\n\tif moduleName == \"\" || referencedTable == \"\" {\n\t\treturn true\n\t}\n\treturn !strings.HasPrefix(referencedTable, moduleName+\"_\")\n}",
+      "solution_explanation": "A simple table-prefix or schema-prefix assertion in unit tests enforces Modular Monolith database boundaries automatically on every commit.",
+      "starter_code": "package archlint\n\nimport \"strings\"\n\nfunc ViolatesModuleTableBoundary(moduleName string, referencedTable string) bool {\n\t// STEP: Return true if referencedTable does not have prefix moduleName + \"_\"\n\treturn false\n}",
+      "task_description": "Implement ViolatesModuleTableBoundary(moduleName string, referencedTable string) bool that returns true if referencedTable does not start with moduleName + \"_\".",
+      "title": "Enforce Module Table Ownership in a SQL Linter Check"
+    },
+    {
+      "additional_challenge": "Open the Architecture Lab to compare how Layered, Clean, Hexagonal, and Modular Monolith organize these files!",
+      "expected_output": "Invarian: Add Money Same Currency\nInvarian: Add Money Rejects Mismatch And Nil",
+      "id": "ex-l8-stage-h-handler-service-repo-layers",
+      "lesson_id": "l8-stage-h-handler-service-repo-layers",
+      "solution_code": "package money\n\nimport \"errors\"\n\ntype Money struct {\n\tCents    int64\n\tCurrency string\n}\n\nfunc AddMoney(a, b *Money) (Money, error) {\n\tif a == nil || b == nil {\n\t\treturn Money{}, errors.New(\"money operand cannot be nil\")\n\t}\n\tif a.Currency != b.Currency {\n\t\treturn Money{}, errors.New(\"currency mismatch\")\n\t}\n\treturn Money{Cents: a.Cents + b.Cents, Currency: a.Currency}, nil\n}",
+      "solution_explanation": "Keeping domain invariants in pure functions makes your service architecture clean and prepares you for Lesson 8.1 (Hexagonal Ports \u0026 Adapters).",
+      "starter_code": "package money\n\nimport \"errors\"\n\ntype Money struct {\n\tCents    int64\n\tCurrency string\n}\n\nfunc AddMoney(a, b *Money) (Money, error) {\n\t// STEP: Guard a == nil || b == nil and a.Currency != b.Currency, then return combined Money\n\treturn Money{}, nil\n}",
+      "task_description": "Implement AddMoney(a, b *Money) (Money, error) checking if a == nil || b == nil, checking if a.Currency != b.Currency, and returning Money{Cents: a.Cents + b.Cents, Currency: a.Currency}, nil.",
+      "title": "Enforce Domain Currency \u0026 Nil Invariants in Pure Service Function"
+    },
+    {
+      "additional_challenge": "Write the PostgreSQL query `INSERT INTO processed_events (event_id) VALUES ($1) ON CONFLICT (event_id) DO NOTHING` to guarantee idempotent message processing.",
+      "expected_output": "Invarian: Circuit Breaker Trips At Threshold\nInvarian: Half Open Trips On Single Failure",
+      "id": "ex-l9-caching-queues-outbox-sagas",
+      "lesson_id": "l9-caching-queues-outbox-sagas",
+      "solution_code": "package resilience\n\nfunc ShouldTripBreaker(consecutiveFailures, threshold int, currentState string) string {\n\tif threshold \u003c= 0 {\n\t\tthreshold = 5\n\t}\n\tif currentState == \"HALF_OPEN\" \u0026\u0026 consecutiveFailures \u003e= 1 {\n\t\treturn \"OPEN\"\n\t}\n\tif consecutiveFailures \u003e= threshold {\n\t\treturn \"OPEN\"\n\t}\n\treturn currentState\n}",
+      "solution_explanation": "A circuit breaker fails fast while `OPEN`, allows a single probe request after a cooldown window (`HALF_OPEN`), and immediately reverts to `OPEN` if that probe fails.",
+      "starter_code": "package resilience\n\nfunc ShouldTripBreaker(consecutiveFailures, threshold int, currentState string) string {\n\t// STEP: If threshold \u003c= 0, default threshold to 5\n\t// STEP: If currentState == \"HALF_OPEN\" and consecutiveFailures \u003e= 1, return \"OPEN\"\n\t// STEP: If consecutiveFailures \u003e= threshold, return \"OPEN\"\n\treturn currentState\n}",
+      "task_description": "Complete ShouldTripBreaker(consecutiveFailures, threshold int, currentState string) string that transitions a Circuit Breaker from 'CLOSED' or 'HALF_OPEN' to 'OPEN' when consecutiveFailures \u003e= threshold.",
+      "title": "Implement an Idempotent Event Consumer Guard \u0026 Circuit Breaker State Transition"
+    },
+    {
+      "additional_challenge": "Write an `http.HandlerFunc` for Server-Sent Events (SSE) that checks `flusher, ok := w.(http.Flusher)` and streams events until `\u003c-r.Context().Done()`.",
+      "expected_output": "Invarian: Is Valid W3 C Traceparent",
+      "id": "ex-l9-grpc-websockets-otel-tracing",
+      "lesson_id": "l9-grpc-websockets-otel-tracing",
+      "solution_code": "package tracing\n\nimport \"strings\"\n\nfunc IsValidW3CTraceparent(header string) bool {\n\tparts := strings.Split(header, \"-\")\n\tif len(parts) != 4 {\n\t\treturn false\n\t}\n\tif parts[0] != \"00\" || len(parts[1]) != 32 || len(parts[2]) != 16 || len(parts[3]) != 2 {\n\t\treturn false\n\t}\n\tif parts[1] == \"00000000000000000000000000000000\" || parts[2] == \"0000000000000000\" {\n\t\treturn false\n\t}\n\treturn true\n}",
+      "solution_explanation": "The W3C Trace Context specification mandates version `00`, a 16-byte (32 hex char) non-zero `trace-id`, an 8-byte (16 hex char) non-zero `parent-id`, and a 1-byte (2 hex char) `trace-flags` field.",
+      "starter_code": "package tracing\n\nimport \"strings\"\n\nfunc IsValidW3CTraceparent(header string) bool {\n\tparts := strings.Split(header, \"-\")\n\t// STEP: Verify len(parts) == 4, parts[0] == \"00\", len(parts[1]) == 32, len(parts[2]) == 16, len(parts[3]) == 2\n\t// STEP: Reject all-zero traceID (\"00000000000000000000000000000000\")\n\treturn false\n}",
+      "task_description": "Implement IsValidW3CTraceparent(header string) bool that checks whether header splits on '-' into 4 parts where version is '00', traceID is 32 hex chars (not all zeros), and spanID is 16 hex chars.",
+      "title": "Validate W3C traceparent Header Format for Distributed Tracing"
+    },
+    {
+      "additional_challenge": "Think about why 100 clients retrying at the exact same 200ms mark still creates spikes, and how adding random jitter smooths the load!",
+      "expected_output": "Invarian: Compute Backoff Ms Progression\nInvarian: Compute Backoff Ms Capped At Max",
+      "id": "ex-l9-stage-i-redis-cache-aside-backoff",
+      "lesson_id": "l9-stage-i-redis-cache-aside-backoff",
+      "solution_code": "package retry\n\nfunc ComputeBackoffMs(baseMs int64, maxMs int64, attempt int) int64 {\n\tif attempt \u003c 1 {\n\t\tattempt = 1\n\t}\n\tif attempt \u003e 30 {\n\t\treturn maxMs\n\t}\n\tdelay := baseMs \u003c\u003c (attempt - 1)\n\tif delay \u003e maxMs || delay \u003c= 0 {\n\t\treturn maxMs\n\t}\n\treturn delay\n}",
+      "solution_explanation": "Understanding bounded exponential backoff prepares you for Circuit Breakers, Singleflight, and Outbox relays in Lesson 9.1.",
+      "starter_code": "package retry\n\nfunc ComputeBackoffMs(baseMs int64, maxMs int64, attempt int) int64 {\n\t// STEP: Clamp attempt \u003c 1 to 1, compute delay := baseMs \u003c\u003c (attempt - 1), and cap delay \u003e maxMs at maxMs\n\treturn 0\n}",
+      "task_description": "Implement ComputeBackoffMs(baseMs int64, maxMs int64, attempt int) int64 by clamping attempt \u003c 1 to 1, computing delay := baseMs \u003c\u003c (attempt - 1), and capping at maxMs.",
+      "title": "Calculate Capped Exponential Backoff Delay Safely"
+    }
+  ]
+}

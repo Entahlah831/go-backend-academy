@@ -1,0 +1,1714 @@
+{
+  "case_studies": [
+    {
+      "architecture_style": "Pragmatic Layered Architecture (Handler -\u003e Service -\u003e Store)",
+      "difficulty": "Beginner (Level 3–4)",
+      "id": "cs-01-task-api",
+      "rationale": "A bounded CRUD domain with user-scoped tasks does not need microservice complexity or 6 layers of abstraction. A 3-package layered structure with `sqlc` + SQLite/PostgreSQL delivers clean separation and 100% testability.",
+      "recommended_db": "SQLite (WAL Mode) for local/single-node or PostgreSQL",
+      "slug": "cs-01-task-api",
+      "study_number": 1,
+      "title": "Personal Task Management API"
+    },
+    {
+      "architecture_style": "Hexagonal Architecture (Ports \u0026 Adapters)",
+      "difficulty": "Intermediate (Level 6)",
+      "id": "cs-02-auth-service",
+      "rationale": "Identity requires durable ACID storage for user accounts, RBAC roles, and refresh-token rotation families (PostgreSQL), paired with sub-millisecond brute-force rate limiting in Redis.",
+      "recommended_db": "PostgreSQL (Credentials \u0026 Refresh Families) + Redis (Revocation Deny-List \u0026 Login Rate Limit)",
+      "slug": "cs-02-auth-service",
+      "study_number": 2,
+      "title": "Authentication \u0026 Authorization Service (OAuth2 + Argon2id + Refresh Rotation)"
+    },
+    {
+      "architecture_style": "Read-Heavy Cache-Aside + Async Buffered Analytics Pipeline",
+      "difficulty": "Intermediate (Level 4–5 \u0026 9)",
+      "id": "cs-03-url-shortener",
+      "rationale": "Read-to-write ratio is 100:1. Redirects (`GET /{code}`) must respond in \u003c2ms via Redis + Go `singleflight` without blocking on synchronous analytics `INSERT`s.",
+      "recommended_db": "PostgreSQL (Base62 Mapping) + Redis (Hot Redirect Cache) + ClickHouse/Timescale (Click Events)",
+      "slug": "cs-03-url-shortener",
+      "study_number": 3,
+      "title": "High-Throughput URL Shortener \u0026 Click Analytics"
+    },
+    {
+      "architecture_style": "Modular Monolith with PostgreSQL FTS (`tsvector` + GIN)",
+      "difficulty": "Intermediate (Level 4–5)",
+      "id": "cs-04-blog-cms",
+      "rationale": "Instead of operating a separate Elasticsearch cluster for \u003c10M articles, PostgreSQL's built-in `tsvector` + `GIN` index provides stemmed full-text search, ranking (`ts_rank_cd`), and ACID publishing workflows in one database.",
+      "recommended_db": "PostgreSQL 17/18 (Relational + Generated `tsvector` GIN Index)",
+      "slug": "cs-04-blog-cms",
+      "study_number": 4,
+      "title": "Blog \u0026 Content Management Backend with Full-Text Search"
+    },
+    {
+      "architecture_style": "Hexagonal Modular Monolith + Transactional Outbox",
+      "difficulty": "Advanced (Level 8–9)",
+      "id": "cs-05-ecommerce-backend",
+      "rationale": "Checkout spans inventory reservation, coupon validation, payment intent creation, and order confirmation. Modular Monolith + Outbox guarantees atomic order creation and reliable downstream fulfillment events.",
+      "recommended_db": "PostgreSQL (Orders, Payments, Outbox) + Redis (Cart \u0026 Idempotency)",
+      "slug": "cs-05-ecommerce-backend",
+      "study_number": 5,
+      "title": "E-Commerce Checkout \u0026 Order Orchestration Backend"
+    },
+    {
+      "architecture_style": "CQRS + Optimistic/Atomic SQL Locking + Temporary Reservation TTL",
+      "difficulty": "Advanced (Level 4 \u0026 9)",
+      "id": "cs-06-inventory-system",
+      "rationale": "During a flash sale (50,000 users trying to buy 100 items in 2 seconds), Redis Lua `DECR` acts as an ultra-fast pre-filter so only 100 requests hit PostgreSQL's transactional reservation table.",
+      "recommended_db": "PostgreSQL (Source of Truth) + Redis (Flash-Sale Atomic Pre-Gate)",
+      "slug": "cs-06-inventory-system",
+      "study_number": 6,
+      "title": "High-Concurrency Flash-Sale Inventory Management System"
+    },
+    {
+      "architecture_style": "Stateful WebSocket Hub per Node + Redis Pub/Sub / NATS Backplane",
+      "difficulty": "Advanced (Level 2 \u0026 9)",
+      "id": "cs-07-realtime-chat",
+      "rationale": "User A may be connected via WebSocket to Go Pod 1 while User B is connected to Go Pod 2. A Redis Pub/Sub or NATS backplane routes messages between pods, while time-ordered clustering keys store chat history.",
+      "recommended_db": "ScyllaDB / Cassandra or PostgreSQL Partitioned Tables (Messages) + Redis (Presence \u0026 Pub/Sub)",
+      "slug": "cs-07-realtime-chat",
+      "study_number": 7,
+      "title": "Real-Time WebSocket Chat \u0026 Presence Backend"
+    },
+    {
+      "architecture_style": "Control-Plane Metadata API + Direct-to-S3/MinIO Pre-Signed Uploads",
+      "difficulty": "Intermediate (Level 3 \u0026 6)",
+      "id": "cs-08-file-storage",
+      "rationale": "Proxying 2GB video uploads through Go API memory wastes bandwidth and RAM. The Go API issues short-lived S3 pre-signed `PUT` URLs with strict `Content-Length` and SHA-256 checksum constraints, or streams via `io.Reader` magic-byte sniffing.",
+      "recommended_db": "PostgreSQL (File Metadata, Checksums \u0026 ACLs) + S3/MinIO Object Storage",
+      "slug": "cs-08-file-storage",
+      "study_number": 8,
+      "title": "Secure Object \u0026 File Storage Service (Pre-Signed URLs \u0026 Streaming)"
+    },
+    {
+      "architecture_style": "Event-Driven Worker Pool + Per-Provider Circuit Breakers + Exponential Backoff \u0026 DLQ",
+      "difficulty": "Advanced (Level 9)",
+      "id": "cs-09-notification-service",
+      "rationale": "External SMS/Email providers (Twilio, SES, FCM) suffer intermittent latency and rate limits. Decoupling dispatch via queues with per-provider circuit breakers and dead-letter queues prevents provider outages from impacting core user APIs.",
+      "recommended_db": "PostgreSQL (Delivery Log \u0026 Templates) + RabbitMQ / Kafka (Dispatch Queues)",
+      "slug": "cs-09-notification-service",
+      "study_number": 9,
+      "title": "Multi-Channel Notification Delivery Service (Email, SMS, Push, Webhook)"
+    },
+    {
+      "architecture_style": "PostgreSQL Exclusion Constraints (`btree_gist`) + ACID Transactions",
+      "difficulty": "Advanced (Level 4)",
+      "id": "cs-10-booking-reservation",
+      "rationale": "Application-level overlap checks (`SELECT count(*) WHERE start \u003c $end AND end \u003e $start`) fail under `READ COMMITTED` when two users book overlapping time ranges simultaneously. PostgreSQL's `EXCLUDE USING gist (room_id WITH =, tstzrange(check_in, check_out) WITH \u0026\u0026)` enforces non-overlapping intervals at the storage index level!",
+      "recommended_db": "PostgreSQL 17/18 with `btree_gist` Extension (`EXCLUDE USING gist`)",
+      "slug": "cs-10-booking-reservation",
+      "study_number": 10,
+      "title": "Hotel / Flight / Clinic Booking \u0026 Time-Slot Reservation System"
+    },
+    {
+      "architecture_style": "Two-Phase Authorize/Capture State Machine + Immutable Double-Entry Ledger",
+      "difficulty": "Advanced (Level 6, 8 \u0026 9)",
+      "id": "cs-11-payment-simulation",
+      "rationale": "Payments never overwrite a single float column. Every movement of funds (Authorization Hold -\u003e Capture -\u003e Platform Fee -\u003e Merchant Payout -\u003e Refund) is recorded as balanced debit/credit rows summing to zero (`SUM(amount_cents) = 0`).",
+      "recommended_db": "PostgreSQL (`SERIALIZABLE` / Row-Locked Ledger)",
+      "slug": "cs-11-payment-simulation",
+      "study_number": 11,
+      "title": "Payment Processing Gateway \u0026 Double-Entry Settlement Engine"
+    },
+    {
+      "architecture_style": "Shared-Schema Multi-Tenancy with PostgreSQL Row-Level Security (RLS) + Tenant Context Middleware",
+      "difficulty": "Advanced (Level 4, 6 \u0026 8)",
+      "id": "cs-12-multitenant-saas",
+      "rationale": "In B2B SaaS, forgetting `WHERE tenant_id = $1` on a single query leaks Customer A's data to Customer B. Enabling PostgreSQL RLS (`USING (tenant_id = current_setting('app.current_tenant_id')::uuid)`) enforces tenant isolation at the database engine level as a defense-in-depth safety net.",
+      "recommended_db": "PostgreSQL 17/18 with `ENABLE ROW LEVEL SECURITY`",
+      "slug": "cs-12-multitenant-saas",
+      "study_number": 12,
+      "title": "Multi-Tenant B2B SaaS Backend with Row-Level Security (RLS)"
+    },
+    {
+      "architecture_style": "Saga Pattern with Compensating Transactions + Transactional Outbox + Kafka",
+      "difficulty": "Advanced (Level 9)",
+      "id": "cs-13-event-driven-orders",
+      "rationale": "When Order Service, Payment Service, and Warehouse Service own separate databases, distributed 2-Phase Commit (XA) destroys availability. A Saga coordinates local ACID transactions via Kafka events and executes explicit compensating actions (`RefundPayment`, `ReleaseStock`) if a downstream step fails.",
+      "recommended_db": "PostgreSQL per Microservice + Apache Kafka Event Backbone",
+      "slug": "cs-13-event-driven-orders",
+      "study_number": 13,
+      "title": "Event-Driven Distributed Order Processing System (Saga Orchestrator)"
+    },
+    {
+      "architecture_style": "Multi-Tier Caching (In-Process L1 LRU + Redis L2 + Singleflight) + Zero-Alloc Hot Paths + Read Replicas",
+      "difficulty": "Advanced Professional (Level 2, 5, 9 \u0026 10)",
+      "id": "cs-14-high-traffic-api",
+      "rationale": "At 50,000+ RPS, even Redis network roundtrips add up. Combining a short-TTL (2s) in-process sharded L1 cache, a 60s Redis L2 cache guarded by `singleflight`, `pgx/v5` binary protocol, and `GOMEMLIMIT` tuning achieves sub-2ms p99 latency.",
+      "recommended_db": "PostgreSQL Primary + Read Replicas + Redis Cluster + Go In-Memory L1 Cache",
+      "slug": "cs-14-high-traffic-api",
+      "study_number": 14,
+      "title": "High-Traffic Low-Latency Public API Service (50,000+ RPS Architecture)"
+    }
+  ],
+  "case_study_steps": [
+    {
+      "case_study_id": "cs-01-task-api",
+      "content_text": "Allow authenticated users to create, prioritize, filter, and complete personal tasks with due-date reminders.",
+      "id": "cs-01-task-api-step-1",
+      "section_key": "business_scenario",
+      "step_number": 1,
+      "title": "1. Business Scenario"
+    },
+    {
+      "case_study_id": "cs-01-task-api",
+      "content_text": "POST /api/v1/tasks (create task with title, priority, due_at)\nGET /api/v1/tasks?status=pending\u0026cursor=... (cursor-paginated list)\nPATCH /api/v1/tasks/{id}/complete (idempotent completion)",
+      "id": "cs-01-task-api-step-2",
+      "section_key": "functional_reqs",
+      "step_number": 2,
+      "title": "2. Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-01-task-api",
+      "content_text": "p99 latency \u003c 15ms\nStrict BOLA isolation (users only see their own tasks)\nZero SQL injection via parameterized queries",
+      "id": "cs-01-task-api-step-3",
+      "section_key": "non_functional_reqs",
+      "step_number": 3,
+      "title": "3. Non-Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-01-task-api",
+      "content_text": "Pragmatic Layered Architecture (Handler -\u003e Service -\u003e Store) — A bounded CRUD domain with user-scoped tasks does not need microservice complexity or 6 layers of abstraction. A 3-package layered structure with `sqlc` + SQLite/PostgreSQL delivers clean separation and 100% testability.",
+      "id": "cs-01-task-api-step-4",
+      "section_key": "architecture",
+      "step_number": 4,
+      "title": "4. Architecture \u0026 Rationale"
+    },
+    {
+      "case_study_id": "cs-01-task-api",
+      "content_text": "SQLite (WAL Mode) for local/single-node or PostgreSQL",
+      "id": "cs-01-task-api-step-5",
+      "section_key": "database_selection",
+      "step_number": 5,
+      "title": "5. Database Selection"
+    },
+    {
+      "case_study_id": "cs-01-task-api",
+      "content_text": "CREATE TABLE tasks (\n    id TEXT PRIMARY KEY,\n    user_id TEXT NOT NULL,\n    title TEXT NOT NULL CHECK (length(title) BETWEEN 1 AND 200),\n    priority INTEGER NOT NULL DEFAULT 2 CHECK (priority BETWEEN 1 AND 3),\n    status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'DONE')),\n    due_at TIMESTAMP,\n    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP\n);\nCREATE INDEX idx_tasks_user_status_created ON tasks(user_id, status, created_at DESC);",
+      "id": "cs-01-task-api-step-6",
+      "section_key": "schema",
+      "step_number": 6,
+      "title": "6. Production Schema"
+    },
+    {
+      "case_study_id": "cs-01-task-api",
+      "content_text": "POST /api/v1/tasks (create task with title, priority, due_at)\nGET /api/v1/tasks?status=pending\u0026cursor=... (cursor-paginated list)\nPATCH /api/v1/tasks/{id}/complete (idempotent completion)\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "id": "cs-01-task-api-step-7",
+      "section_key": "api_design",
+      "step_number": 7,
+      "title": "7. API Endpoint Design"
+    },
+    {
+      "case_study_id": "cs-01-task-api",
+      "content_text": "func (s *TaskStore) CompleteTask(ctx context.Context, taskID, userID string) error {\n\tres, err := s.db.ExecContext(ctx, `\n\t\tUPDATE tasks SET status = 'DONE'\n\t\tWHERE id = $1 AND user_id = $2\n\t`, taskID, userID)\n\tif err != nil {\n\t\treturn err\n\t}\n\tif n, _ := res.RowsAffected(); n == 0 {\n\t\treturn ErrTaskNotFound\n\t}\n\treturn nil\n}",
+      "id": "cs-01-task-api-step-8",
+      "section_key": "go_implementation",
+      "step_number": 8,
+      "title": "8. Go Implementation Pattern"
+    },
+    {
+      "case_study_id": "cs-01-task-api",
+      "content_text": "1) Table-driven unit tests (`t.Run`, `t.Parallel`) for pure domain invariants; 2) `httptest.NewServer` + real DB container (`testcontainers-go` or SQLite WAL) testing constraint violations and concurrent race conditions (`go test -race ./...`); 3) Fuzz testing (`go test -fuzz`) on request decoders.",
+      "id": "cs-01-task-api-step-9",
+      "section_key": "testing",
+      "step_number": 9,
+      "title": "9. Testing Strategy"
+    },
+    {
+      "case_study_id": "cs-01-task-api",
+      "content_text": "Enforce object-level ownership (`WHERE id = $1 AND user_id/tenant_id = $2` — OWASP API1:2023 BOLA), bound payload size via `http.MaxBytesReader` (OWASP API4:2023), use parameterized SQL queries exclusively, and validate outbound URLs in `net.Dialer.Control` (OWASP API7:2023 SSRF).",
+      "id": "cs-01-task-api-step-10",
+      "section_key": "security",
+      "step_number": 10,
+      "title": "10. Security Considerations"
+    },
+    {
+      "case_study_id": "cs-01-task-api",
+      "content_text": "Cover hot read paths with composite B-Tree/GIN indexes verified via `EXPLAIN (ANALYZE, BUFFERS)`; replace deep `OFFSET` with keyset cursor pagination; bound `*sql.DB` / `pgxpool` connection limits (`MaxOpenConns`, `MaxIdleConns`).",
+      "id": "cs-01-task-api-step-11",
+      "section_key": "performance",
+      "step_number": 11,
+      "title": "11. Performance Considerations"
+    },
+    {
+      "case_study_id": "cs-01-task-api",
+      "content_text": "Single static Go binary + Litestream continuous WAL backup to S3, or Docker Compose with PostgreSQL.",
+      "id": "cs-01-task-api-step-12",
+      "section_key": "deployment",
+      "step_number": 12,
+      "title": "12. Deployment Strategy"
+    },
+    {
+      "case_study_id": "cs-01-task-api",
+      "content_text": "Querying `WHERE id = $1` without `AND user_id = $2` (allows any user to complete or view another user's task via ID guessing); using `OFFSET` instead of cursor pagination.",
+      "id": "cs-01-task-api-step-13",
+      "section_key": "common_mistakes",
+      "step_number": 13,
+      "title": "13. Common Engineering Mistakes"
+    },
+    {
+      "case_study_id": "cs-01-task-api",
+      "content_text": "Can start as an internal module inside a Modular Monolith using SQLite WAL (single-node) or PostgreSQL (multi-replica), and only extract into an independent gRPC/Kafka service if organizational boundaries or asymmetric scaling (\u003e10,000 RPS) justify the operational overhead.",
+      "id": "cs-01-task-api-step-14",
+      "section_key": "alternatives",
+      "step_number": 14,
+      "title": "14. Alternative Implementations"
+    },
+    {
+      "case_study_id": "cs-02-auth-service",
+      "content_text": "Centralized identity provider issuing short-lived EdDSA JWT access tokens (5m TTL) and rotating HttpOnly refresh tokens (7d TTL) with automatic breach detection on token reuse.",
+      "id": "cs-02-auth-service-step-1",
+      "section_key": "business_scenario",
+      "step_number": 1,
+      "title": "1. Business Scenario"
+    },
+    {
+      "case_study_id": "cs-02-auth-service",
+      "content_text": "POST /v1/auth/register (Argon2id hash)\nPOST /v1/auth/login (rate-limited + constant-time verify)\nPOST /v1/auth/refresh (rotates token; revokes entire family if used token is replayed)",
+      "id": "cs-02-auth-service-step-2",
+      "section_key": "functional_reqs",
+      "step_number": 2,
+      "title": "2. Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-02-auth-service",
+      "content_text": "Argon2id tuned to 64MB RAM, 3 iterations, 4 threads, bounded by a Go semaphore of 8 concurrent hashes\nZero timing side-channels",
+      "id": "cs-02-auth-service-step-3",
+      "section_key": "non_functional_reqs",
+      "step_number": 3,
+      "title": "3. Non-Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-02-auth-service",
+      "content_text": "Hexagonal Architecture (Ports \u0026 Adapters) — Identity requires durable ACID storage for user accounts, RBAC roles, and refresh-token rotation families (PostgreSQL), paired with sub-millisecond brute-force rate limiting in Redis.",
+      "id": "cs-02-auth-service-step-4",
+      "section_key": "architecture",
+      "step_number": 4,
+      "title": "4. Architecture \u0026 Rationale"
+    },
+    {
+      "case_study_id": "cs-02-auth-service",
+      "content_text": "PostgreSQL (Credentials \u0026 Refresh Families) + Redis (Revocation Deny-List \u0026 Login Rate Limit)",
+      "id": "cs-02-auth-service-step-5",
+      "section_key": "database_selection",
+      "step_number": 5,
+      "title": "5. Database Selection"
+    },
+    {
+      "case_study_id": "cs-02-auth-service",
+      "content_text": "CREATE TABLE refresh_tokens (\n    token_hash BYTEA PRIMARY KEY,\n    family_id UUID NOT NULL,\n    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,\n    is_used BOOLEAN NOT NULL DEFAULT FALSE,\n    revoked_at TIMESTAMPTZ,\n    expires_at TIMESTAMPTZ NOT NULL\n);\nCREATE INDEX idx_refresh_family ON refresh_tokens(family_id);",
+      "id": "cs-02-auth-service-step-6",
+      "section_key": "schema",
+      "step_number": 6,
+      "title": "6. Production Schema"
+    },
+    {
+      "case_study_id": "cs-02-auth-service",
+      "content_text": "POST /v1/auth/register (Argon2id hash)\nPOST /v1/auth/login (rate-limited + constant-time verify)\nPOST /v1/auth/refresh (rotates token; revokes entire family if used token is replayed)\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "id": "cs-02-auth-service-step-7",
+      "section_key": "api_design",
+      "step_number": 7,
+      "title": "7. API Endpoint Design"
+    },
+    {
+      "case_study_id": "cs-02-auth-service",
+      "content_text": "// If an already-used refresh token is presented again, an attacker stole the token!\n// Immediately revoke the entire token family for that session.\nif tokenRecord.IsUsed {\n\t_, _ = tx.ExecContext(ctx, `UPDATE refresh_tokens SET revoked_at = NOW() WHERE family_id = $1`, tokenRecord.FamilyID)\n\t_ = tx.Commit()\n\treturn nil, ErrCompromisedTokenFamily\n}",
+      "id": "cs-02-auth-service-step-8",
+      "section_key": "go_implementation",
+      "step_number": 8,
+      "title": "8. Go Implementation Pattern"
+    },
+    {
+      "case_study_id": "cs-02-auth-service",
+      "content_text": "1) Table-driven unit tests (`t.Run`, `t.Parallel`) for pure domain invariants; 2) `httptest.NewServer` + real DB container (`testcontainers-go` or SQLite WAL) testing constraint violations and concurrent race conditions (`go test -race ./...`); 3) Fuzz testing (`go test -fuzz`) on request decoders.",
+      "id": "cs-02-auth-service-step-9",
+      "section_key": "testing",
+      "step_number": 9,
+      "title": "9. Testing Strategy"
+    },
+    {
+      "case_study_id": "cs-02-auth-service",
+      "content_text": "Enforce object-level ownership (`WHERE id = $1 AND user_id/tenant_id = $2` — OWASP API1:2023 BOLA), bound payload size via `http.MaxBytesReader` (OWASP API4:2023), use parameterized SQL queries exclusively, and validate outbound URLs in `net.Dialer.Control` (OWASP API7:2023 SSRF).",
+      "id": "cs-02-auth-service-step-10",
+      "section_key": "security",
+      "step_number": 10,
+      "title": "10. Security Considerations"
+    },
+    {
+      "case_study_id": "cs-02-auth-service",
+      "content_text": "Cover hot read paths with composite B-Tree/GIN indexes verified via `EXPLAIN (ANALYZE, BUFFERS)`; replace deep `OFFSET` with keyset cursor pagination; bound `*sql.DB` / `pgxpool` connection limits (`MaxOpenConns`, `MaxIdleConns`).",
+      "id": "cs-02-auth-service-step-11",
+      "section_key": "performance",
+      "step_number": 11,
+      "title": "11. Performance Considerations"
+    },
+    {
+      "case_study_id": "cs-02-auth-service",
+      "content_text": "Kubernetes Deployment (3 replicas) with asymmetric Ed25519 public keys published via `/.well-known/jwks.json`.",
+      "id": "cs-02-auth-service-step-12",
+      "section_key": "deployment",
+      "step_number": 12,
+      "title": "12. Deployment Strategy"
+    },
+    {
+      "case_study_id": "cs-02-auth-service",
+      "content_text": "Allowing unlimited concurrent Argon2id logins (enables trivial CPU/OOM DoS with 100 parallel POST requests—always guard Argon2id behind a channel semaphore!); not rotating refresh tokens.",
+      "id": "cs-02-auth-service-step-13",
+      "section_key": "common_mistakes",
+      "step_number": 13,
+      "title": "13. Common Engineering Mistakes"
+    },
+    {
+      "case_study_id": "cs-02-auth-service",
+      "content_text": "Can start as an internal module inside a Modular Monolith using SQLite WAL (single-node) or PostgreSQL (multi-replica), and only extract into an independent gRPC/Kafka service if organizational boundaries or asymmetric scaling (\u003e10,000 RPS) justify the operational overhead.",
+      "id": "cs-02-auth-service-step-14",
+      "section_key": "alternatives",
+      "step_number": 14,
+      "title": "14. Alternative Implementations"
+    },
+    {
+      "case_study_id": "cs-03-url-shortener",
+      "content_text": "Shorten URLs into collision-free 7-character Base62 codes and record geo/referrer click analytics without slowing down HTTP 302/307 redirects.",
+      "id": "cs-03-url-shortener-step-1",
+      "section_key": "business_scenario",
+      "step_number": 1,
+      "title": "1. Business Scenario"
+    },
+    {
+      "case_study_id": "cs-03-url-shortener",
+      "content_text": "POST /v1/shorten (generates Base62 ID from distributed Snowflake/sequence)\nGET /{code} (307 Redirect + non-blocking click event enqueue)\nGET /v1/urls/{code}/stats",
+      "id": "cs-03-url-shortener-step-2",
+      "section_key": "functional_reqs",
+      "step_number": 2,
+      "title": "2. Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-03-url-shortener",
+      "content_text": "10,000 redirects/sec per node\np99 redirect latency \u003c 3ms\nSSRF/open-redirect target validation",
+      "id": "cs-03-url-shortener-step-3",
+      "section_key": "non_functional_reqs",
+      "step_number": 3,
+      "title": "3. Non-Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-03-url-shortener",
+      "content_text": "Read-Heavy Cache-Aside + Async Buffered Analytics Pipeline — Read-to-write ratio is 100:1. Redirects (`GET /{code}`) must respond in \u003c2ms via Redis + Go `singleflight` without blocking on synchronous analytics `INSERT`s.",
+      "id": "cs-03-url-shortener-step-4",
+      "section_key": "architecture",
+      "step_number": 4,
+      "title": "4. Architecture \u0026 Rationale"
+    },
+    {
+      "case_study_id": "cs-03-url-shortener",
+      "content_text": "PostgreSQL (Base62 Mapping) + Redis (Hot Redirect Cache) + ClickHouse/Timescale (Click Events)",
+      "id": "cs-03-url-shortener-step-5",
+      "section_key": "database_selection",
+      "step_number": 5,
+      "title": "5. Database Selection"
+    },
+    {
+      "case_study_id": "cs-03-url-shortener",
+      "content_text": "CREATE TABLE short_urls (\n    code VARCHAR(12) PRIMARY KEY,\n    original_url TEXT NOT NULL,\n    creator_id UUID NOT NULL,\n    expires_at TIMESTAMPTZ,\n    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);",
+      "id": "cs-03-url-shortener-step-6",
+      "section_key": "schema",
+      "step_number": 6,
+      "title": "6. Production Schema"
+    },
+    {
+      "case_study_id": "cs-03-url-shortener",
+      "content_text": "POST /v1/shorten (generates Base62 ID from distributed Snowflake/sequence)\nGET /{code} (307 Redirect + non-blocking click event enqueue)\nGET /v1/urls/{code}/stats\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "id": "cs-03-url-shortener-step-7",
+      "section_key": "api_design",
+      "step_number": 7,
+      "title": "7. API Endpoint Design"
+    },
+    {
+      "case_study_id": "cs-03-url-shortener",
+      "content_text": "// Resolve redirect using singleflight to prevent cache stampede on viral links\nval, err, _ := s.sfGroup.Do(code, func() (any, error) {\n\tif cached, err := s.redis.Get(ctx, \"url:\"+code).Result(); err == nil {\n\t\treturn cached, nil\n\t}\n\torigURL, err := s.repo.GetOriginalURL(ctx, code)\n\tif err != nil {\n\t\treturn \"\", err\n\t}\n\t_ = s.redis.Set(ctx, \"url:\"+code, origURL, 15*time.Minute).Err()\n\treturn origURL, nil\n})",
+      "id": "cs-03-url-shortener-step-8",
+      "section_key": "go_implementation",
+      "step_number": 8,
+      "title": "8. Go Implementation Pattern"
+    },
+    {
+      "case_study_id": "cs-03-url-shortener",
+      "content_text": "1) Table-driven unit tests (`t.Run`, `t.Parallel`) for pure domain invariants; 2) `httptest.NewServer` + real DB container (`testcontainers-go` or SQLite WAL) testing constraint violations and concurrent race conditions (`go test -race ./...`); 3) Fuzz testing (`go test -fuzz`) on request decoders.",
+      "id": "cs-03-url-shortener-step-9",
+      "section_key": "testing",
+      "step_number": 9,
+      "title": "9. Testing Strategy"
+    },
+    {
+      "case_study_id": "cs-03-url-shortener",
+      "content_text": "Enforce object-level ownership (`WHERE id = $1 AND user_id/tenant_id = $2` — OWASP API1:2023 BOLA), bound payload size via `http.MaxBytesReader` (OWASP API4:2023), use parameterized SQL queries exclusively, and validate outbound URLs in `net.Dialer.Control` (OWASP API7:2023 SSRF).",
+      "id": "cs-03-url-shortener-step-10",
+      "section_key": "security",
+      "step_number": 10,
+      "title": "10. Security Considerations"
+    },
+    {
+      "case_study_id": "cs-03-url-shortener",
+      "content_text": "Cover hot read paths with composite B-Tree/GIN indexes verified via `EXPLAIN (ANALYZE, BUFFERS)`; replace deep `OFFSET` with keyset cursor pagination; bound `*sql.DB` / `pgxpool` connection limits (`MaxOpenConns`, `MaxIdleConns`).",
+      "id": "cs-03-url-shortener-step-11",
+      "section_key": "performance",
+      "step_number": 11,
+      "title": "11. Performance Considerations"
+    },
+    {
+      "case_study_id": "cs-03-url-shortener",
+      "content_text": "Edge-cached Go instances + Redis Cluster + batched background click flush worker.",
+      "id": "cs-03-url-shortener-step-12",
+      "section_key": "deployment",
+      "step_number": 12,
+      "title": "12. Deployment Strategy"
+    },
+    {
+      "case_study_id": "cs-03-url-shortener",
+      "content_text": "Running `UPDATE short_urls SET clicks = clicks + 1 WHERE code = $1` synchronously inside the `GET /{code}` redirect handler (serializes every click on a single row lock in PostgreSQL!).",
+      "id": "cs-03-url-shortener-step-13",
+      "section_key": "common_mistakes",
+      "step_number": 13,
+      "title": "13. Common Engineering Mistakes"
+    },
+    {
+      "case_study_id": "cs-03-url-shortener",
+      "content_text": "Can start as an internal module inside a Modular Monolith using SQLite WAL (single-node) or PostgreSQL (multi-replica), and only extract into an independent gRPC/Kafka service if organizational boundaries or asymmetric scaling (\u003e10,000 RPS) justify the operational overhead.",
+      "id": "cs-03-url-shortener-step-14",
+      "section_key": "alternatives",
+      "step_number": 14,
+      "title": "14. Alternative Implementations"
+    },
+    {
+      "case_study_id": "cs-04-blog-cms",
+      "content_text": "Multi-author publishing platform with draft/review/published state machine, revision history, and weighted full-text search.",
+      "id": "cs-04-blog-cms-step-1",
+      "section_key": "business_scenario",
+      "step_number": 1,
+      "title": "1. Business Scenario"
+    },
+    {
+      "case_study_id": "cs-04-blog-cms",
+      "content_text": "POST /v1/articles\nPOST /v1/articles/{id}/publish\nGET /v1/articles/search?q=golang+concurrency",
+      "id": "cs-04-blog-cms-step-2",
+      "section_key": "functional_reqs",
+      "step_number": 2,
+      "title": "2. Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-04-blog-cms",
+      "content_text": "Full-text search p95 \u003c 10ms\nZero XSS via strict HTML sanitization (`bluemonday`) on rendered markdown",
+      "id": "cs-04-blog-cms-step-3",
+      "section_key": "non_functional_reqs",
+      "step_number": 3,
+      "title": "3. Non-Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-04-blog-cms",
+      "content_text": "Modular Monolith with PostgreSQL FTS (`tsvector` + GIN) — Instead of operating a separate Elasticsearch cluster for \u003c10M articles, PostgreSQL's built-in `tsvector` + `GIN` index provides stemmed full-text search, ranking (`ts_rank_cd`), and ACID publishing workflows in one database.",
+      "id": "cs-04-blog-cms-step-4",
+      "section_key": "architecture",
+      "step_number": 4,
+      "title": "4. Architecture \u0026 Rationale"
+    },
+    {
+      "case_study_id": "cs-04-blog-cms",
+      "content_text": "PostgreSQL 17/18 (Relational + Generated `tsvector` GIN Index)",
+      "id": "cs-04-blog-cms-step-5",
+      "section_key": "database_selection",
+      "step_number": 5,
+      "title": "5. Database Selection"
+    },
+    {
+      "case_study_id": "cs-04-blog-cms",
+      "content_text": "CREATE TABLE articles (\n    id UUID PRIMARY KEY,\n    slug VARCHAR(200) NOT NULL UNIQUE,\n    title TEXT NOT NULL,\n    body_markdown TEXT NOT NULL,\n    status VARCHAR(20) NOT NULL DEFAULT 'DRAFT',\n    search_tsv TSVECTOR GENERATED ALWAYS AS (\n        setweight(to_tsvector('english', coalesce(title, '')), 'A') ||\n        setweight(to_tsvector('english', coalesce(body_markdown, '')), 'B')\n    ) STORED\n);\nCREATE INDEX idx_articles_search_gin ON articles USING GIN (search_tsv);",
+      "id": "cs-04-blog-cms-step-6",
+      "section_key": "schema",
+      "step_number": 6,
+      "title": "6. Production Schema"
+    },
+    {
+      "case_study_id": "cs-04-blog-cms",
+      "content_text": "POST /v1/articles\nPOST /v1/articles/{id}/publish\nGET /v1/articles/search?q=golang+concurrency\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "id": "cs-04-blog-cms-step-7",
+      "section_key": "api_design",
+      "step_number": 7,
+      "title": "7. API Endpoint Design"
+    },
+    {
+      "case_study_id": "cs-04-blog-cms",
+      "content_text": "const searchSQL = `\nSELECT id, slug, title, ts_rank_cd(search_tsv, websearch_to_tsquery('english', $1)) AS rank\nFROM articles\nWHERE status = 'PUBLISHED' AND search_tsv @@ websearch_to_tsquery('english', $1)\nORDER BY rank DESC LIMIT 20;`",
+      "id": "cs-04-blog-cms-step-8",
+      "section_key": "go_implementation",
+      "step_number": 8,
+      "title": "8. Go Implementation Pattern"
+    },
+    {
+      "case_study_id": "cs-04-blog-cms",
+      "content_text": "1) Table-driven unit tests (`t.Run`, `t.Parallel`) for pure domain invariants; 2) `httptest.NewServer` + real DB container (`testcontainers-go` or SQLite WAL) testing constraint violations and concurrent race conditions (`go test -race ./...`); 3) Fuzz testing (`go test -fuzz`) on request decoders.",
+      "id": "cs-04-blog-cms-step-9",
+      "section_key": "testing",
+      "step_number": 9,
+      "title": "9. Testing Strategy"
+    },
+    {
+      "case_study_id": "cs-04-blog-cms",
+      "content_text": "Enforce object-level ownership (`WHERE id = $1 AND user_id/tenant_id = $2` — OWASP API1:2023 BOLA), bound payload size via `http.MaxBytesReader` (OWASP API4:2023), use parameterized SQL queries exclusively, and validate outbound URLs in `net.Dialer.Control` (OWASP API7:2023 SSRF).",
+      "id": "cs-04-blog-cms-step-10",
+      "section_key": "security",
+      "step_number": 10,
+      "title": "10. Security Considerations"
+    },
+    {
+      "case_study_id": "cs-04-blog-cms",
+      "content_text": "Cover hot read paths with composite B-Tree/GIN indexes verified via `EXPLAIN (ANALYZE, BUFFERS)`; replace deep `OFFSET` with keyset cursor pagination; bound `*sql.DB` / `pgxpool` connection limits (`MaxOpenConns`, `MaxIdleConns`).",
+      "id": "cs-04-blog-cms-step-11",
+      "section_key": "performance",
+      "step_number": 11,
+      "title": "11. Performance Considerations"
+    },
+    {
+      "case_study_id": "cs-04-blog-cms",
+      "content_text": "Docker Compose / Cloud Run + CDN cache with `Surrogate-Key` purge on article update.",
+      "id": "cs-04-blog-cms-step-12",
+      "section_key": "deployment",
+      "step_number": 12,
+      "title": "12. Deployment Strategy"
+    },
+    {
+      "case_study_id": "cs-04-blog-cms",
+      "content_text": "Using `WHERE body_markdown ILIKE '%term%'` without a trigram or GIN `tsvector` index, forcing a full table scan reading gigabytes of text.",
+      "id": "cs-04-blog-cms-step-13",
+      "section_key": "common_mistakes",
+      "step_number": 13,
+      "title": "13. Common Engineering Mistakes"
+    },
+    {
+      "case_study_id": "cs-04-blog-cms",
+      "content_text": "Can start as an internal module inside a Modular Monolith using SQLite WAL (single-node) or PostgreSQL (multi-replica), and only extract into an independent gRPC/Kafka service if organizational boundaries or asymmetric scaling (\u003e10,000 RPS) justify the operational overhead.",
+      "id": "cs-04-blog-cms-step-14",
+      "section_key": "alternatives",
+      "step_number": 14,
+      "title": "14. Alternative Implementations"
+    },
+    {
+      "case_study_id": "cs-05-ecommerce-backend",
+      "content_text": "Process customer checkouts with strict idempotency, exact integer cent pricing, inventory reservation, and webhook reconciliation.",
+      "id": "cs-05-ecommerce-backend-step-1",
+      "section_key": "business_scenario",
+      "step_number": 1,
+      "title": "1. Business Scenario"
+    },
+    {
+      "case_study_id": "cs-05-ecommerce-backend",
+      "content_text": "POST /v1/checkout (requires Idempotency-Key)\nPOST /v1/webhooks/payment (verifies HMAC-SHA256 signature)",
+      "id": "cs-05-ecommerce-backend-step-2",
+      "section_key": "functional_reqs",
+      "step_number": 2,
+      "title": "2. Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-05-ecommerce-backend",
+      "content_text": "Zero double-charges on client network retries\nExact integer money arithmetic",
+      "id": "cs-05-ecommerce-backend-step-3",
+      "section_key": "non_functional_reqs",
+      "step_number": 3,
+      "title": "3. Non-Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-05-ecommerce-backend",
+      "content_text": "Hexagonal Modular Monolith + Transactional Outbox — Checkout spans inventory reservation, coupon validation, payment intent creation, and order confirmation. Modular Monolith + Outbox guarantees atomic order creation and reliable downstream fulfillment events.",
+      "id": "cs-05-ecommerce-backend-step-4",
+      "section_key": "architecture",
+      "step_number": 4,
+      "title": "4. Architecture \u0026 Rationale"
+    },
+    {
+      "case_study_id": "cs-05-ecommerce-backend",
+      "content_text": "PostgreSQL (Orders, Payments, Outbox) + Redis (Cart \u0026 Idempotency)",
+      "id": "cs-05-ecommerce-backend-step-5",
+      "section_key": "database_selection",
+      "step_number": 5,
+      "title": "5. Database Selection"
+    },
+    {
+      "case_study_id": "cs-05-ecommerce-backend",
+      "content_text": "CREATE TABLE orders (\n    id UUID PRIMARY KEY,\n    idempotency_key VARCHAR(128) NOT NULL UNIQUE,\n    user_id UUID NOT NULL,\n    total_cents BIGINT NOT NULL CHECK (total_cents \u003e= 0),\n    status VARCHAR(32) NOT NULL DEFAULT 'AWAITING_PAYMENT',\n    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);",
+      "id": "cs-05-ecommerce-backend-step-6",
+      "section_key": "schema",
+      "step_number": 6,
+      "title": "6. Production Schema"
+    },
+    {
+      "case_study_id": "cs-05-ecommerce-backend",
+      "content_text": "POST /v1/checkout (requires Idempotency-Key)\nPOST /v1/webhooks/payment (verifies HMAC-SHA256 signature)\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "id": "cs-05-ecommerce-backend-step-7",
+      "section_key": "api_design",
+      "step_number": 7,
+      "title": "7. API Endpoint Design"
+    },
+    {
+      "case_study_id": "cs-05-ecommerce-backend",
+      "content_text": "// Verify webhook HMAC signature in constant time before processing payment event\nmac := hmac.New(sha256.New, webhookSecret)\nmac.Write(rawBody)\nexpectedMAC := mac.Sum(nil)\nif !hmac.Equal(providedMAC, expectedMAC) {\n\treturn ErrInvalidWebhookSignature\n}",
+      "id": "cs-05-ecommerce-backend-step-8",
+      "section_key": "go_implementation",
+      "step_number": 8,
+      "title": "8. Go Implementation Pattern"
+    },
+    {
+      "case_study_id": "cs-05-ecommerce-backend",
+      "content_text": "1) Table-driven unit tests (`t.Run`, `t.Parallel`) for pure domain invariants; 2) `httptest.NewServer` + real DB container (`testcontainers-go` or SQLite WAL) testing constraint violations and concurrent race conditions (`go test -race ./...`); 3) Fuzz testing (`go test -fuzz`) on request decoders.",
+      "id": "cs-05-ecommerce-backend-step-9",
+      "section_key": "testing",
+      "step_number": 9,
+      "title": "9. Testing Strategy"
+    },
+    {
+      "case_study_id": "cs-05-ecommerce-backend",
+      "content_text": "Enforce object-level ownership (`WHERE id = $1 AND user_id/tenant_id = $2` — OWASP API1:2023 BOLA), bound payload size via `http.MaxBytesReader` (OWASP API4:2023), use parameterized SQL queries exclusively, and validate outbound URLs in `net.Dialer.Control` (OWASP API7:2023 SSRF).",
+      "id": "cs-05-ecommerce-backend-step-10",
+      "section_key": "security",
+      "step_number": 10,
+      "title": "10. Security Considerations"
+    },
+    {
+      "case_study_id": "cs-05-ecommerce-backend",
+      "content_text": "Cover hot read paths with composite B-Tree/GIN indexes verified via `EXPLAIN (ANALYZE, BUFFERS)`; replace deep `OFFSET` with keyset cursor pagination; bound `*sql.DB` / `pgxpool` connection limits (`MaxOpenConns`, `MaxIdleConns`).",
+      "id": "cs-05-ecommerce-backend-step-11",
+      "section_key": "performance",
+      "step_number": 11,
+      "title": "11. Performance Considerations"
+    },
+    {
+      "case_study_id": "cs-05-ecommerce-backend",
+      "content_text": "Multi-AZ Kubernetes + RDS PostgreSQL Multi-AZ.",
+      "id": "cs-05-ecommerce-backend-step-12",
+      "section_key": "deployment",
+      "step_number": 12,
+      "title": "12. Deployment Strategy"
+    },
+    {
+      "case_study_id": "cs-05-ecommerce-backend",
+      "content_text": "Trusting price values sent from the frontend cart JSON instead of recalculating prices from the database catalog inside the checkout transaction.",
+      "id": "cs-05-ecommerce-backend-step-13",
+      "section_key": "common_mistakes",
+      "step_number": 13,
+      "title": "13. Common Engineering Mistakes"
+    },
+    {
+      "case_study_id": "cs-05-ecommerce-backend",
+      "content_text": "Can start as an internal module inside a Modular Monolith using SQLite WAL (single-node) or PostgreSQL (multi-replica), and only extract into an independent gRPC/Kafka service if organizational boundaries or asymmetric scaling (\u003e10,000 RPS) justify the operational overhead.",
+      "id": "cs-05-ecommerce-backend-step-14",
+      "section_key": "alternatives",
+      "step_number": 14,
+      "title": "14. Alternative Implementations"
+    },
+    {
+      "case_study_id": "cs-06-inventory-system",
+      "content_text": "Prevent overselling (`available_qty \u003c 0`) under 50k RPS flash-sale contention while releasing unpaid cart holds after 10 minutes.",
+      "id": "cs-06-inventory-system-step-1",
+      "section_key": "business_scenario",
+      "step_number": 1,
+      "title": "1. Business Scenario"
+    },
+    {
+      "case_study_id": "cs-06-inventory-system",
+      "content_text": "POST /v1/inventory/reserve\nPOST /v1/inventory/commit\nBackground Worker: ReleaseExpiredHolds",
+      "id": "cs-06-inventory-system-step-2",
+      "section_key": "functional_reqs",
+      "step_number": 2,
+      "title": "2. Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-06-inventory-system",
+      "content_text": "Zero overselling invariant (`available_qty \u003e= 0`)\nAutomatic hold expiration",
+      "id": "cs-06-inventory-system-step-3",
+      "section_key": "non_functional_reqs",
+      "step_number": 3,
+      "title": "3. Non-Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-06-inventory-system",
+      "content_text": "CQRS + Optimistic/Atomic SQL Locking + Temporary Reservation TTL — During a flash sale (50,000 users trying to buy 100 items in 2 seconds), Redis Lua `DECR` acts as an ultra-fast pre-filter so only 100 requests hit PostgreSQL's transactional reservation table.",
+      "id": "cs-06-inventory-system-step-4",
+      "section_key": "architecture",
+      "step_number": 4,
+      "title": "4. Architecture \u0026 Rationale"
+    },
+    {
+      "case_study_id": "cs-06-inventory-system",
+      "content_text": "PostgreSQL (Source of Truth) + Redis (Flash-Sale Atomic Pre-Gate)",
+      "id": "cs-06-inventory-system-step-5",
+      "section_key": "database_selection",
+      "step_number": 5,
+      "title": "5. Database Selection"
+    },
+    {
+      "case_study_id": "cs-06-inventory-system",
+      "content_text": "CREATE TABLE inventory_skus (\n    sku VARCHAR(64) PRIMARY KEY,\n    available_qty INTEGER NOT NULL CHECK (available_qty \u003e= 0),\n    reserved_qty INTEGER NOT NULL CHECK (reserved_qty \u003e= 0),\n    version BIGINT NOT NULL DEFAULT 1\n);",
+      "id": "cs-06-inventory-system-step-6",
+      "section_key": "schema",
+      "step_number": 6,
+      "title": "6. Production Schema"
+    },
+    {
+      "case_study_id": "cs-06-inventory-system",
+      "content_text": "POST /v1/inventory/reserve\nPOST /v1/inventory/commit\nBackground Worker: ReleaseExpiredHolds\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "id": "cs-06-inventory-system-step-7",
+      "section_key": "api_design",
+      "step_number": 7,
+      "title": "7. API Endpoint Design"
+    },
+    {
+      "case_study_id": "cs-06-inventory-system",
+      "content_text": "UPDATE inventory_skus\nSET available_qty = available_qty - $1,\n    reserved_qty = reserved_qty + $1,\n    version = version + 1\nWHERE sku = $2 AND available_qty \u003e= $1;",
+      "id": "cs-06-inventory-system-step-8",
+      "section_key": "go_implementation",
+      "step_number": 8,
+      "title": "8. Go Implementation Pattern"
+    },
+    {
+      "case_study_id": "cs-06-inventory-system",
+      "content_text": "1) Table-driven unit tests (`t.Run`, `t.Parallel`) for pure domain invariants; 2) `httptest.NewServer` + real DB container (`testcontainers-go` or SQLite WAL) testing constraint violations and concurrent race conditions (`go test -race ./...`); 3) Fuzz testing (`go test -fuzz`) on request decoders.",
+      "id": "cs-06-inventory-system-step-9",
+      "section_key": "testing",
+      "step_number": 9,
+      "title": "9. Testing Strategy"
+    },
+    {
+      "case_study_id": "cs-06-inventory-system",
+      "content_text": "Enforce object-level ownership (`WHERE id = $1 AND user_id/tenant_id = $2` — OWASP API1:2023 BOLA), bound payload size via `http.MaxBytesReader` (OWASP API4:2023), use parameterized SQL queries exclusively, and validate outbound URLs in `net.Dialer.Control` (OWASP API7:2023 SSRF).",
+      "id": "cs-06-inventory-system-step-10",
+      "section_key": "security",
+      "step_number": 10,
+      "title": "10. Security Considerations"
+    },
+    {
+      "case_study_id": "cs-06-inventory-system",
+      "content_text": "Cover hot read paths with composite B-Tree/GIN indexes verified via `EXPLAIN (ANALYZE, BUFFERS)`; replace deep `OFFSET` with keyset cursor pagination; bound `*sql.DB` / `pgxpool` connection limits (`MaxOpenConns`, `MaxIdleConns`).",
+      "id": "cs-06-inventory-system-step-11",
+      "section_key": "performance",
+      "step_number": 11,
+      "title": "11. Performance Considerations"
+    },
+    {
+      "case_study_id": "cs-06-inventory-system",
+      "content_text": "Go service with background `FOR UPDATE SKIP LOCKED` reservation reaper.",
+      "id": "cs-06-inventory-system-step-12",
+      "section_key": "deployment",
+      "step_number": 12,
+      "title": "12. Deployment Strategy"
+    },
+    {
+      "case_study_id": "cs-06-inventory-system",
+      "content_text": "Deducting permanent stock on 'Add to Cart' instead of creating a time-bounded `inventory_reservations` row with an `expires_at` timestamp (allows competitors to lock up 100% of stock without paying).",
+      "id": "cs-06-inventory-system-step-13",
+      "section_key": "common_mistakes",
+      "step_number": 13,
+      "title": "13. Common Engineering Mistakes"
+    },
+    {
+      "case_study_id": "cs-06-inventory-system",
+      "content_text": "Can start as an internal module inside a Modular Monolith using SQLite WAL (single-node) or PostgreSQL (multi-replica), and only extract into an independent gRPC/Kafka service if organizational boundaries or asymmetric scaling (\u003e10,000 RPS) justify the operational overhead.",
+      "id": "cs-06-inventory-system-step-14",
+      "section_key": "alternatives",
+      "step_number": 14,
+      "title": "14. Alternative Implementations"
+    },
+    {
+      "case_study_id": "cs-07-realtime-chat",
+      "content_text": "Deliver real-time messages across rooms and direct channels with read receipts, online presence, and pagination by Snowflake/UUIDv7 message ID.",
+      "id": "cs-07-realtime-chat-step-1",
+      "section_key": "business_scenario",
+      "step_number": 1,
+      "title": "1. Business Scenario"
+    },
+    {
+      "case_study_id": "cs-07-realtime-chat",
+      "content_text": "GET /v1/ws (WebSocket upgrade with read/write pumps)\nPOST /v1/rooms/{id}/messages\nGET /v1/rooms/{id}/messages?before={msg_id}",
+      "id": "cs-07-realtime-chat-step-2",
+      "section_key": "functional_reqs",
+      "step_number": 2,
+      "title": "2. Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-07-realtime-chat",
+      "content_text": "Bound per-client outgoing send channel (`make(chan []byte, 64)`) to drop/disconnect slow consumers before OOM\nHeartbeat Ping/Pong every 30s",
+      "id": "cs-07-realtime-chat-step-3",
+      "section_key": "non_functional_reqs",
+      "step_number": 3,
+      "title": "3. Non-Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-07-realtime-chat",
+      "content_text": "Stateful WebSocket Hub per Node + Redis Pub/Sub / NATS Backplane — User A may be connected via WebSocket to Go Pod 1 while User B is connected to Go Pod 2. A Redis Pub/Sub or NATS backplane routes messages between pods, while time-ordered clustering keys store chat history.",
+      "id": "cs-07-realtime-chat-step-4",
+      "section_key": "architecture",
+      "step_number": 4,
+      "title": "4. Architecture \u0026 Rationale"
+    },
+    {
+      "case_study_id": "cs-07-realtime-chat",
+      "content_text": "ScyllaDB / Cassandra or PostgreSQL Partitioned Tables (Messages) + Redis (Presence \u0026 Pub/Sub)",
+      "id": "cs-07-realtime-chat-step-5",
+      "section_key": "database_selection",
+      "step_number": 5,
+      "title": "5. Database Selection"
+    },
+    {
+      "case_study_id": "cs-07-realtime-chat",
+      "content_text": "-- Partitioned by channel_id, ordered by time-sortable message_id (UUIDv7 / Snowflake)\nCREATE TABLE chat_messages (\n    channel_id UUID NOT NULL,\n    message_id UUID NOT NULL,\n    sender_id UUID NOT NULL,\n    body TEXT NOT NULL,\n    PRIMARY KEY (channel_id, message_id)\n);",
+      "id": "cs-07-realtime-chat-step-6",
+      "section_key": "schema",
+      "step_number": 6,
+      "title": "6. Production Schema"
+    },
+    {
+      "case_study_id": "cs-07-realtime-chat",
+      "content_text": "GET /v1/ws (WebSocket upgrade with read/write pumps)\nPOST /v1/rooms/{id}/messages\nGET /v1/rooms/{id}/messages?before={msg_id}\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "id": "cs-07-realtime-chat-step-7",
+      "section_key": "api_design",
+      "step_number": 7,
+      "title": "7. API Endpoint Design"
+    },
+    {
+      "case_study_id": "cs-07-realtime-chat",
+      "content_text": "// Non-blocking fan-out to client send buffer: evict slow client instead of blocking entire room hub!\nselect {\ncase client.sendCh \u003c- msgBytes:\ndefault:\n\tclose(client.sendCh)\n\tdelete(h.clients, client)\n}",
+      "id": "cs-07-realtime-chat-step-8",
+      "section_key": "go_implementation",
+      "step_number": 8,
+      "title": "8. Go Implementation Pattern"
+    },
+    {
+      "case_study_id": "cs-07-realtime-chat",
+      "content_text": "1) Table-driven unit tests (`t.Run`, `t.Parallel`) for pure domain invariants; 2) `httptest.NewServer` + real DB container (`testcontainers-go` or SQLite WAL) testing constraint violations and concurrent race conditions (`go test -race ./...`); 3) Fuzz testing (`go test -fuzz`) on request decoders.",
+      "id": "cs-07-realtime-chat-step-9",
+      "section_key": "testing",
+      "step_number": 9,
+      "title": "9. Testing Strategy"
+    },
+    {
+      "case_study_id": "cs-07-realtime-chat",
+      "content_text": "Enforce object-level ownership (`WHERE id = $1 AND user_id/tenant_id = $2` — OWASP API1:2023 BOLA), bound payload size via `http.MaxBytesReader` (OWASP API4:2023), use parameterized SQL queries exclusively, and validate outbound URLs in `net.Dialer.Control` (OWASP API7:2023 SSRF).",
+      "id": "cs-07-realtime-chat-step-10",
+      "section_key": "security",
+      "step_number": 10,
+      "title": "10. Security Considerations"
+    },
+    {
+      "case_study_id": "cs-07-realtime-chat",
+      "content_text": "Cover hot read paths with composite B-Tree/GIN indexes verified via `EXPLAIN (ANALYZE, BUFFERS)`; replace deep `OFFSET` with keyset cursor pagination; bound `*sql.DB` / `pgxpool` connection limits (`MaxOpenConns`, `MaxIdleConns`).",
+      "id": "cs-07-realtime-chat-step-11",
+      "section_key": "performance",
+      "step_number": 11,
+      "title": "11. Performance Considerations"
+    },
+    {
+      "case_study_id": "cs-07-realtime-chat",
+      "content_text": "Kubernetes with sticky WebSocket load-balancer timeouts (3600s) + NATS/Redis cluster.",
+      "id": "cs-07-realtime-chat-step-12",
+      "section_key": "deployment",
+      "step_number": 12,
+      "title": "12. Deployment Strategy"
+    },
+    {
+      "case_study_id": "cs-07-realtime-chat",
+      "content_text": "Doing a blocking `client.sendCh \u003c- msg` inside the central room broadcast loop—one user on a stalled 2G mobile connection blocks message delivery for all 1,000 users in the room!",
+      "id": "cs-07-realtime-chat-step-13",
+      "section_key": "common_mistakes",
+      "step_number": 13,
+      "title": "13. Common Engineering Mistakes"
+    },
+    {
+      "case_study_id": "cs-07-realtime-chat",
+      "content_text": "Can start as an internal module inside a Modular Monolith using SQLite WAL (single-node) or PostgreSQL (multi-replica), and only extract into an independent gRPC/Kafka service if organizational boundaries or asymmetric scaling (\u003e10,000 RPS) justify the operational overhead.",
+      "id": "cs-07-realtime-chat-step-14",
+      "section_key": "alternatives",
+      "step_number": 14,
+      "title": "14. Alternative Implementations"
+    },
+    {
+      "case_study_id": "cs-08-file-storage",
+      "content_text": "Upload, virus-scan, verify MIME magic bytes, and serve private files with tenant access control.",
+      "id": "cs-08-file-storage-step-1",
+      "section_key": "business_scenario",
+      "step_number": 1,
+      "title": "1. Business Scenario"
+    },
+    {
+      "case_study_id": "cs-08-file-storage",
+      "content_text": "POST /v1/files/upload-intent (returns Pre-Signed PUT URL)\nPOST /v1/files/{id}/finalize (verifies object header via http.DetectContentType)",
+      "id": "cs-08-file-storage-step-2",
+      "section_key": "functional_reqs",
+      "step_number": 2,
+      "title": "2. Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-08-file-storage",
+      "content_text": "Never trust client-provided Content-Type header or file extension\nZero path traversal (`filepath.Clean` + UUID object keys)",
+      "id": "cs-08-file-storage-step-3",
+      "section_key": "non_functional_reqs",
+      "step_number": 3,
+      "title": "3. Non-Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-08-file-storage",
+      "content_text": "Control-Plane Metadata API + Direct-to-S3/MinIO Pre-Signed Uploads — Proxying 2GB video uploads through Go API memory wastes bandwidth and RAM. The Go API issues short-lived S3 pre-signed `PUT` URLs with strict `Content-Length` and SHA-256 checksum constraints, or streams via `io.Reader` magic-byte sniffing.",
+      "id": "cs-08-file-storage-step-4",
+      "section_key": "architecture",
+      "step_number": 4,
+      "title": "4. Architecture \u0026 Rationale"
+    },
+    {
+      "case_study_id": "cs-08-file-storage",
+      "content_text": "PostgreSQL (File Metadata, Checksums \u0026 ACLs) + S3/MinIO Object Storage",
+      "id": "cs-08-file-storage-step-5",
+      "section_key": "database_selection",
+      "step_number": 5,
+      "title": "5. Database Selection"
+    },
+    {
+      "case_study_id": "cs-08-file-storage",
+      "content_text": "CREATE TABLE stored_files (\n    id UUID PRIMARY KEY,\n    owner_id UUID NOT NULL,\n    object_key TEXT NOT NULL UNIQUE,\n    detected_mime VARCHAR(120) NOT NULL,\n    size_bytes BIGINT NOT NULL CHECK (size_bytes \u003e 0),\n    sha256_hex CHAR(64) NOT NULL,\n    status VARCHAR(24) NOT NULL DEFAULT 'PENDING'\n);",
+      "id": "cs-08-file-storage-step-6",
+      "section_key": "schema",
+      "step_number": 6,
+      "title": "6. Production Schema"
+    },
+    {
+      "case_study_id": "cs-08-file-storage",
+      "content_text": "POST /v1/files/upload-intent (returns Pre-Signed PUT URL)\nPOST /v1/files/{id}/finalize (verifies object header via http.DetectContentType)\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "id": "cs-08-file-storage-step-7",
+      "section_key": "api_design",
+      "step_number": 7,
+      "title": "7. API Endpoint Design"
+    },
+    {
+      "case_study_id": "cs-08-file-storage",
+      "content_text": "// Read first 512 bytes to detect true MIME magic number (prevents .html disguised as .png XSS)\nheaderBuf := make([]byte, 512)\nn, _ := io.ReadFull(fileStream, headerBuf)\ntrueMIME := http.DetectContentType(headerBuf[:n])",
+      "id": "cs-08-file-storage-step-8",
+      "section_key": "go_implementation",
+      "step_number": 8,
+      "title": "8. Go Implementation Pattern"
+    },
+    {
+      "case_study_id": "cs-08-file-storage",
+      "content_text": "1) Table-driven unit tests (`t.Run`, `t.Parallel`) for pure domain invariants; 2) `httptest.NewServer` + real DB container (`testcontainers-go` or SQLite WAL) testing constraint violations and concurrent race conditions (`go test -race ./...`); 3) Fuzz testing (`go test -fuzz`) on request decoders.",
+      "id": "cs-08-file-storage-step-9",
+      "section_key": "testing",
+      "step_number": 9,
+      "title": "9. Testing Strategy"
+    },
+    {
+      "case_study_id": "cs-08-file-storage",
+      "content_text": "Enforce object-level ownership (`WHERE id = $1 AND user_id/tenant_id = $2` — OWASP API1:2023 BOLA), bound payload size via `http.MaxBytesReader` (OWASP API4:2023), use parameterized SQL queries exclusively, and validate outbound URLs in `net.Dialer.Control` (OWASP API7:2023 SSRF).",
+      "id": "cs-08-file-storage-step-10",
+      "section_key": "security",
+      "step_number": 10,
+      "title": "10. Security Considerations"
+    },
+    {
+      "case_study_id": "cs-08-file-storage",
+      "content_text": "Cover hot read paths with composite B-Tree/GIN indexes verified via `EXPLAIN (ANALYZE, BUFFERS)`; replace deep `OFFSET` with keyset cursor pagination; bound `*sql.DB` / `pgxpool` connection limits (`MaxOpenConns`, `MaxIdleConns`).",
+      "id": "cs-08-file-storage-step-11",
+      "section_key": "performance",
+      "step_number": 11,
+      "title": "11. Performance Considerations"
+    },
+    {
+      "case_study_id": "cs-08-file-storage",
+      "content_text": "Go API + MinIO / AWS S3 + async ClamAV scanner worker.",
+      "id": "cs-08-file-storage-step-12",
+      "section_key": "deployment",
+      "step_number": 12,
+      "title": "12. Deployment Strategy"
+    },
+    {
+      "case_study_id": "cs-08-file-storage",
+      "content_text": "Using the user-supplied filename directly in `os.Create(\"/uploads/\" + filename)` (allows `../../etc/cron.d/pwn` path traversal) or trusting `r.Header.Get(\"Content-Type\")`.",
+      "id": "cs-08-file-storage-step-13",
+      "section_key": "common_mistakes",
+      "step_number": 13,
+      "title": "13. Common Engineering Mistakes"
+    },
+    {
+      "case_study_id": "cs-08-file-storage",
+      "content_text": "Can start as an internal module inside a Modular Monolith using SQLite WAL (single-node) or PostgreSQL (multi-replica), and only extract into an independent gRPC/Kafka service if organizational boundaries or asymmetric scaling (\u003e10,000 RPS) justify the operational overhead.",
+      "id": "cs-08-file-storage-step-14",
+      "section_key": "alternatives",
+      "step_number": 14,
+      "title": "14. Alternative Implementations"
+    },
+    {
+      "case_study_id": "cs-09-notification-service",
+      "content_text": "Reliably deliver transactional notifications with deduplication, provider failover, and retry backoff.",
+      "id": "cs-09-notification-service-step-1",
+      "section_key": "business_scenario",
+      "step_number": 1,
+      "title": "1. Business Scenario"
+    },
+    {
+      "case_study_id": "cs-09-notification-service",
+      "content_text": "POST /v1/notifications/send\nWorker: Retry with Full Jitter up to 5 attempts -\u003e route to DLQ",
+      "id": "cs-09-notification-service-step-2",
+      "section_key": "functional_reqs",
+      "step_number": 2,
+      "title": "2. Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-09-notification-service",
+      "content_text": "Idempotent deduplication by `(notification_id, channel)`\nCircuit breaker automatic failover from Primary SMTP to Backup SES",
+      "id": "cs-09-notification-service-step-3",
+      "section_key": "non_functional_reqs",
+      "step_number": 3,
+      "title": "3. Non-Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-09-notification-service",
+      "content_text": "Event-Driven Worker Pool + Per-Provider Circuit Breakers + Exponential Backoff \u0026 DLQ — External SMS/Email providers (Twilio, SES, FCM) suffer intermittent latency and rate limits. Decoupling dispatch via queues with per-provider circuit breakers and dead-letter queues prevents provider outages from impacting core user APIs.",
+      "id": "cs-09-notification-service-step-4",
+      "section_key": "architecture",
+      "step_number": 4,
+      "title": "4. Architecture \u0026 Rationale"
+    },
+    {
+      "case_study_id": "cs-09-notification-service",
+      "content_text": "PostgreSQL (Delivery Log \u0026 Templates) + RabbitMQ / Kafka (Dispatch Queues)",
+      "id": "cs-09-notification-service-step-5",
+      "section_key": "database_selection",
+      "step_number": 5,
+      "title": "5. Database Selection"
+    },
+    {
+      "case_study_id": "cs-09-notification-service",
+      "content_text": "CREATE TABLE notification_deliveries (\n    id UUID PRIMARY KEY,\n    idempotency_key VARCHAR(128) NOT NULL UNIQUE,\n    channel VARCHAR(24) NOT NULL,\n    recipient TEXT NOT NULL,\n    status VARCHAR(24) NOT NULL DEFAULT 'QUEUED',\n    attempt_count INTEGER NOT NULL DEFAULT 0,\n    next_retry_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);",
+      "id": "cs-09-notification-service-step-6",
+      "section_key": "schema",
+      "step_number": 6,
+      "title": "6. Production Schema"
+    },
+    {
+      "case_study_id": "cs-09-notification-service",
+      "content_text": "POST /v1/notifications/send\nWorker: Retry with Full Jitter up to 5 attempts -\u003e route to DLQ\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "id": "cs-09-notification-service-step-7",
+      "section_key": "api_design",
+      "step_number": 7,
+      "title": "7. API Endpoint Design"
+    },
+    {
+      "case_study_id": "cs-09-notification-service",
+      "content_text": "// Poll due retries across multiple worker pods without duplicate locking:\nSELECT id, channel, recipient FROM notification_deliveries\nWHERE status = 'RETRY_SCHEDULED' AND next_retry_at \u003c= NOW()\nORDER BY next_retry_at ASC LIMIT 50\nFOR UPDATE SKIP LOCKED;",
+      "id": "cs-09-notification-service-step-8",
+      "section_key": "go_implementation",
+      "step_number": 8,
+      "title": "8. Go Implementation Pattern"
+    },
+    {
+      "case_study_id": "cs-09-notification-service",
+      "content_text": "1) Table-driven unit tests (`t.Run`, `t.Parallel`) for pure domain invariants; 2) `httptest.NewServer` + real DB container (`testcontainers-go` or SQLite WAL) testing constraint violations and concurrent race conditions (`go test -race ./...`); 3) Fuzz testing (`go test -fuzz`) on request decoders.",
+      "id": "cs-09-notification-service-step-9",
+      "section_key": "testing",
+      "step_number": 9,
+      "title": "9. Testing Strategy"
+    },
+    {
+      "case_study_id": "cs-09-notification-service",
+      "content_text": "Enforce object-level ownership (`WHERE id = $1 AND user_id/tenant_id = $2` — OWASP API1:2023 BOLA), bound payload size via `http.MaxBytesReader` (OWASP API4:2023), use parameterized SQL queries exclusively, and validate outbound URLs in `net.Dialer.Control` (OWASP API7:2023 SSRF).",
+      "id": "cs-09-notification-service-step-10",
+      "section_key": "security",
+      "step_number": 10,
+      "title": "10. Security Considerations"
+    },
+    {
+      "case_study_id": "cs-09-notification-service",
+      "content_text": "Cover hot read paths with composite B-Tree/GIN indexes verified via `EXPLAIN (ANALYZE, BUFFERS)`; replace deep `OFFSET` with keyset cursor pagination; bound `*sql.DB` / `pgxpool` connection limits (`MaxOpenConns`, `MaxIdleConns`).",
+      "id": "cs-09-notification-service-step-11",
+      "section_key": "performance",
+      "step_number": 11,
+      "title": "11. Performance Considerations"
+    },
+    {
+      "case_study_id": "cs-09-notification-service",
+      "content_text": "Stateless API + Autoscaled Queue Consumer Pods.",
+      "id": "cs-09-notification-service-step-12",
+      "section_key": "deployment",
+      "step_number": 12,
+      "title": "12. Deployment Strategy"
+    },
+    {
+      "case_study_id": "cs-09-notification-service",
+      "content_text": "Sending emails synchronously inside the `POST /register` HTTP handler (adds 800ms to registration and fails user signup whenever the SMTP server blips).",
+      "id": "cs-09-notification-service-step-13",
+      "section_key": "common_mistakes",
+      "step_number": 13,
+      "title": "13. Common Engineering Mistakes"
+    },
+    {
+      "case_study_id": "cs-09-notification-service",
+      "content_text": "Can start as an internal module inside a Modular Monolith using SQLite WAL (single-node) or PostgreSQL (multi-replica), and only extract into an independent gRPC/Kafka service if organizational boundaries or asymmetric scaling (\u003e10,000 RPS) justify the operational overhead.",
+      "id": "cs-09-notification-service-step-14",
+      "section_key": "alternatives",
+      "step_number": 14,
+      "title": "14. Alternative Implementations"
+    },
+    {
+      "case_study_id": "cs-10-booking-reservation",
+      "content_text": "Guarantee mathematically zero double-bookings for rooms, seats, or doctor appointments across arbitrary date/time intervals.",
+      "id": "cs-10-booking-reservation-step-1",
+      "section_key": "business_scenario",
+      "step_number": 1,
+      "title": "1. Business Scenario"
+    },
+    {
+      "case_study_id": "cs-10-booking-reservation",
+      "content_text": "POST /v1/bookings (atomic interval reservation)\nDELETE /v1/bookings/{id} (cancellation)",
+      "id": "cs-10-booking-reservation-step-2",
+      "section_key": "functional_reqs",
+      "step_number": 2,
+      "title": "2. Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-10-booking-reservation",
+      "content_text": "100% immunity to overlapping time-range race conditions",
+      "id": "cs-10-booking-reservation-step-3",
+      "section_key": "non_functional_reqs",
+      "step_number": 3,
+      "title": "3. Non-Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-10-booking-reservation",
+      "content_text": "PostgreSQL Exclusion Constraints (`btree_gist`) + ACID Transactions — Application-level overlap checks (`SELECT count(*) WHERE start \u003c $end AND end \u003e $start`) fail under `READ COMMITTED` when two users book overlapping time ranges simultaneously. PostgreSQL's `EXCLUDE USING gist (room_id WITH =, tstzrange(check_in, check_out) WITH \u0026\u0026)` enforces non-overlapping intervals at the storage index level!",
+      "id": "cs-10-booking-reservation-step-4",
+      "section_key": "architecture",
+      "step_number": 4,
+      "title": "4. Architecture \u0026 Rationale"
+    },
+    {
+      "case_study_id": "cs-10-booking-reservation",
+      "content_text": "PostgreSQL 17/18 with `btree_gist` Extension (`EXCLUDE USING gist`)",
+      "id": "cs-10-booking-reservation-step-5",
+      "section_key": "database_selection",
+      "step_number": 5,
+      "title": "5. Database Selection"
+    },
+    {
+      "case_study_id": "cs-10-booking-reservation",
+      "content_text": "CREATE EXTENSION IF NOT EXISTS btree_gist;\n\nCREATE TABLE room_bookings (\n    id UUID PRIMARY KEY,\n    room_id UUID NOT NULL,\n    guest_id UUID NOT NULL,\n    stay_period TSTZRANGE NOT NULL,\n    status VARCHAR(20) NOT NULL DEFAULT 'CONFIRMED',\n    EXCLUDE USING gist (\n        room_id WITH =,\n        stay_period WITH \u0026\u0026\n    ) WHERE (status = 'CONFIRMED')\n);",
+      "id": "cs-10-booking-reservation-step-6",
+      "section_key": "schema",
+      "step_number": 6,
+      "title": "6. Production Schema"
+    },
+    {
+      "case_study_id": "cs-10-booking-reservation",
+      "content_text": "POST /v1/bookings (atomic interval reservation)\nDELETE /v1/bookings/{id} (cancellation)\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "id": "cs-10-booking-reservation-step-7",
+      "section_key": "api_design",
+      "step_number": 7,
+      "title": "7. API Endpoint Design"
+    },
+    {
+      "case_study_id": "cs-10-booking-reservation",
+      "content_text": "_, err := db.ExecContext(ctx, `\n\tINSERT INTO room_bookings (id, room_id, guest_id, stay_period)\n\tVALUES ($1, $2, $3, tstzrange($4::timestamptz, $5::timestamptz, '[)'))\n`, bookingID, roomID, guestID, checkIn, checkOut)\n// Postgres returns SQLSTATE 23P01 (exclusion_violation) if any overlap exists!",
+      "id": "cs-10-booking-reservation-step-8",
+      "section_key": "go_implementation",
+      "step_number": 8,
+      "title": "8. Go Implementation Pattern"
+    },
+    {
+      "case_study_id": "cs-10-booking-reservation",
+      "content_text": "1) Table-driven unit tests (`t.Run`, `t.Parallel`) for pure domain invariants; 2) `httptest.NewServer` + real DB container (`testcontainers-go` or SQLite WAL) testing constraint violations and concurrent race conditions (`go test -race ./...`); 3) Fuzz testing (`go test -fuzz`) on request decoders.",
+      "id": "cs-10-booking-reservation-step-9",
+      "section_key": "testing",
+      "step_number": 9,
+      "title": "9. Testing Strategy"
+    },
+    {
+      "case_study_id": "cs-10-booking-reservation",
+      "content_text": "Enforce object-level ownership (`WHERE id = $1 AND user_id/tenant_id = $2` — OWASP API1:2023 BOLA), bound payload size via `http.MaxBytesReader` (OWASP API4:2023), use parameterized SQL queries exclusively, and validate outbound URLs in `net.Dialer.Control` (OWASP API7:2023 SSRF).",
+      "id": "cs-10-booking-reservation-step-10",
+      "section_key": "security",
+      "step_number": 10,
+      "title": "10. Security Considerations"
+    },
+    {
+      "case_study_id": "cs-10-booking-reservation",
+      "content_text": "Cover hot read paths with composite B-Tree/GIN indexes verified via `EXPLAIN (ANALYZE, BUFFERS)`; replace deep `OFFSET` with keyset cursor pagination; bound `*sql.DB` / `pgxpool` connection limits (`MaxOpenConns`, `MaxIdleConns`).",
+      "id": "cs-10-booking-reservation-step-11",
+      "section_key": "performance",
+      "step_number": 11,
+      "title": "11. Performance Considerations"
+    },
+    {
+      "case_study_id": "cs-10-booking-reservation",
+      "content_text": "PostgreSQL primary with GiST exclusion constraint.",
+      "id": "cs-10-booking-reservation-step-12",
+      "section_key": "deployment",
+      "step_number": 12,
+      "title": "12. Deployment Strategy"
+    },
+    {
+      "case_study_id": "cs-10-booking-reservation",
+      "content_text": "Checking for overlapping dates in Go code with a `SELECT` before `INSERT` without `EXCLUDE USING gist` or `SERIALIZABLE` isolation—causes double-bookings under concurrent requests.",
+      "id": "cs-10-booking-reservation-step-13",
+      "section_key": "common_mistakes",
+      "step_number": 13,
+      "title": "13. Common Engineering Mistakes"
+    },
+    {
+      "case_study_id": "cs-10-booking-reservation",
+      "content_text": "Can start as an internal module inside a Modular Monolith using SQLite WAL (single-node) or PostgreSQL (multi-replica), and only extract into an independent gRPC/Kafka service if organizational boundaries or asymmetric scaling (\u003e10,000 RPS) justify the operational overhead.",
+      "id": "cs-10-booking-reservation-step-14",
+      "section_key": "alternatives",
+      "step_number": 14,
+      "title": "14. Alternative Implementations"
+    },
+    {
+      "case_study_id": "cs-11-payment-simulation",
+      "content_text": "Simulate payment authorization, capture, partial refunds, and reconciliation reports with cryptographic idempotency.",
+      "id": "cs-11-payment-simulation-step-1",
+      "section_key": "business_scenario",
+      "step_number": 1,
+      "title": "1. Business Scenario"
+    },
+    {
+      "case_study_id": "cs-11-payment-simulation",
+      "content_text": "POST /v1/payment-intents (Authorize)\nPOST /v1/payment-intents/{id}/capture\nPOST /v1/payment-intents/{id}/refund",
+      "id": "cs-11-payment-simulation-step-2",
+      "section_key": "functional_reqs",
+      "step_number": 2,
+      "title": "2. Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-11-payment-simulation",
+      "content_text": "Every transaction balances debits and credits to 0\nPCI-DSS scoping: never log raw PAN/CVV in slog",
+      "id": "cs-11-payment-simulation-step-3",
+      "section_key": "non_functional_reqs",
+      "step_number": 3,
+      "title": "3. Non-Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-11-payment-simulation",
+      "content_text": "Two-Phase Authorize/Capture State Machine + Immutable Double-Entry Ledger — Payments never overwrite a single float column. Every movement of funds (Authorization Hold -\u003e Capture -\u003e Platform Fee -\u003e Merchant Payout -\u003e Refund) is recorded as balanced debit/credit rows summing to zero (`SUM(amount_cents) = 0`).",
+      "id": "cs-11-payment-simulation-step-4",
+      "section_key": "architecture",
+      "step_number": 4,
+      "title": "4. Architecture \u0026 Rationale"
+    },
+    {
+      "case_study_id": "cs-11-payment-simulation",
+      "content_text": "PostgreSQL (`SERIALIZABLE` / Row-Locked Ledger)",
+      "id": "cs-11-payment-simulation-step-5",
+      "section_key": "database_selection",
+      "step_number": 5,
+      "title": "5. Database Selection"
+    },
+    {
+      "case_study_id": "cs-11-payment-simulation",
+      "content_text": "CREATE TABLE journal_postings (\n    id UUID PRIMARY KEY,\n    transaction_id UUID NOT NULL,\n    account_id UUID NOT NULL,\n    amount_cents BIGINT NOT NULL, -- Debits negative, Credits positive\n    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);",
+      "id": "cs-11-payment-simulation-step-6",
+      "section_key": "schema",
+      "step_number": 6,
+      "title": "6. Production Schema"
+    },
+    {
+      "case_study_id": "cs-11-payment-simulation",
+      "content_text": "POST /v1/payment-intents (Authorize)\nPOST /v1/payment-intents/{id}/capture\nPOST /v1/payment-intents/{id}/refund\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "id": "cs-11-payment-simulation-step-7",
+      "section_key": "api_design",
+      "step_number": 7,
+      "title": "7. API Endpoint Design"
+    },
+    {
+      "case_study_id": "cs-11-payment-simulation",
+      "content_text": "// Invariant check before committing double-entry journal batch:\nvar netSum int64\nfor _, entry := range postings {\n\tnetSum += entry.AmountCents\n}\nif netSum != 0 {\n\treturn ErrUnbalancedJournalTransaction\n}",
+      "id": "cs-11-payment-simulation-step-8",
+      "section_key": "go_implementation",
+      "step_number": 8,
+      "title": "8. Go Implementation Pattern"
+    },
+    {
+      "case_study_id": "cs-11-payment-simulation",
+      "content_text": "1) Table-driven unit tests (`t.Run`, `t.Parallel`) for pure domain invariants; 2) `httptest.NewServer` + real DB container (`testcontainers-go` or SQLite WAL) testing constraint violations and concurrent race conditions (`go test -race ./...`); 3) Fuzz testing (`go test -fuzz`) on request decoders.",
+      "id": "cs-11-payment-simulation-step-9",
+      "section_key": "testing",
+      "step_number": 9,
+      "title": "9. Testing Strategy"
+    },
+    {
+      "case_study_id": "cs-11-payment-simulation",
+      "content_text": "Enforce object-level ownership (`WHERE id = $1 AND user_id/tenant_id = $2` — OWASP API1:2023 BOLA), bound payload size via `http.MaxBytesReader` (OWASP API4:2023), use parameterized SQL queries exclusively, and validate outbound URLs in `net.Dialer.Control` (OWASP API7:2023 SSRF).",
+      "id": "cs-11-payment-simulation-step-10",
+      "section_key": "security",
+      "step_number": 10,
+      "title": "10. Security Considerations"
+    },
+    {
+      "case_study_id": "cs-11-payment-simulation",
+      "content_text": "Cover hot read paths with composite B-Tree/GIN indexes verified via `EXPLAIN (ANALYZE, BUFFERS)`; replace deep `OFFSET` with keyset cursor pagination; bound `*sql.DB` / `pgxpool` connection limits (`MaxOpenConns`, `MaxIdleConns`).",
+      "id": "cs-11-payment-simulation-step-11",
+      "section_key": "performance",
+      "step_number": 11,
+      "title": "11. Performance Considerations"
+    },
+    {
+      "case_study_id": "cs-11-payment-simulation",
+      "content_text": "Isolated VPC subnet, strict mTLS, PostgreSQL synchronous replication.",
+      "id": "cs-11-payment-simulation-step-12",
+      "section_key": "deployment",
+      "step_number": 12,
+      "title": "12. Deployment Strategy"
+    },
+    {
+      "case_study_id": "cs-11-payment-simulation",
+      "content_text": "Using `UPDATE payments SET amount = ...` instead of append-only compensating refund entries; using `float64` for currency.",
+      "id": "cs-11-payment-simulation-step-13",
+      "section_key": "common_mistakes",
+      "step_number": 13,
+      "title": "13. Common Engineering Mistakes"
+    },
+    {
+      "case_study_id": "cs-11-payment-simulation",
+      "content_text": "Can start as an internal module inside a Modular Monolith using SQLite WAL (single-node) or PostgreSQL (multi-replica), and only extract into an independent gRPC/Kafka service if organizational boundaries or asymmetric scaling (\u003e10,000 RPS) justify the operational overhead.",
+      "id": "cs-11-payment-simulation-step-14",
+      "section_key": "alternatives",
+      "step_number": 14,
+      "title": "14. Alternative Implementations"
+    },
+    {
+      "case_study_id": "cs-12-multitenant-saas",
+      "content_text": "Isolate thousands of enterprise organizations with per-tenant RBAC, custom rate limits, and guaranteed zero cross-tenant data leakage.",
+      "id": "cs-12-multitenant-saas-step-1",
+      "section_key": "business_scenario",
+      "step_number": 1,
+      "title": "1. Business Scenario"
+    },
+    {
+      "case_study_id": "cs-12-multitenant-saas",
+      "content_text": "Middleware extracts verified `tenant_id` from JWT\nTransaction wrapper sets `SET LOCAL app.current_tenant_id = ...`",
+      "id": "cs-12-multitenant-saas-step-2",
+      "section_key": "functional_reqs",
+      "step_number": 2,
+      "title": "2. Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-12-multitenant-saas",
+      "content_text": "Defense-in-depth tenant isolation (Application filter + Postgres RLS policy)\nPer-tenant rate limiting in Redis",
+      "id": "cs-12-multitenant-saas-step-3",
+      "section_key": "non_functional_reqs",
+      "step_number": 3,
+      "title": "3. Non-Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-12-multitenant-saas",
+      "content_text": "Shared-Schema Multi-Tenancy with PostgreSQL Row-Level Security (RLS) + Tenant Context Middleware — In B2B SaaS, forgetting `WHERE tenant_id = $1` on a single query leaks Customer A's data to Customer B. Enabling PostgreSQL RLS (`USING (tenant_id = current_setting('app.current_tenant_id')::uuid)`) enforces tenant isolation at the database engine level as a defense-in-depth safety net.",
+      "id": "cs-12-multitenant-saas-step-4",
+      "section_key": "architecture",
+      "step_number": 4,
+      "title": "4. Architecture \u0026 Rationale"
+    },
+    {
+      "case_study_id": "cs-12-multitenant-saas",
+      "content_text": "PostgreSQL 17/18 with `ENABLE ROW LEVEL SECURITY`",
+      "id": "cs-12-multitenant-saas-step-5",
+      "section_key": "database_selection",
+      "step_number": 5,
+      "title": "5. Database Selection"
+    },
+    {
+      "case_study_id": "cs-12-multitenant-saas",
+      "content_text": "CREATE TABLE projects (\n    id UUID PRIMARY KEY,\n    tenant_id UUID NOT NULL,\n    name TEXT NOT NULL\n);\nALTER TABLE projects ENABLE ROW LEVEL SECURITY;\nALTER TABLE projects FORCE ROW LEVEL SECURITY;\nCREATE POLICY tenant_isolation_policy ON projects\n    USING (tenant_id = current_setting('app.current_tenant_id', true)::uuid);",
+      "id": "cs-12-multitenant-saas-step-6",
+      "section_key": "schema",
+      "step_number": 6,
+      "title": "6. Production Schema"
+    },
+    {
+      "case_study_id": "cs-12-multitenant-saas",
+      "content_text": "Middleware extracts verified `tenant_id` from JWT\nTransaction wrapper sets `SET LOCAL app.current_tenant_id = ...`\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "id": "cs-12-multitenant-saas-step-7",
+      "section_key": "api_design",
+      "step_number": 7,
+      "title": "7. API Endpoint Design"
+    },
+    {
+      "case_study_id": "cs-12-multitenant-saas",
+      "content_text": "// SET LOCAL scopes the setting strictly to the current transaction so pooled connections never leak tenant_id!\nif _, err := tx.ExecContext(ctx, \"SELECT set_config('app.current_tenant_id', $1, true)\", tenantID); err != nil {\n\treturn err\n}",
+      "id": "cs-12-multitenant-saas-step-8",
+      "section_key": "go_implementation",
+      "step_number": 8,
+      "title": "8. Go Implementation Pattern"
+    },
+    {
+      "case_study_id": "cs-12-multitenant-saas",
+      "content_text": "1) Table-driven unit tests (`t.Run`, `t.Parallel`) for pure domain invariants; 2) `httptest.NewServer` + real DB container (`testcontainers-go` or SQLite WAL) testing constraint violations and concurrent race conditions (`go test -race ./...`); 3) Fuzz testing (`go test -fuzz`) on request decoders.",
+      "id": "cs-12-multitenant-saas-step-9",
+      "section_key": "testing",
+      "step_number": 9,
+      "title": "9. Testing Strategy"
+    },
+    {
+      "case_study_id": "cs-12-multitenant-saas",
+      "content_text": "CRITICAL POSTGRESQL RLS NOTE: Table owners and superusers bypass Row-Level Security by default! Production deployment MUST: (1) run `ALTER TABLE ... ENABLE ROW LEVEL SECURITY;` AND `ALTER TABLE ... FORCE ROW LEVEL SECURITY;`, (2) connect from the Go application using a dedicated non-superuser role created with `NOBYPASSRLS`, and (3) set the tenant context per transaction via `SELECT set_config('app.current_tenant_id', $1, true)` (`SET LOCAL`) so pooled connections never leak tenant state across requests.",
+      "id": "cs-12-multitenant-saas-step-10",
+      "section_key": "security",
+      "step_number": 10,
+      "title": "10. Security Considerations"
+    },
+    {
+      "case_study_id": "cs-12-multitenant-saas",
+      "content_text": "Cover hot read paths with composite B-Tree/GIN indexes verified via `EXPLAIN (ANALYZE, BUFFERS)`; replace deep `OFFSET` with keyset cursor pagination; bound `*sql.DB` / `pgxpool` connection limits (`MaxOpenConns`, `MaxIdleConns`).",
+      "id": "cs-12-multitenant-saas-step-11",
+      "section_key": "performance",
+      "step_number": 11,
+      "title": "11. Performance Considerations"
+    },
+    {
+      "case_study_id": "cs-12-multitenant-saas",
+      "content_text": "Kubernetes + PgBouncer (Transaction Pooling compatible with `SET LOCAL`) + PostgreSQL.",
+      "id": "cs-12-multitenant-saas-step-12",
+      "section_key": "deployment",
+      "step_number": 12,
+      "title": "12. Deployment Strategy"
+    },
+    {
+      "case_study_id": "cs-12-multitenant-saas",
+      "content_text": "Using session-level `SET app.current_tenant_id` instead of transaction-local `SET LOCAL` (or `set_config(..., true)`), which leaks the tenant context to the next HTTP request reusing that connection from the pool!",
+      "id": "cs-12-multitenant-saas-step-13",
+      "section_key": "common_mistakes",
+      "step_number": 13,
+      "title": "13. Common Engineering Mistakes"
+    },
+    {
+      "case_study_id": "cs-12-multitenant-saas",
+      "content_text": "Can start as an internal module inside a Modular Monolith using SQLite WAL (single-node) or PostgreSQL (multi-replica), and only extract into an independent gRPC/Kafka service if organizational boundaries or asymmetric scaling (\u003e10,000 RPS) justify the operational overhead.",
+      "id": "cs-12-multitenant-saas-step-14",
+      "section_key": "alternatives",
+      "step_number": 14,
+      "title": "14. Alternative Implementations"
+    },
+    {
+      "case_study_id": "cs-13-event-driven-orders",
+      "content_text": "Coordinate OrderCreated -\u003e StockReserved -\u003e PaymentCaptured -\u003e ShipmentScheduled, rolling back via compensating events if payment fails.",
+      "id": "cs-13-event-driven-orders-step-1",
+      "section_key": "business_scenario",
+      "step_number": 1,
+      "title": "1. Business Scenario"
+    },
+    {
+      "case_study_id": "cs-13-event-driven-orders",
+      "content_text": "Saga State Machine (`STARTED -\u003e STOCK_RESERVED -\u003e PAID -\u003e COMPLETED` or `COMPENSATING -\u003e CANCELED`)\nIdempotent Kafka Consumer with `processed_events` table",
+      "id": "cs-13-event-driven-orders-step-2",
+      "section_key": "functional_reqs",
+      "step_number": 2,
+      "title": "2. Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-13-event-driven-orders",
+      "content_text": "Eventual consistency convergence\nAt-least-once event delivery with idempotent handling",
+      "id": "cs-13-event-driven-orders-step-3",
+      "section_key": "non_functional_reqs",
+      "step_number": 3,
+      "title": "3. Non-Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-13-event-driven-orders",
+      "content_text": "Saga Pattern with Compensating Transactions + Transactional Outbox + Kafka — When Order Service, Payment Service, and Warehouse Service own separate databases, distributed 2-Phase Commit (XA) destroys availability. A Saga coordinates local ACID transactions via Kafka events and executes explicit compensating actions (`RefundPayment`, `ReleaseStock`) if a downstream step fails.",
+      "id": "cs-13-event-driven-orders-step-4",
+      "section_key": "architecture",
+      "step_number": 4,
+      "title": "4. Architecture \u0026 Rationale"
+    },
+    {
+      "case_study_id": "cs-13-event-driven-orders",
+      "content_text": "PostgreSQL per Microservice + Apache Kafka Event Backbone",
+      "id": "cs-13-event-driven-orders-step-5",
+      "section_key": "database_selection",
+      "step_number": 5,
+      "title": "5. Database Selection"
+    },
+    {
+      "case_study_id": "cs-13-event-driven-orders",
+      "content_text": "CREATE TABLE saga_instances (\n    saga_id UUID PRIMARY KEY,\n    order_id UUID NOT NULL UNIQUE,\n    current_step VARCHAR(40) NOT NULL,\n    status VARCHAR(24) NOT NULL,\n    payload JSONB NOT NULL,\n    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);",
+      "id": "cs-13-event-driven-orders-step-6",
+      "section_key": "schema",
+      "step_number": 6,
+      "title": "6. Production Schema"
+    },
+    {
+      "case_study_id": "cs-13-event-driven-orders",
+      "content_text": "Saga State Machine (`STARTED -\u003e STOCK_RESERVED -\u003e PAID -\u003e COMPLETED` or `COMPENSATING -\u003e CANCELED`)\nIdempotent Kafka Consumer with `processed_events` table\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "id": "cs-13-event-driven-orders-step-7",
+      "section_key": "api_design",
+      "step_number": 7,
+      "title": "7. API Endpoint Design"
+    },
+    {
+      "case_study_id": "cs-13-event-driven-orders",
+      "content_text": "// Compensating transaction must also be idempotent and retried until acknowledged\nswitch event.Type {\ncase \"PaymentFailed\":\n\treturn s.publishOutboxCommand(ctx, tx, \"inventory.release_reservation\", event.OrderID)\n}",
+      "id": "cs-13-event-driven-orders-step-8",
+      "section_key": "go_implementation",
+      "step_number": 8,
+      "title": "8. Go Implementation Pattern"
+    },
+    {
+      "case_study_id": "cs-13-event-driven-orders",
+      "content_text": "1) Table-driven unit tests (`t.Run`, `t.Parallel`) for pure domain invariants; 2) `httptest.NewServer` + real DB container (`testcontainers-go` or SQLite WAL) testing constraint violations and concurrent race conditions (`go test -race ./...`); 3) Fuzz testing (`go test -fuzz`) on request decoders.",
+      "id": "cs-13-event-driven-orders-step-9",
+      "section_key": "testing",
+      "step_number": 9,
+      "title": "9. Testing Strategy"
+    },
+    {
+      "case_study_id": "cs-13-event-driven-orders",
+      "content_text": "Enforce object-level ownership (`WHERE id = $1 AND user_id/tenant_id = $2` — OWASP API1:2023 BOLA), bound payload size via `http.MaxBytesReader` (OWASP API4:2023), use parameterized SQL queries exclusively, and validate outbound URLs in `net.Dialer.Control` (OWASP API7:2023 SSRF).",
+      "id": "cs-13-event-driven-orders-step-10",
+      "section_key": "security",
+      "step_number": 10,
+      "title": "10. Security Considerations"
+    },
+    {
+      "case_study_id": "cs-13-event-driven-orders",
+      "content_text": "Cover hot read paths with composite B-Tree/GIN indexes verified via `EXPLAIN (ANALYZE, BUFFERS)`; replace deep `OFFSET` with keyset cursor pagination; bound `*sql.DB` / `pgxpool` connection limits (`MaxOpenConns`, `MaxIdleConns`).",
+      "id": "cs-13-event-driven-orders-step-11",
+      "section_key": "performance",
+      "step_number": 11,
+      "title": "11. Performance Considerations"
+    },
+    {
+      "case_study_id": "cs-13-event-driven-orders",
+      "content_text": "Multi-service Kubernetes cluster + Kafka (3+ brokers, `acks=all`, `min.insync.replicas=2`).",
+      "id": "cs-13-event-driven-orders-step-12",
+      "section_key": "deployment",
+      "step_number": 12,
+      "title": "12. Deployment Strategy"
+    },
+    {
+      "case_study_id": "cs-13-event-driven-orders",
+      "content_text": "Assuming compensating transactions never fail (compensations must be retried indefinitely with alerting if stuck) or forgetting that events can arrive out of order.",
+      "id": "cs-13-event-driven-orders-step-13",
+      "section_key": "common_mistakes",
+      "step_number": 13,
+      "title": "13. Common Engineering Mistakes"
+    },
+    {
+      "case_study_id": "cs-13-event-driven-orders",
+      "content_text": "Can start as an internal module inside a Modular Monolith using SQLite WAL (single-node) or PostgreSQL (multi-replica), and only extract into an independent gRPC/Kafka service if organizational boundaries or asymmetric scaling (\u003e10,000 RPS) justify the operational overhead.",
+      "id": "cs-13-event-driven-orders-step-14",
+      "section_key": "alternatives",
+      "step_number": 14,
+      "title": "14. Alternative Implementations"
+    },
+    {
+      "case_study_id": "cs-14-high-traffic-api",
+      "content_text": "Serve high-volume public catalog/metadata reads and bursty writes with strict SLA (\u003c5ms p99 read latency, 99.99% availability).",
+      "id": "cs-14-high-traffic-api-step-1",
+      "section_key": "business_scenario",
+      "step_number": 1,
+      "title": "1. Business Scenario"
+    },
+    {
+      "case_study_id": "cs-14-high-traffic-api",
+      "content_text": "L1 in-memory cache -\u003e L2 Redis -\u003e Singleflight -\u003e Postgres Read Replica\nToken-bucket rate limiting per API key\nOpenTelemetry + Prometheus `/metrics` + `net/http/pprof`",
+      "id": "cs-14-high-traffic-api-step-2",
+      "section_key": "functional_reqs",
+      "step_number": 2,
+      "title": "2. Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-14-high-traffic-api",
+      "content_text": "\u003c 2 heap allocations per cache-hit request\nGraceful load shedding when concurrency limit is exceeded",
+      "id": "cs-14-high-traffic-api-step-3",
+      "section_key": "non_functional_reqs",
+      "step_number": 3,
+      "title": "3. Non-Functional Requirements"
+    },
+    {
+      "case_study_id": "cs-14-high-traffic-api",
+      "content_text": "Multi-Tier Caching (In-Process L1 LRU + Redis L2 + Singleflight) + Zero-Alloc Hot Paths + Read Replicas — At 50,000+ RPS, even Redis network roundtrips add up. Combining a short-TTL (2s) in-process sharded L1 cache, a 60s Redis L2 cache guarded by `singleflight`, `pgx/v5` binary protocol, and `GOMEMLIMIT` tuning achieves sub-2ms p99 latency.",
+      "id": "cs-14-high-traffic-api-step-4",
+      "section_key": "architecture",
+      "step_number": 4,
+      "title": "4. Architecture \u0026 Rationale"
+    },
+    {
+      "case_study_id": "cs-14-high-traffic-api",
+      "content_text": "PostgreSQL Primary + Read Replicas + Redis Cluster + Go In-Memory L1 Cache",
+      "id": "cs-14-high-traffic-api-step-5",
+      "section_key": "database_selection",
+      "step_number": 5,
+      "title": "5. Database Selection"
+    },
+    {
+      "case_study_id": "cs-14-high-traffic-api",
+      "content_text": "-- Partitioned high-volume table with covering index for Index-Only Scans\nCREATE INDEX idx_catalog_covering ON catalog_items (tenant_id, item_key) INCLUDE (payload_json, updated_at);",
+      "id": "cs-14-high-traffic-api-step-6",
+      "section_key": "schema",
+      "step_number": 6,
+      "title": "6. Production Schema"
+    },
+    {
+      "case_study_id": "cs-14-high-traffic-api",
+      "content_text": "L1 in-memory cache -\u003e L2 Redis -\u003e Singleflight -\u003e Postgres Read Replica\nToken-bucket rate limiting per API key\nOpenTelemetry + Prometheus `/metrics` + `net/http/pprof`\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "id": "cs-14-high-traffic-api-step-7",
+      "section_key": "api_design",
+      "step_number": 7,
+      "title": "7. API Endpoint Design"
+    },
+    {
+      "case_study_id": "cs-14-high-traffic-api",
+      "content_text": "// Load shedding middleware: fail fast with 503 + Retry-After rather than queueing 100k requests until OOM\nselect {\ncase sem \u003c- struct{}{}:\n\tdefer func() { \u003c-sem }()\n\tnext.ServeHTTP(w, r)\ndefault:\n\tw.Header().Set(\"Retry-After\", \"2\")\n\thttp.Error(w, `{\"error\":\"server busy, shedding load\"}`, http.StatusServiceUnavailable)\n}",
+      "id": "cs-14-high-traffic-api-step-8",
+      "section_key": "go_implementation",
+      "step_number": 8,
+      "title": "8. Go Implementation Pattern"
+    },
+    {
+      "case_study_id": "cs-14-high-traffic-api",
+      "content_text": "1) Table-driven unit tests (`t.Run`, `t.Parallel`) for pure domain invariants; 2) `httptest.NewServer` + real DB container (`testcontainers-go` or SQLite WAL) testing constraint violations and concurrent race conditions (`go test -race ./...`); 3) Fuzz testing (`go test -fuzz`) on request decoders.",
+      "id": "cs-14-high-traffic-api-step-9",
+      "section_key": "testing",
+      "step_number": 9,
+      "title": "9. Testing Strategy"
+    },
+    {
+      "case_study_id": "cs-14-high-traffic-api",
+      "content_text": "Enforce object-level ownership (`WHERE id = $1 AND user_id/tenant_id = $2` — OWASP API1:2023 BOLA), bound payload size via `http.MaxBytesReader` (OWASP API4:2023), use parameterized SQL queries exclusively, and validate outbound URLs in `net.Dialer.Control` (OWASP API7:2023 SSRF).",
+      "id": "cs-14-high-traffic-api-step-10",
+      "section_key": "security",
+      "step_number": 10,
+      "title": "10. Security Considerations"
+    },
+    {
+      "case_study_id": "cs-14-high-traffic-api",
+      "content_text": "Cover hot read paths with composite B-Tree/GIN indexes verified via `EXPLAIN (ANALYZE, BUFFERS)`; replace deep `OFFSET` with keyset cursor pagination; bound `*sql.DB` / `pgxpool` connection limits (`MaxOpenConns`, `MaxIdleConns`).",
+      "id": "cs-14-high-traffic-api-step-11",
+      "section_key": "performance",
+      "step_number": 11,
+      "title": "11. Performance Considerations"
+    },
+    {
+      "case_study_id": "cs-14-high-traffic-api",
+      "content_text": "HPA-autoscaled Distroless Go pods, `GOMEMLIMIT` tuned, Envoy/Caddy edge proxy, Prometheus + Grafana + Tempo.",
+      "id": "cs-14-high-traffic-api-step-12",
+      "section_key": "deployment",
+      "step_number": 12,
+      "title": "12. Deployment Strategy"
+    },
+    {
+      "case_study_id": "cs-14-high-traffic-api",
+      "content_text": "Allowing unbounded request queueing during downstream slowdowns instead of bounded concurrency load shedding; leaving `net/http/pprof` exposed on the public internet port instead of an internal admin port.",
+      "id": "cs-14-high-traffic-api-step-13",
+      "section_key": "common_mistakes",
+      "step_number": 13,
+      "title": "13. Common Engineering Mistakes"
+    },
+    {
+      "case_study_id": "cs-14-high-traffic-api",
+      "content_text": "Can start as an internal module inside a Modular Monolith using SQLite WAL (single-node) or PostgreSQL (multi-replica), and only extract into an independent gRPC/Kafka service if organizational boundaries or asymmetric scaling (\u003e10,000 RPS) justify the operational overhead.",
+      "id": "cs-14-high-traffic-api-step-14",
+      "section_key": "alternatives",
+      "step_number": 14,
+      "title": "14. Alternative Implementations"
+    }
+  ]
+}
