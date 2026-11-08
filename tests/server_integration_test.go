@@ -1141,5 +1141,128 @@ func TestContentSingleSourceAndSeedSync(t *testing.T) {
 	}
 }
 
+func TestServerSideSessionIssuanceAndBounds(t *testing.T) {
+	_, ts := setupTestServer(t)
+
+	// 1. Initial request should issue gba_sid cookie
+	resp, err := http.Get(ts.URL + "/api/v1/curriculum")
+	if err != nil {
+		t.Fatalf("GET /api/v1/curriculum failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	var sessionCookie *http.Cookie
+	for _, c := range resp.Cookies() {
+		if c.Name == "gba_sid" {
+			sessionCookie = c
+			break
+		}
+	}
+	if sessionCookie == nil {
+		t.Fatalf("expected gba_sid cookie to be set on initial response")
+	}
+	if !sessionCookie.HttpOnly {
+		t.Errorf("expected gba_sid cookie to be HttpOnly")
+	}
+	if sessionCookie.SameSite != http.SameSiteLaxMode {
+		t.Errorf("expected gba_sid cookie to have SameSite=Lax")
+	}
+
+	client := &http.Client{}
+
+	doReq := func(method, path string, body any, wantStatus int) []byte {
+		t.Helper()
+		var rdr io.Reader
+		if body != nil {
+			b, _ := json.Marshal(body)
+			rdr = bytes.NewReader(b)
+		}
+		req, err := http.NewRequest(method, ts.URL+path, rdr)
+		if err != nil {
+			t.Fatalf("creating request: %v", err)
+		}
+		req.Header.Set("Content-Type", "application/json")
+		req.AddCookie(sessionCookie)
+		res, err := client.Do(req)
+		if err != nil {
+			t.Fatalf("%s %s failed: %v", method, path, err)
+		}
+		defer res.Body.Close()
+		raw, _ := io.ReadAll(res.Body)
+		if res.StatusCode != wantStatus {
+			t.Fatalf("%s %s status=%d want=%d body=%s", method, path, res.StatusCode, wantStatus, string(raw))
+		}
+		return raw
+	}
+
+	// 2. Save progress without user_id in payload
+	doReq("POST", "/api/v1/progress", map[string]any{
+		"lesson_id": "l0-stage-a-what-is-backend",
+		"status":    "completed",
+	}, http.StatusOK)
+
+	// Fetch progress with session cookie, verify it has l0-stage-a-what-is-backend
+	rawProg := doReq("GET", "/api/v1/progress", nil, http.StatusOK)
+	var progRes struct {
+		Progress map[string]string `json:"progress"`
+	}
+	_ = json.Unmarshal(rawProg, &progRes)
+	st, foundLesson := progRes.Progress["l0-stage-a-what-is-backend"]
+	if !foundLesson || st != "completed" {
+		t.Errorf("expected lesson to be completed in session progress, got %v", progRes.Progress)
+	}
+
+	// 3. Save bookmark without user_id
+	doReq("POST", "/api/v1/bookmarks", map[string]any{
+		"item_id":   "l0-stage-a-what-is-backend",
+		"item_type": "lesson",
+	}, http.StatusOK)
+
+	rawBookmarks := doReq("GET", "/api/v1/bookmarks", nil, http.StatusOK)
+	var bkmRes struct {
+		Bookmarks []struct {
+			ItemID string `json:"item_id"`
+		} `json:"bookmarks"`
+	}
+	_ = json.Unmarshal(rawBookmarks, &bkmRes)
+	if len(bkmRes.Bookmarks) == 0 || bkmRes.Bookmarks[0].ItemID != "l0-stage-a-what-is-backend" {
+		t.Errorf("expected bookmark l0-stage-a-what-is-backend, got %v", bkmRes.Bookmarks)
+	}
+
+	// 4. Save note without user_id
+	rawNoteResp := doReq("POST", "/api/v1/notes", map[string]any{
+		"lesson_id": "l0-stage-a-what-is-backend",
+		"content":   "Session-scoped test note",
+	}, http.StatusOK)
+	var noteSaved struct {
+		Status string `json:"status"`
+		NoteID string `json:"note_id"`
+	}
+	_ = json.Unmarshal(rawNoteResp, &noteSaved)
+	if !strings.HasPrefix(noteSaved.NoteID, "not_") {
+		t.Errorf("expected note_id prefix not_, got %s", noteSaved.NoteID)
+	}
+
+	rawNotes := doReq("GET", "/api/v1/notes", nil, http.StatusOK)
+	var notesRes struct {
+		Notes map[string]string `json:"notes"`
+	}
+	_ = json.Unmarshal(rawNotes, &notesRes)
+	if notesRes.Notes["l0-stage-a-what-is-backend"] != "Session-scoped test note" {
+		t.Errorf("expected session note content to be retained, got %v", notesRes.Notes)
+	}
+
+	// 5. Bounds test: Oversized note (> 64 KB) must fail with 400 PAYLOAD_TOO_LARGE
+	hugeContent := strings.Repeat("A", 66000)
+	rawErr := doReq("POST", "/api/v1/notes", map[string]any{
+		"lesson_id": "l0-stage-a-what-is-backend",
+		"content":   hugeContent,
+	}, http.StatusBadRequest)
+	if !strings.Contains(string(rawErr), "PAYLOAD_TOO_LARGE") {
+		t.Errorf("expected PAYLOAD_TOO_LARGE for oversized note, got %s", string(rawErr))
+	}
+}
+
+
 
 

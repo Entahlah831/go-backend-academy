@@ -4974,6 +4974,20 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
       }
     };
 
+    function getActiveUserId() {
+      let uid = SafeStore.get('active_uid');
+      if (!uid) {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+          uid = 'usr_' + crypto.randomUUID().replace(/-/g, '').slice(0, 32);
+        } else {
+          uid = 'usr_local_default';
+        }
+        SafeStore.set('active_uid', uid);
+      }
+      return uid;
+    }
+    window.getActiveUserId = getActiveUserId;
+
     const AppState = {
       currentView: 'dashboard',
       currentLessonId: PLATFORM_DATA.curriculum[0].id,

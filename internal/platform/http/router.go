@@ -2,8 +2,12 @@ package httpplatform
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -13,6 +17,8 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/gobackendacademy/platform/internal/config"
 	"github.com/gobackendacademy/platform/internal/modules/assessments"
@@ -28,6 +34,11 @@ import (
 )
 
 const defaultUserID = "usr_local_default"
+const sessionCookieName = "gba_sid"
+
+type contextKey string
+
+const userContextKey contextKey = "gba_user_id"
 
 // userIDPattern matches the users.id VARCHAR(64) column and keeps IDs URL/log safe.
 var userIDPattern = regexp.MustCompile(`^[A-Za-z0-9_.\-]{1,64}$`)
@@ -82,6 +93,7 @@ func (s *Server) Analyzer() *diagnostics.Analyzer {
 func (s *Server) Handler() http.Handler {
 	limiter := NewRateLimiterWithTrusted(s.cfg.RateLimitRPS, s.cfg.RateLimitBurst, s.cfg.TrustedProxyCIDRs)
 	var h http.Handler = s.mux
+	h = s.sessionMiddleware(h)
 	h = limiter.Middleware(h)
 	h = CORSMiddleware(s.cfg.CORSAllowedOrigins)(h)
 	h = SecurityHeadersMiddleware(h)
@@ -89,6 +101,59 @@ func (s *Server) Handler() http.Handler {
 	h = RecoveryMiddleware(s.logger)(h)
 	h = RequestIDMiddleware(h)
 	return h
+}
+
+func (s *Server) sessionMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		var sessionUID string
+
+		cookie, err := r.Cookie(sessionCookieName)
+		if err == nil && cookie.Value != "" {
+			tokenHash := fmt.Sprintf("%x", sha256.Sum256([]byte(cookie.Value)))
+			if uid, err := s.store.GetSessionUser(ctx, tokenHash); err == nil && uid != "" {
+				sessionUID = uid
+			}
+		}
+
+		if sessionUID == "" {
+			raw := make([]byte, 32)
+			_, _ = rand.Read(raw)
+			tokenStr := base64.RawURLEncoding.EncodeToString(raw)
+			tokenHash := fmt.Sprintf("%x", sha256.Sum256([]byte(tokenStr)))
+
+			sessionUID = "usr_" + strings.ReplaceAll(uuid.NewString(), "-", "")[:24]
+			expiresAt := time.Now().Add(30 * 24 * time.Hour)
+			_ = s.store.CreateSession(ctx, tokenHash, sessionUID, expiresAt)
+
+			http.SetCookie(w, &http.Cookie{
+				Name:     sessionCookieName,
+				Value:    tokenStr,
+				Path:     "/",
+				HttpOnly: true,
+				SameSite: http.SameSiteLaxMode,
+				MaxAge:   30 * 86400,
+			})
+		}
+
+		ctx = context.WithValue(ctx, userContextKey, sessionUID)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// resolveUser extracts the user ID from explicit input (if valid) or falls back to the session.
+func (s *Server) resolveUser(r *http.Request, explicit string) (string, bool) {
+	if explicit != "" {
+		if !userIDPattern.MatchString(explicit) {
+			return "", false
+		}
+		_ = s.store.CreateSession(r.Context(), "", explicit, time.Now().Add(30*24*time.Hour))
+		return explicit, true
+	}
+	if uid, ok := r.Context().Value(userContextKey).(string); ok && uid != "" {
+		return uid, true
+	}
+	return defaultUserID, true
 }
 
 func (s *Server) registerRoutes() {
@@ -274,7 +339,7 @@ func (s *Server) handleVerifyExercise(w http.ResponseWriter, r *http.Request) {
 		WriteProblem(w, r, http.StatusBadRequest, "INVALID_PAYLOAD", "Bad Request", "exercise_id and code are required.")
 		return
 	}
-	uid, ok := resolveUserID(req.UserID)
+	uid, ok := s.resolveUser(r, req.UserID)
 	if !ok {
 		writeInvalidUser(w, r)
 		return
@@ -293,7 +358,7 @@ func (s *Server) handleVerifyExercise(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleListExerciseAttempts(w http.ResponseWriter, r *http.Request) {
-	uid, ok := resolveUserID(r.URL.Query().Get("user_id"))
+	uid, ok := s.resolveUser(r, r.URL.Query().Get("user_id"))
 	if !ok {
 		writeInvalidUser(w, r)
 		return
@@ -353,7 +418,7 @@ func (s *Server) handleGradeQuiz(w http.ResponseWriter, r *http.Request) {
 		writeDecodeError(w, r, err, "Body must be {\"answers\": [<option index per question>], \"user_id\": optional}.")
 		return
 	}
-	uid, ok := resolveUserID(req.UserID)
+	uid, ok := s.resolveUser(r, req.UserID)
 	if !ok {
 		writeInvalidUser(w, r)
 		return
@@ -372,7 +437,7 @@ func (s *Server) handleGradeQuiz(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleListQuizAttempts(w http.ResponseWriter, r *http.Request) {
-	uid, ok := resolveUserID(r.URL.Query().Get("user_id"))
+	uid, ok := s.resolveUser(r, r.URL.Query().Get("user_id"))
 	if !ok {
 		writeInvalidUser(w, r)
 		return
@@ -512,7 +577,7 @@ func (s *Server) handleRecommendations(w http.ResponseWriter, r *http.Request) {
 // ---------- progress, bookmarks, notes ----------
 
 func (s *Server) handleGetProgress(w http.ResponseWriter, r *http.Request) {
-	userID, ok := resolveUserID(r.URL.Query().Get("user_id"))
+	userID, ok := s.resolveUser(r, r.URL.Query().Get("user_id"))
 	if !ok {
 		writeInvalidUser(w, r)
 		return
@@ -539,7 +604,7 @@ func (s *Server) handleSaveProgress(w http.ResponseWriter, r *http.Request) {
 		WriteProblem(w, r, http.StatusBadRequest, "INVALID_PAYLOAD", "Bad Request", "lesson_id is required.")
 		return
 	}
-	uid, ok := resolveUserID(payload.UserID)
+	uid, ok := s.resolveUser(r, payload.UserID)
 	if !ok {
 		writeInvalidUser(w, r)
 		return
@@ -568,7 +633,7 @@ func (s *Server) handleSaveProgress(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleGetBookmarks(w http.ResponseWriter, r *http.Request) {
-	userID, ok := resolveUserID(r.URL.Query().Get("user_id"))
+	userID, ok := s.resolveUser(r, r.URL.Query().Get("user_id"))
 	if !ok {
 		writeInvalidUser(w, r)
 		return
@@ -596,9 +661,13 @@ func (s *Server) handleSaveBookmark(w http.ResponseWriter, r *http.Request) {
 		WriteProblem(w, r, http.StatusBadRequest, "INVALID_PAYLOAD", "Bad Request", "item_id is required (max 64 characters).")
 		return
 	}
-	uid, ok := resolveUserID(payload.UserID)
+	uid, ok := s.resolveUser(r, payload.UserID)
 	if !ok {
 		writeInvalidUser(w, r)
+		return
+	}
+	if count, err := s.store.CountUserBookmarks(r.Context(), uid); err == nil && count >= 500 {
+		WriteProblem(w, r, http.StatusBadRequest, "BOOKMARK_LIMIT_EXCEEDED", "Bad Request", "Bookmark limit exceeded (max 500 bookmarks per user).")
 		return
 	}
 	if payload.ItemType == "" {
@@ -617,7 +686,7 @@ func (s *Server) handleSaveBookmark(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleGetNotes(w http.ResponseWriter, r *http.Request) {
-	userID, ok := resolveUserID(r.URL.Query().Get("user_id"))
+	userID, ok := s.resolveUser(r, r.URL.Query().Get("user_id"))
 	if !ok {
 		writeInvalidUser(w, r)
 		return
@@ -644,9 +713,17 @@ func (s *Server) handleSaveNote(w http.ResponseWriter, r *http.Request) {
 		WriteProblem(w, r, http.StatusBadRequest, "INVALID_PAYLOAD", "Bad Request", "lesson_id is required.")
 		return
 	}
-	uid, ok := resolveUserID(payload.UserID)
+	if len(payload.Content) > 65536 {
+		WriteProblem(w, r, http.StatusBadRequest, "PAYLOAD_TOO_LARGE", "Bad Request", "Note content exceeds maximum allowed size (64 KB).")
+		return
+	}
+	uid, ok := s.resolveUser(r, payload.UserID)
 	if !ok {
 		writeInvalidUser(w, r)
+		return
+	}
+	if count, err := s.store.CountUserNotes(r.Context(), uid); err == nil && count >= 200 {
+		WriteProblem(w, r, http.StatusBadRequest, "NOTE_LIMIT_EXCEEDED", "Bad Request", "User note limit exceeded (max 200 notes per user).")
 		return
 	}
 	exists, err := s.lessonsSvc.HasLesson(r.Context(), payload.LessonID)
@@ -658,14 +735,11 @@ func (s *Server) handleSaveNote(w http.ResponseWriter, r *http.Request) {
 		WriteProblem(w, r, http.StatusBadRequest, "UNKNOWN_LESSON", "Bad Request", "lesson_id does not match any curriculum lesson.")
 		return
 	}
-	noteID := "note_" + uid + "_" + payload.LessonID
-	if len(noteID) > 64 {
-		noteID = noteID[:64]
-	}
+	noteID := "not_" + strings.ReplaceAll(uuid.NewString(), "-", "")[:24]
 	if err := s.store.SaveNote(r.Context(), noteID, uid, payload.LessonID, payload.Content); err != nil {
 		s.writeDBError(w, r, err)
 		return
 	}
-	WriteJSON(w, http.StatusOK, map[string]any{"status": "saved", "lesson_id": payload.LessonID})
+	WriteJSON(w, http.StatusOK, map[string]any{"status": "saved", "lesson_id": payload.LessonID, "note_id": noteID})
 }
 

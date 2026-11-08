@@ -243,6 +243,45 @@ func (s *Store) SaveNote(ctx context.Context, noteID, userID, lessonID, content 
 	return nil
 }
 
+func (s *Store) CountUserNotes(ctx context.Context, userID string) (int, error) {
+	var count int
+	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM user_notes WHERE user_id = $1`, userID).Scan(&count)
+	return count, err
+}
+
+func (s *Store) CountUserBookmarks(ctx context.Context, userID string) (int, error) {
+	var count int
+	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM user_bookmarks WHERE user_id = $1`, userID).Scan(&count)
+	return count, err
+}
+
+func (s *Store) CreateSession(ctx context.Context, sessionHash, userID string, expiresAt time.Time) error {
+	if err := s.ensureUser(ctx, userID); err != nil {
+		return err
+	}
+	const q = `
+		INSERT INTO sessions (id, user_id, expires_at)
+		VALUES ($1, $2, $3)
+		ON CONFLICT (id) DO UPDATE SET expires_at = EXCLUDED.expires_at
+	`
+	if _, err := s.db.ExecContext(ctx, q, sessionHash, userID, expiresAt); err != nil {
+		return fmt.Errorf("creating session: %w", err)
+	}
+	return nil
+}
+
+func (s *Store) GetSessionUser(ctx context.Context, sessionHash string) (string, error) {
+	const q = `SELECT user_id FROM sessions WHERE id = $1 AND expires_at > CURRENT_TIMESTAMP`
+	var userID string
+	if err := s.db.QueryRowContext(ctx, q, sessionHash).Scan(&userID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", ErrNotFound
+		}
+		return "", fmt.Errorf("querying session: %w", err)
+	}
+	return userID, nil
+}
+
 func (s *Store) GetNotes(ctx context.Context, userID string) (map[string]string, error) {
 	out := make(map[string]string)
 	const q = `SELECT lesson_id, content FROM user_notes WHERE user_id = $1`
