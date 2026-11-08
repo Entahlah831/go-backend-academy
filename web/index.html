@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="id" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -375,23 +375,23 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-ac
           <div class="nav-list">
             <button type="button" data-view="dblab" class="nav-btn">
               <span>4. Database &amp; SQL Lab</span>
-              <span class="nav-meta">7 DBs, 10 Labs</span>
+              <span class="nav-meta">Nyata (SQLite)</span>
             </button>
             <button type="button" data-view="apilab" class="nav-btn">
               <span>5. API &amp; HTTP Lab</span>
-              <span class="nav-meta">REST Sim</span>
+              <span class="nav-meta">Simulasi</span>
             </button>
             <button type="button" data-view="playground" class="nav-btn">
-              <span>6. Go Code Playground</span>
-              <span class="nav-meta">Sandbox</span>
+              <span>6. Template Kode (Lokal)</span>
+              <span class="nav-meta">Jalankan di laptop</span>
             </button>
             <button type="button" data-view="concurrencylab" class="nav-btn">
               <span>7. Concurrency Lab</span>
-              <span class="nav-meta">GMP &amp; Locks</span>
+              <span class="nav-meta">Simulasi</span>
             </button>
             <button type="button" data-view="archlab" class="nav-btn">
               <span>8. Architecture Lab</span>
-              <span class="nav-meta">5 Patterns</span>
+              <span class="nav-meta">5 Pola</span>
             </button>
           </div>
         </div>
@@ -401,7 +401,7 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-ac
           <div class="nav-list">
             <button type="button" data-view="diagnostics" class="nav-btn">
               <span>9. Code Review &amp; Diagnostics</span>
-              <span class="nav-meta">Offline</span>
+              <span class="nav-meta">Diagnostik offline</span>
             </button>
             <button type="button" data-view="projects" class="nav-btn">
               <span>10. Real-World Projects</span>
@@ -452,41 +452,34 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-ac
         <div class="surface-card">
           <div class="surface-header">
             <div class="title-stack">
-              <div class="pill-row">
-                <span class="tag-pill ok">100% Offline Engineering Platform</span>
-                <span class="tag-pill cool">Zero Cloud AI or API Keys Required</span>
-              </div>
-              <h2>Go Backend Academy: Production Engineering Platform</h2>
+              <h2>Belajar Backend Go dari Nol: 41 Pelajaran &amp; Praktik Langsung</h2>
               <p>
-                Follow the complete engineering cycle: <strong>Understand, Experiment, Implement, Debug, Compare, Optimize, Apply</strong>. Every lesson distinguishes Go language specification guarantees from runtime implementation details and database storage internals.
+                Kuasai rekayasa backend Go secara bertahap melalui siklus <strong>Understand, Experiment, Implement, Debug, Compare, Optimize, Apply</strong>. Dilengkapi lab SQL mandiri, simulasi konkurensi, dan kurikulum ramah pemula tanpa ketergantungan API cloud eksternal.
               </p>
             </div>
             <div class="control-group">
               <button type="button" id="btn-hero-start-curriculum" class="btn-primary">
-                Start Learning Curriculum
-              </button>
-              <button type="button" id="btn-hero-open-diagnostics">
-                Open Offline Code Diagnostics Lab
+                Mulai Pelajaran 0.0A
               </button>
             </div>
           </div>
 
           <div class="telemetry-grid">
             <div class="telemetry-cell">
-              <div class="telemetry-label">Lessons Completed</div>
-              <div id="dash-metric-completed" class="telemetry-val accent">0 / 41 Lessons</div>
+              <div class="telemetry-label">Pelajaran Selesai</div>
+              <div id="dash-metric-completed" class="telemetry-val accent">0 / 41 Pelajaran</div>
             </div>
             <div class="telemetry-cell">
-              <div class="telemetry-label">Exercises Verified</div>
-              <div id="dash-metric-exercises" class="telemetry-val ok">0 / 41 Passed</div>
+              <div class="telemetry-label">Latihan Terverifikasi</div>
+              <div id="dash-metric-exercises" class="telemetry-val ok">0 / 41 Lulus</div>
             </div>
             <div class="telemetry-cell">
-              <div class="telemetry-label">DB Comparison Lab</div>
-              <div class="telemetry-val cool">7 DBs x 10 Scenarios</div>
+              <div class="telemetry-label">Lab Komparasi Database</div>
+              <div class="telemetry-val cool">7 DB x 10 Skenario</div>
             </div>
             <div class="telemetry-cell">
-              <div class="telemetry-label">Production Case Studies</div>
-              <div class="telemetry-val">14 x 15 Sections</div>
+              <div class="telemetry-label">Studi Kasus Produksi</div>
+              <div class="telemetry-val">14 x 15 Bagian</div>
             </div>
           </div>
         </div>
@@ -495,8 +488,8 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-ac
         <div class="surface-card">
           <div class="surface-header">
             <div class="title-stack">
-              <h3>Personalized Next Steps (Based on Completed Lessons, Failed Exercises &amp; Diagnostics)</h3>
-              <p>Zero fabricated activity, grounded strictly in your real progress state and diagnostic rules.</p>
+              <h3>Langkah Belajar Selanjutnya (Berdasarkan Progres &amp; Prasyarat)</h3>
+              <p>Rekomendasi adaptif berdasarkan urutan kurikulum dan hasil latihan Anda.</p>
             </div>
             <span class="tag-pill accent">Recommendation Engine</span>
           </div>
@@ -507,38 +500,50 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-ac
         <div class="grid-4">
           <article class="surface-card">
             <div class="title-stack">
-              <h3>7 DB Engines + Disposable SQL Playground</h3>
-              <p>Execute SQL queries, inspect result tables, and compare indexed vs unindexed EXPLAIN plans.</p>
+              <div class="pill-row">
+                <span class="tag-pill ok">Nyata (SQLite sandbox)</span>
+              </div>
+              <h3>Database &amp; SQL Lab</h3>
+              <p>Eksekusi query SQL riil, periksa hasil tabel data, dan bandingkan query plan EXPLAIN ANALYZE berindeks vs tanpa indeks.</p>
             </div>
             <div class="control-group">
-              <button type="button" data-quick-view="dblab" class="btn-ok">Open Database Lab</button>
+              <button type="button" data-quick-view="dblab" class="btn-ok">Buka Database Lab</button>
             </div>
           </article>
           <article class="surface-card">
             <div class="title-stack">
-              <h3>Go Code Review &amp; Static Analysis</h3>
-              <p>Run deterministic Go rules (GO-SEC-001, GO-DB-001, GO-CONC-001) + go vet without cloud AI.</p>
+              <div class="pill-row">
+                <span class="tag-pill accent">Diagnostik offline</span>
+              </div>
+              <h3>Code Review &amp; Diagnostik</h3>
+              <p>Analisis statis kode Go dengan aturan deterministik (GO-SEC, GO-DB, GO-CONC) tanpa memerlukan cloud AI.</p>
             </div>
             <div class="control-group">
-              <button type="button" data-quick-view="diagnostics" class="btn-cool">Open Diagnostics Lab</button>
+              <button type="button" data-quick-view="diagnostics" class="btn-cool">Buka Diagnostik Lab</button>
             </div>
           </article>
           <article class="surface-card">
             <div class="title-stack">
-              <h3>GMP Scheduler, Channels, Races &amp; Deadlocks</h3>
-              <p>Simulate worker pools, buffered vs unbuffered channel leaks, and AB/BA lock ordering.</p>
+              <div class="pill-row">
+                <span class="tag-pill cool">Simulasi deterministik</span>
+              </div>
+              <h3>Concurrency &amp; Mutex Simulator</h3>
+              <p>Simulasikan worker pool, kebocoran goroutine pada unbuffered channel, dan pencegahan deadlock AB/BA.</p>
             </div>
             <div class="control-group">
-              <button type="button" data-quick-view="concurrencylab">Open Concurrency Lab</button>
+              <button type="button" data-quick-view="concurrencylab">Buka Concurrency Lab</button>
             </div>
           </article>
           <article class="surface-card">
             <div class="title-stack">
-              <h3>Compare 5 Backend Architectures</h3>
-              <p>Contrast Modular Monolith, Hexagonal, Clean, Layered, and Microservices code structure.</p>
+              <div class="pill-row">
+                <span class="tag-pill">Jalankan di laptop</span>
+              </div>
+              <h3>Template Kode &amp; Arsitektur</h3>
+              <p>Pelajari pola kode Modular Monolith, Hexagonal (Ports &amp; Adapters), dan arsitektur berlapis untuk dijalankan lokal.</p>
             </div>
             <div class="control-group">
-              <button type="button" data-quick-view="archlab">Open Architecture Lab</button>
+              <button type="button" data-quick-view="archlab">Buka Architecture Lab</button>
             </div>
           </article>
         </div>
@@ -564,6 +569,7 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-ac
             <select id="lesson-select-dropdown" aria-label="Select Curriculum Lesson"></select>
           </div>
           <div class="control-group">
+            <button type="button" id="btn-toggle-learning-mode" class="btn-ghost" title="Ganti antara Mode Pemula dan Mode Lengkap">Mode: Pemula</button>
             <button type="button" id="btn-prev-lesson" class="btn-ghost">Previous</button>
             <button type="button" id="btn-next-lesson" class="btn-ghost">Next</button>
             <button type="button" id="btn-bookmark-lesson">Bookmark</button>
@@ -619,19 +625,25 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-ac
           </div>
 
           <div class="surface-card">
-            <div class="surface-header">
-              <div class="title-stack">
-                <h3>Engineering Decision Analysis (12 Questions Answered)</h3>
-                <p>Focused on Core Mechanics (1 to 4) by default: switch tabs to inspect Trade-Offs and Production Impact</p>
+            <details id="lesson-deep-dive-details" class="sidebar-level-group" style="margin-bottom: var(--space-xs); border: 1px solid var(--color-rule);">
+              <summary style="cursor: pointer; padding: var(--space-xs) var(--space-sm); font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
+                <span>Pelajari Lebih Dalam (Analisis 12 Pertanyaan Rekayasa &amp; Keputusan Arsitektur)</span>
+                <span class="nav-meta">Opsional</span>
+              </summary>
+              <div class="surface-header" style="margin-top: var(--space-sm); padding: var(--space-xs) var(--space-sm);">
+                <div class="title-stack">
+                  <h3>Engineering Decision Analysis (12 Questions Answered)</h3>
+                  <p>Focused on Core Mechanics (1 to 4) by default: switch tabs to inspect Trade-Offs and Production Impact</p>
+                </div>
+                <div class="segmented-bar" role="tablist" aria-label="Filter 12 Engineering Pillars">
+                  <button type="button" data-pillar-group="core" class="pillar-filter-btn is-active">Core Mechanics (1 to 4)</button>
+                  <button type="button" data-pillar-group="tradeoffs" class="pillar-filter-btn">Scope &amp; Trade-Offs (5 to 8)</button>
+                  <button type="button" data-pillar-group="production" class="pillar-filter-btn">Production Impact (9 to 12)</button>
+                  <button type="button" data-pillar-group="all" class="pillar-filter-btn">All 12 Pillars</button>
+                </div>
               </div>
-              <div class="segmented-bar" role="tablist" aria-label="Filter 12 Engineering Pillars">
-                <button type="button" data-pillar-group="core" class="pillar-filter-btn is-active">Core Mechanics (1 to 4)</button>
-                <button type="button" data-pillar-group="tradeoffs" class="pillar-filter-btn">Scope &amp; Trade-Offs (5 to 8)</button>
-                <button type="button" data-pillar-group="production" class="pillar-filter-btn">Production Impact (9 to 12)</button>
-                <button type="button" data-pillar-group="all" class="pillar-filter-btn">All 12 Pillars</button>
-              </div>
-            </div>
-            <div id="lesson-pillars-grid" class="grid-2"></div>
+              <div id="lesson-pillars-grid" class="grid-2" style="padding: var(--space-xs) var(--space-sm);"></div>
+            </details>
             <div class="step-next-footer">
               <span class="telemetry-label">Ready to see how this looks in real Go code?</span>
               <button type="button" data-goto-lesson-step="step2" class="btn-primary">Continue to Step 2: Code Walkthrough</button>
@@ -891,8 +903,12 @@ Origin: http://localhost:8080</textarea>
         <div class="surface-card">
           <div class="surface-header">
             <div class="title-stack">
-              <h2>Go Pattern Templates, Local Execution Workflow &amp; DB Library Comparison</h2>
-              <p>Select a starter template, copy code to run locally with <code>go test -race</code>, or run offline diagnostics directly.</p>
+              <div class="pill-row">
+                <span class="tag-pill">Jalankan di laptop</span>
+                <span class="tag-pill cool">Salin &amp; Jalankan di Terminal Lokal</span>
+              </div>
+              <h2>Template Kode Go &amp; Alur Eksekusi Lokal</h2>
+              <p>Pilih template kode produksi, salin ke direktori proyek lokal Anda untuk dijalankan dengan <code>go run .</code> atau <code>go test -race</code>, atau uji pola dengan diagnostik offline.</p>
             </div>
             <div class="control-group">
               <select id="pg-template-select" aria-label="Select Go Playground Template">
@@ -4395,7 +4411,8 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
       triggeredRules: SafeStore.get('triggeredRules', []),
       bookmarks: SafeStore.get('bookmarks', {}),
       quizAnswers: SafeStore.get('quizAnswers', {}),
-      personalNotes: SafeStore.get('personalNotes', '')
+      personalNotes: SafeStore.get('personalNotes', ''),
+      learningMode: SafeStore.get('learningMode', 'beginner')
     };
 
     function showToast(msg) {
@@ -5091,6 +5108,15 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
       const isDone = !!AppState.completedLessons[lesson.id];
       const compBtn = document.getElementById('btn-mark-lesson-complete');
       compBtn.textContent = isDone ? 'Completed' : 'Mark Completed';
+
+      const deepDiveEl = document.getElementById('lesson-deep-dive-details');
+      const modeBtn = document.getElementById('btn-toggle-learning-mode');
+      if (modeBtn) {
+        modeBtn.textContent = AppState.learningMode === 'beginner' ? 'Mode: Pemula' : 'Mode: Lengkap';
+      }
+      if (deepDiveEl) {
+        deepDiveEl.open = AppState.learningMode !== 'beginner';
+      }
 
       renderLessonTier(lesson);
       renderLessonPillars(lesson);
@@ -6052,8 +6078,17 @@ func SafeSocketControl(network, address string, c syscall.RawConn) error {
         btn.addEventListener('click', () => switchView(btn.getAttribute('data-quick-view')));
       });
 
-      document.getElementById('btn-hero-start-curriculum').addEventListener('click', () => switchView('curriculum'));
-      document.getElementById('btn-hero-open-diagnostics').addEventListener('click', () => switchView('diagnostics'));
+      const startCurriculumBtn = document.getElementById('btn-hero-start-curriculum');
+      if (startCurriculumBtn) {
+        startCurriculumBtn.addEventListener('click', () => {
+          AppState.currentLessonId = 'l0-stage-a-what-is-backend';
+          switchView('curriculum');
+        });
+      }
+      const openDiagHeroBtn = document.getElementById('btn-hero-open-diagnostics');
+      if (openDiagHeroBtn) {
+        openDiagHeroBtn.addEventListener('click', () => switchView('diagnostics'));
+      }
 
       document.getElementById('btn-theme-toggle').addEventListener('click', () => {
         const html = document.documentElement;
@@ -6152,6 +6187,19 @@ func SafeSocketControl(network, address string, c syscall.RawConn) error {
           renderLessonPillars(lesson);
         });
       });
+      const modeToggleBtn = document.getElementById('btn-toggle-learning-mode');
+      if (modeToggleBtn) {
+        modeToggleBtn.addEventListener('click', () => {
+          AppState.learningMode = AppState.learningMode === 'beginner' ? 'full' : 'beginner';
+          SafeStore.set('learningMode', AppState.learningMode);
+          const deepDiveEl = document.getElementById('lesson-deep-dive-details');
+          if (deepDiveEl) {
+            deepDiveEl.open = AppState.learningMode !== 'beginner';
+          }
+          modeToggleBtn.textContent = AppState.learningMode === 'beginner' ? 'Mode: Pemula' : 'Mode: Lengkap';
+          showToast(AppState.learningMode === 'beginner' ? 'Mode Pemula aktif (fokus konsep inti)' : 'Mode Lengkap aktif (semua 12 pilar dibuka)');
+        });
+      }
       document.getElementById('btn-bookmark-lesson').addEventListener('click', () => {
         const id = AppState.currentLessonId;
         AppState.bookmarks[id] = !AppState.bookmarks[id];

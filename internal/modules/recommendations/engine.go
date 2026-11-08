@@ -92,18 +92,73 @@ func (e *Engine) Compute(snap LearningSnapshot) []RecommendationItem {
 		})
 	}
 
-	// 5. Default progressive starting path if user is brand new
-	if len(out) < 2 && !snap.CompletedLessons["l1-memory-slices-maps-escape"] {
-		out = append(out, RecommendationItem{
-			ID:                      "rec-slice-memory-model",
-			WhatToLearn:             "Slice Backing Arrays, Sub-Slice Memory Retention & Escape Analysis (Level 1.1)",
-			WhyItMatters:            "Understanding the 24-byte slice header and compiler escape analysis prevents multi-megabyte backing-array memory leaks.",
-			Prerequisites:           []string{"Level 0.1 HTTP Lifecycle"},
-			ExpectedLearningOutcome: "Detach sub-slices safely with copy()/bytes.Clone() and inspect heap escapes via -gcflags='-m'.",
-			SuggestedExercise:       "Fix Sub-Slice Memory Retention & Side-Effect Mutation",
-			TargetLessonID:          "l1-memory-slices-maps-escape",
-			TriggerReason:           "Core Go Foundation Path",
-		})
+	// 5. Progressive sequential starting path for beginners
+	progressiveLessons := []struct {
+		id       string
+		title    string
+		why      string
+		prereqs  []string
+		outcome  string
+		exercise string
+	}{
+		{
+			id:       "l0-stage-a-what-is-backend",
+			title:    "Fondasi Rekayasa Backend: Apa itu Server, Port & Proses OS (Level 0.0A)",
+			why:      "Memahami bagaimana proses server Go berjalan di OS, mendengarkan koneksi jaringan via port, dan membaca konfigurasi sebelum menulis kode backend.",
+			prereqs:  []string{"Tidak ada (Mulai dari Nol)"},
+			outcome:  "Memahami peran backend dalam arsitektur software, konfigurasi PORT, dan siklus request-response.",
+			exercise: "Implementasikan fungsi DefaultPort() untuk konfigurasi server",
+		},
+		{
+			id:       "l0-stage-a-git-go-workspace",
+			title:    "Terminal, Git & Go Module Setup (Level 0.0B)",
+			why:      "Mempersiapkan lingkungan pengembangan lokal: navigasi CLI, git init & commit, dan go mod init.",
+			prereqs:  []string{"Level 0.0A Apa itu Backend"},
+			outcome:  "Mampu menginisialisasi modul Go dan melacak riwayat repositori kode dengan Git.",
+			exercise: "Inisialisasi Go Module dan konfigurasi file main.go",
+		},
+		{
+			id:       "l1-stage-b-variables-types-zerovalues",
+			title:    "Variabel, Tipe Data Statis & Nilai Default Zero Values (Level 1.0A)",
+			why:      "Go adalah bahasa dengan static typing yang kuat; memahami tipe data dan zero-value menjamin kehandalan kode.",
+			prereqs:  []string{"Level 0.0B Terminal & Go Modules"},
+			outcome:  "Mendeklarasikan variabel dengan aman tanpa memory leaks atau uninitialized pointer panics.",
+			exercise: "Deklarasi variabel dan tipe data dengan zero values yang aman",
+		},
+		{
+			id:       "l1-stage-b-control-flow-loops-functions",
+			title:    "Kontrol Alur, Percabangan, Perulangan & Fungsi Bersih (Level 1.0B)",
+			why:      "Menulis logika keputusan bersih dengan if/else, switch, perulangan for, dan fungsi dengan error return ganda.",
+			prereqs:  []string{"Level 1.0A Variabel & Tipe Data"},
+			outcome:  "Mampu menulis fungsi bisnis yang mengembalikan nilai dan penanganan error eksplisit.",
+			exercise: "Implementasi fungsi helper perhitungan dengan validasi kondisi batas",
+		},
+		{
+			id:       "l1-memory-slices-maps-escape",
+			title:    "Slice Backing Arrays, Sub-Slice Memory Retention & Escape Analysis (Level 1.1)",
+			why:      "Memahami 24-byte slice header dan alokasi heap vs stack mencegah kebocoran memori multi-megabyte.",
+			prereqs:  []string{"Level 1.0B Fungsi & Kontrol Alur"},
+			outcome:  "Memutus keterikatan sub-slice memori dengan copy() / bytes.Clone() dan menginspeksi escape analysis.",
+			exercise: "Perbaiki memory retention pada sub-slice",
+		},
+	}
+
+	for _, p := range progressiveLessons {
+		if len(out) >= 2 {
+			break
+		}
+		if !snap.CompletedLessons[p.id] {
+			out = append(out, RecommendationItem{
+				ID:                      "rec-prog-" + p.id,
+				WhatToLearn:             p.title,
+				WhyItMatters:            p.why,
+				Prerequisites:           p.prereqs,
+				ExpectedLearningOutcome: p.outcome,
+				SuggestedExercise:       p.exercise,
+				TargetLessonID:          p.id,
+				TriggerReason:           "Alur Kurikulum Progresif (Urutan Prasyarat)",
+			})
+		}
 	}
 
 	if len(out) < 3 && !snap.CompletedLessons["l2-gmp-channels-context-workers"] {

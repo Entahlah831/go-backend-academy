@@ -418,25 +418,19 @@ func ResolvePort(defaultPort string) string {
 	return defaultPort
 }', 'os.Getenv("PORT") allows .env, systemd, Docker, or Kubernetes to inject any port at runtime while falling back to defaultPort in local dev.') ON CONFLICT (id) DO UPDATE SET body_text = EXCLUDED.body_text, diagram_text = EXCLUDED.diagram_text, code_incorrect = EXCLUDED.code_incorrect, code_corrected = EXCLUDED.code_corrected, reasoning = EXCLUDED.reasoning;
 INSERT INTO lesson_references (id, lesson_id, title, url, doc_version, ref_type, last_verified) VALUES ('l0-stage-a-what-is-backend-ref-1', 'l0-stage-a-what-is-backend', 'Go Standard Library: os', 'https://pkg.go.dev/os', 'Go 1.23+', 'official', '2026-11-07') ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, url = EXCLUDED.url;
-INSERT INTO exercises (id, lesson_id, title, task_description, starter_code, expected_output, solution_code, solution_explanation, additional_challenge) VALUES ('ex-l0-stage-a-what-is-backend', 'l0-stage-a-what-is-backend', 'Resolve Server Port from Environment with Safe Default', 'Implement ResolvePort(defaultPort string) string that reads os.Getenv("PORT") and returns it if non-empty, otherwise returning defaultPort.', 'package main
+INSERT INTO exercises (id, lesson_id, title, task_description, starter_code, expected_output, solution_code, solution_explanation, additional_challenge) VALUES ('ex-l0-stage-a-what-is-backend', 'l0-stage-a-what-is-backend', 'Konfigurasi Alamat Listen Port Default Server HTTP', 'Implementasikan fungsi DefaultPort() string yang mengembalikan alamat port default ":8080" untuk server HTTP.', 'package main
 
-import "os"
-
-func ResolvePort(defaultPort string) string {
-	// STEP: Read os.Getenv("PORT") and return it if non-empty, else return defaultPort
+// DefaultPort mengembalikan alamat listen port default untuk server HTTP
+func DefaultPort() string {
+	// STEP: Kembalikan string ":8080"
 	return ""
-}', 'Invarian: Resolve Port From Env
-Invarian: Resolve Port Fallback', 'package main
+}', 'Invarian: DefaultPort mengembalikan '':8080'' sebagai alamat listen port server.', 'package main
 
-import "os"
-
-func ResolvePort(defaultPort string) string {
-	if v := os.Getenv("PORT"); v != "" {
-		return v
-	}
-	return defaultPort
-}', 'os.Getenv reads the process environment variable table populated by the OS or .env loader.', 'Also read os.Getenv("HOST") and combine host + ":" + port.') ON CONFLICT (id) DO UPDATE SET starter_code = EXCLUDED.starter_code, solution_code = EXCLUDED.solution_code, task_description = EXCLUDED.task_description;
-INSERT INTO exercise_test_cases (id, exercise_id, order_index, description, required_pattern) VALUES ('ex-l0-stage-a-what-is-backend-tc-1', 'ex-l0-stage-a-what-is-backend', 1, 'Verify ResolvePort returns os.Getenv("PORT") when set; Verify ResolvePort returns defaultPort when PORT is empty', 'os.Getenv("PORT")|v != ""|return defaultPort') ON CONFLICT (id) DO UPDATE SET description = EXCLUDED.description, required_pattern = EXCLUDED.required_pattern;
+// DefaultPort mengembalikan alamat listen port default untuk server HTTP
+func DefaultPort() string {
+	return ":8080"
+}', 'Fungsi DefaultPort mengembalikan port default tanpa memerlukan pembacaan environment atau branching yang rumit di hari pertama.', 'Di pelajaran berikutnya (Level 1.0B), kita akan meningkatkan fungsi ini dengan ResolvePort(envVal string) menggunakan os.Getenv dan percabangan if/else!') ON CONFLICT (id) DO UPDATE SET starter_code = EXCLUDED.starter_code, solution_code = EXCLUDED.solution_code, task_description = EXCLUDED.task_description;
+INSERT INTO exercise_test_cases (id, exercise_id, order_index, description, required_pattern) VALUES ('ex-l0-stage-a-what-is-backend-tc-1', 'ex-l0-stage-a-what-is-backend', 1, 'Verify DefaultPort returns ":8080"', 'func DefaultPort() string|return ":8080"') ON CONFLICT (id) DO UPDATE SET description = EXCLUDED.description, required_pattern = EXCLUDED.required_pattern;
 
 INSERT INTO lessons (id, module_id, level_id, order_index, slug, title, summary, difficulty, last_verified) VALUES ('l0-stage-a-git-go-workspace', 'mod-l0-stage-a-orientation', 1, 2, 'l0-stage-a-git-go-workspace', '0.0B Installing Go, Terminal Commands, Git Basics & Your First main.go', 'Navigating directories in the terminal, tracking code changes with Git (init, status, add, commit), initializing a Go module (go mod init), and running your first main.go file.', 'beginner', '2026-11-07') ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, summary = EXCLUDED.summary, order_index = EXCLUDED.order_index;
 INSERT INTO lesson_sections (id, lesson_id, section_type, title, body_text, diagram_text, code_incorrect, code_corrected, reasoning) VALUES ('l0-stage-a-git-go-workspace-sec-main', 'l0-stage-a-git-go-workspace', 'core', '0.0B Installing Go, Terminal Commands, Git Basics & Your First main.go', '[Beginner Overview]
@@ -1278,7 +1272,7 @@ UPDATE exercise_test_cases SET required_pattern = 'MaxIdleConnsPerHost:|IdleConn
 UPDATE exercise_test_cases SET required_pattern = '*patchMaxConns|*patchTLS|patchMaxConns != nil' WHERE exercise_id = 'ex-l0-rest-json-api-contracts';
 UPDATE exercise_test_cases SET required_pattern = 'if name == ""|name = "Backend Engineer"|fmt.Sprintf("Hello, %s!", name)' WHERE exercise_id = 'ex-l0-stage-a-git-go-workspace';
 UPDATE exercise_test_cases SET required_pattern = 'strings.TrimSpace(rawMethod)|statusCode < 100|statusCode > 599' WHERE exercise_id = 'ex-l0-stage-a-http-request-response';
-UPDATE exercise_test_cases SET required_pattern = 'os.Getenv("PORT")|v != ""|return defaultPort' WHERE exercise_id = 'ex-l0-stage-a-what-is-backend';
+UPDATE exercise_test_cases SET required_pattern = 'func DefaultPort() string|return ":8080"' WHERE exercise_id = 'ex-l0-stage-a-what-is-backend';
 UPDATE exercise_test_cases SET required_pattern = 'actorUserID == ""|docOwnerID == ""|actorRole == "admin"' WHERE exercise_id = 'ex-l0-stateless-vs-stateful-arch';
 UPDATE exercise_test_cases SET required_pattern = 'errors.Is(err, ErrRecordNotFound)|errors.As(err, &qErr)|return 429' WHERE exercise_id = 'ex-l1-interfaces-errors-generics';
 UPDATE exercise_test_cases SET required_pattern = 'make([]int, n)|copy(out, src[:n])|n > len(src)' WHERE exercise_id = 'ex-l1-memory-slices-maps-escape';
