@@ -1,11 +1,11 @@
 package recommendations
 
 type LearningSnapshot struct {
-	CompletedLessons  map[string]bool `json:"completed_lessons"`
-	FailedExercises   map[string]int  `json:"failed_exercises"`
-	QuizScores        map[string]int  `json:"quiz_scores"`
-	TriggeredRuleIDs  []string        `json:"triggered_rule_ids"`
-	CurrentLessonID   string          `json:"current_lesson_id"`
+	CompletedLessons map[string]bool `json:"completed_lessons"`
+	FailedExercises  map[string]int  `json:"failed_exercises"`
+	QuizScores       map[string]int  `json:"quiz_scores"`
+	TriggeredRuleIDs []string        `json:"triggered_rule_ids"`
+	CurrentLessonID  string          `json:"current_lesson_id"`
 }
 
 type RecommendationItem struct {

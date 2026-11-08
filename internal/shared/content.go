@@ -132,11 +132,11 @@ type LessonDetail struct {
 }
 
 type DBScenario struct {
-	ID               string          `json:"id"`
-	Number           int             `json:"number"`
-	Title            string          `json:"title"`
-	RecommendedStack string          `json:"recommended_stack"`
-	Rationale        string          `json:"rationale"`
+	ID                string          `json:"id"`
+	Number            int             `json:"number"`
+	Title             string          `json:"title"`
+	RecommendedStack  string          `json:"recommended_stack"`
+	Rationale         string          `json:"rationale"`
 	EnginesComparison json.RawMessage `json:"engines_comparison"`
 }
 

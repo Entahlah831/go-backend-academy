@@ -428,12 +428,12 @@ Buat `internal/modules/diagnostics/testdata/*.go.txt` + `*.expected.json`: 12 sa
 - [x] T3.3 §4.1–4.5 satu mesin diagnostik, AST rule, golden test, klasifikasi jujur.
 - [x] T3.4 Selesaikan atau hapus stub AI (§4.4).
 
-### Fase 4 — konten & arsitektur (berjalan)
-- [ ] T4.1 §2.4 seed upsert + hash; hapus/perbaiki seed 003; unique `order_index`.
-- [ ] T4.2 §2.5 satu sumber konten + generator + CI diff.
-- [ ] T4.3 §2.7 sesi server-side.
-- [ ] T4.4 §5.2 perluasan materi dan celah kurikulum.
-- [ ] T4.5 CI: `gofmt -l`, `go vet`, `go test -race`, ekstraksi dan kompilasi seluruh `solution_code` dan blok kode lesson, cek tautan referensi (mingguan).
+### Fase 4 — konten & arsitektur (selesai)
+- [x] T4.1 §2.4 seed upsert + hash; hapus/perbaiki seed 003; unique `order_index`.
+- [x] T4.2 §2.5 satu sumber konten + generator + CI diff.
+- [x] T4.3 §2.7 sesi server-side.
+- [x] T4.4 §5.2 perluasan materi dan celah kurikulum.
+- [x] T4.5 CI: `gofmt -l`, `go vet`, `go test -race`, ekstraksi dan kompilasi seluruh `solution_code` dan blok kode lesson, cek tautan referensi (mingguan).
 
 ---
 

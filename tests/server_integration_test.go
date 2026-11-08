@@ -695,7 +695,6 @@ func getJSON(t *testing.T, url string, dst any) {
 	}
 }
 
-
 func TestAllExercisesServerSideVerification(t *testing.T) {
 	srv, ts := setupTestServer(t)
 
@@ -1341,8 +1340,3 @@ func TestCurriculumExpansionAndStructuredSections(t *testing.T) {
 
 	_ = srv
 }
-
-
-
-
-

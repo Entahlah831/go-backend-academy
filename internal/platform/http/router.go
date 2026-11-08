@@ -742,4 +742,3 @@ func (s *Server) handleSaveNote(w http.ResponseWriter, r *http.Request) {
 	}
 	WriteJSON(w, http.StatusOK, map[string]any{"status": "saved", "lesson_id": payload.LessonID, "note_id": noteID})
 }
-

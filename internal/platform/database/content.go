@@ -80,7 +80,6 @@ func (s *Store) LessonExists(ctx context.Context, id string) (bool, error) {
 	return s.exists(ctx, `SELECT 1 FROM lessons WHERE id = $1`, id)
 }
 
-
 func (s *Store) ExerciseRequiredPatterns(ctx context.Context, exerciseID string) ([]string, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT required_pattern FROM exercise_test_cases
