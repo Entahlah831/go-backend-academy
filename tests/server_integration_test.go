@@ -953,5 +953,48 @@ func DefaultPort() string {
 	}
 }
 
+func TestDiagnosticRulesInSyncWithCode(t *testing.T) {
+	_, ts := setupTestServer(t)
+
+	resp, err := http.Get(ts.URL + "/api/v1/diagnostics/rules")
+	if err != nil {
+		t.Fatalf("GET /api/v1/diagnostics/rules: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200 OK, got %d", resp.StatusCode)
+	}
+
+	var res struct {
+		Rules []struct {
+			RuleID string `json:"rule_id"`
+		} `json:"rules"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
+		t.Fatalf("decoding rules: %v", err)
+	}
+
+	dbRules := map[string]bool{}
+	for _, r := range res.Rules {
+		dbRules[r.RuleID] = true
+	}
+
+	codeRules := diagnostics.AllRuleIDs()
+	codeRuleMap := map[string]bool{}
+	for _, r := range codeRules {
+		codeRuleMap[r] = true
+		if !dbRules[r] {
+			t.Errorf("Rule %s exists in code but is missing from diagnostic_rules database table", r)
+		}
+	}
+
+	for dbRule := range dbRules {
+		if !codeRuleMap[dbRule] {
+			t.Errorf("Rule %s exists in diagnostic_rules database table but is not registered in code", dbRule)
+		}
+	}
+}
+
 
 

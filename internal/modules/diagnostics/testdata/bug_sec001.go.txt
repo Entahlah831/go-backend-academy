@@ -1,0 +1,11 @@
+package main
+
+import (
+	"database/sql"
+	"fmt"
+)
+
+func QueryUser(db *sql.DB, id string) {
+	q := fmt.Sprintf("SELECT * FROM users WHERE id = '%s'", id)
+	db.QueryContext(nil, q)
+}

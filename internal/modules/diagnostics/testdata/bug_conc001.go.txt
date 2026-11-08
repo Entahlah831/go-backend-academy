@@ -1,0 +1,7 @@
+package main
+
+func SpawnTask() {
+	go func() {
+		println("async task running")
+	}()
+}

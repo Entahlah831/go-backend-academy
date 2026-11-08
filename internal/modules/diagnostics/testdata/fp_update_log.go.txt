@@ -1,0 +1,7 @@
+package main
+
+import "fmt"
+
+func LogAction(id string) {
+	fmt.Println("UPDATE processing finished for order: " + id)
+}

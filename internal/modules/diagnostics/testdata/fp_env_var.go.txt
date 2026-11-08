@@ -1,0 +1,6 @@
+package main
+
+func LoadConfig() string {
+	secretEnv := "APP_SECRET"
+	return secretEnv
+}

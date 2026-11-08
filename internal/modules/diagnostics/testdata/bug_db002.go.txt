@@ -1,0 +1,7 @@
+package main
+
+import "database/sql"
+
+func InitDB() (*sql.DB, error) {
+	return sql.Open("postgres", "postgres://localhost/db")
+}

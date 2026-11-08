@@ -1,0 +1,12 @@
+package main
+
+import (
+	"io"
+	"net/http"
+)
+
+func ReadHandler(w http.ResponseWriter, r *http.Request) {
+	b, err := io.ReadAll(r.Body)
+	_ = err
+	_ = b
+}

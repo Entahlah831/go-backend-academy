@@ -1,0 +1,18 @@
+package main
+
+import (
+	"context"
+	"sync"
+)
+
+func RunLocalLoop(ctx context.Context, wg *sync.WaitGroup) {
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		var sum int
+		for i := 0; i < 10; i++ {
+			sum += i
+		}
+		_ = sum
+	}()
+}

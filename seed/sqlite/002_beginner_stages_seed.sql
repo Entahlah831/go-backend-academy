@@ -1575,3 +1575,24 @@ func TestEvaluateCapstoneReadiness(t *testing.T) {
 	}
 }
 ') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+
+-- Diagnostic rules synchronization (v2.6)
+INSERT INTO diagnostic_rules (rule_id, category, classification, severity, title, description, why_it_matters, suggested_fix, related_lesson_id, doc_url) VALUES
+('GO-SEC-007', 'security', 'potential_issue', 'high', 'Hardcoded Secret / Credential Literal', 'Detected hardcoded secret, token, private key or password in source code.', 'Hardcoded credentials in source control can be leaked and cannot be rotated without recompilation.', 'Read credentials dynamically from environment variables or secrets manager.', 'l6-security-auth-owasp', 'https://owasp.org/www-community/Source_Code_Analysis_Tools')
+ON CONFLICT (rule_id) DO UPDATE SET title = EXCLUDED.title, classification = EXCLUDED.classification, severity = EXCLUDED.severity;
+
+INSERT INTO diagnostic_rules (rule_id, category, classification, severity, title, description, why_it_matters, suggested_fix, related_lesson_id, doc_url) VALUES
+('GO-HTTP-001', 'network', 'potential_issue', 'medium', 'Hardcoded Network Port or Address Constant', 'Network port or address defined as a fixed constant without environment variable fallback.', 'Prevents dynamic port binding in container and PaaS environments like Cloud Run and Kubernetes.', 'Use an environment variable helper like envOr("PORT", "8080").', 'l0-backend-http-lifecycle', 'https://12factor.net/config')
+ON CONFLICT (rule_id) DO UPDATE SET title = EXCLUDED.title, classification = EXCLUDED.classification, severity = EXCLUDED.severity;
+
+INSERT INTO diagnostic_rules (rule_id, category, classification, severity, title, description, why_it_matters, suggested_fix, related_lesson_id, doc_url) VALUES
+('GO-DB-004', 'database', 'potential_issue', 'medium', 'Database Query Executed Without Context Cancellation', 'Detected Query, QueryRow, or Exec called without a context.Context parameter.', 'Queries without context cannot be cancelled when an HTTP client disconnects or request times out, leading to query exhaustion.', 'Use the *Context variant (db.QueryContext, db.QueryRowContext, db.ExecContext) with r.Context().', 'l5-db-ecosystem-comparison', 'https://go.dev/doc/database/cancel-operations')
+ON CONFLICT (rule_id) DO UPDATE SET title = EXCLUDED.title, classification = EXCLUDED.classification, severity = EXCLUDED.severity;
+
+INSERT INTO diagnostic_rules (rule_id, category, classification, severity, title, description, why_it_matters, suggested_fix, related_lesson_id, doc_url) VALUES
+('GO-VET-001', 'toolchain', 'potential_issue', 'medium', 'Go Compiler / go vet Diagnostic Output', 'Confirmed syntax, type-checking, or go vet analyzer diagnostic reported directly by the Go toolchain.', 'Code that fails compiler or vet inspection cannot run reliably in production.', 'Fix the compilation or vet diagnostic reported at the line indicated.', 'l1-toolchain-modules-packages', 'https://pkg.go.dev/cmd/vet')
+ON CONFLICT (rule_id) DO UPDATE SET title = EXCLUDED.title, classification = EXCLUDED.classification, severity = EXCLUDED.severity;
+
+INSERT INTO diagnostic_rules (rule_id, category, classification, severity, title, description, why_it_matters, suggested_fix, related_lesson_id, doc_url) VALUES
+('GO-INFO-000', 'info', 'no_finding_detected', 'info', 'No Static Rule Triggered in This Snippet', 'None of the configured offline static rules or AST checks matched this snippet.', 'Absence of static findings does NOT guarantee code is bug-free or secure. Concurrency races and runtime query plan bottlenecks require testing and benchmarking.', 'Run go test -race and database EXPLAIN ANALYZE for runtime verification.', 'l7-testing-fuzzing-benchmarks', 'https://go.dev/doc/articles/race_detector')
+ON CONFLICT (rule_id) DO UPDATE SET title = EXCLUDED.title, classification = EXCLUDED.classification, severity = EXCLUDED.severity;

@@ -220,7 +220,7 @@ CREATE TABLE IF NOT EXISTS database_scenarios (
 CREATE TABLE IF NOT EXISTS diagnostic_rules (
     rule_id VARCHAR(32) PRIMARY KEY,
     category VARCHAR(40) NOT NULL,
-    classification VARCHAR(40) NOT NULL CHECK (classification IN ('confirmed_diagnostic', 'potential_issue', 'educational_heuristic')),
+    classification VARCHAR(40) NOT NULL CHECK (classification IN ('confirmed_diagnostic', 'potential_issue', 'educational_heuristic', 'no_finding_detected')),
     severity VARCHAR(24) NOT NULL CHECK (severity IN ('critical', 'high', 'medium', 'info')),
     title VARCHAR(200) NOT NULL,
     description TEXT NOT NULL,

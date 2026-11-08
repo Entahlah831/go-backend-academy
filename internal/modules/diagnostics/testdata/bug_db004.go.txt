@@ -1,0 +1,10 @@
+package main
+
+import (
+	"context"
+	"database/sql"
+)
+
+func FetchLegacy(ctx context.Context, db *sql.DB) {
+	db.Query("SELECT 1")
+}

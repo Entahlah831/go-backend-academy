@@ -5330,6 +5330,7 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
       return {
         offline_mode: true,
+        engine_source: 'Browser (Fallback)',
         summary_status: findings[0].rule_id === 'GO-INFO-000' ? 'no_finding_detected' : 'findings_detected',
         findings,
         static_analysis_limitations: 'Static rules inspect syntax and local code patterns in isolation. They cannot prove business-logic authorization (BOLA), multi-service deadlocks, or database index selectivity. Always combine static checks with go vet, staticcheck, and go test -race.',
@@ -5345,9 +5346,15 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
         return 'ok';
       };
 
+      const engineBadge = report.engine_source || 'Browser (Fallback)';
+      const engineClass = engineBadge.includes('Server') ? 'accent' : 'cool';
+
       return `
         <div class="surface-recessed">
-          <div class="mono" style="color: var(--color-ok); font-weight: 500;">${escapeHtml(report.optional_ai_status)}</div>
+          <div class="control-group" style="justify-content: space-between; margin-bottom: var(--space-xs);">
+            <div class="mono" style="color: var(--color-ok); font-weight: 500;">${escapeHtml(report.optional_ai_status || '')}</div>
+            <span class="tag-pill ${engineClass}">${escapeHtml(engineBadge)}</span>
+          </div>
           <p><strong>Scope &amp; Limitations:</strong> ${escapeHtml(report.static_analysis_limitations)}</p>
         </div>
         ${report.findings.map(f => `
@@ -6411,7 +6418,10 @@ func SafeSocketControl(network, address string, c syscall.RawConn) error {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ code })
           });
-          if (res.ok) report = await res.json();
+          if (res.ok) {
+            report = await res.json();
+            report.engine_source = report.engine_source || 'Server (Go AST)';
+          }
         } catch (e) {}
       }
 
@@ -6430,7 +6440,10 @@ func SafeSocketControl(network, address string, c syscall.RawConn) error {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ code })
           });
-          if (res.ok) report = await res.json();
+          if (res.ok) {
+            report = await res.json();
+            report.engine_source = report.engine_source || 'Server (Go AST)';
+          }
         } catch (e) {}
       }
       const container = document.getElementById('dock-diag-results');

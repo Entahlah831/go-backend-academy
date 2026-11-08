@@ -1,0 +1,15 @@
+package main
+
+import (
+	"context"
+	"database/sql"
+)
+
+func FetchRows(ctx context.Context, db *sql.DB) error {
+	rows, err := db.QueryContext(ctx, "SELECT id FROM users WHERE active = true")
+	if err != nil {
+		return err
+	}
+	_ = rows
+	return nil
+}

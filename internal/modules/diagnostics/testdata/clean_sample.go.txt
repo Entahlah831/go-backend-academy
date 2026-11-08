@@ -1,0 +1,16 @@
+package main
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+)
+
+func GetUserEmail(ctx context.Context, db *sql.DB, userID string) (string, error) {
+	var email string
+	err := db.QueryRowContext(ctx, "SELECT email FROM users WHERE id = $1", userID).Scan(&email)
+	if err != nil {
+		return "", fmt.Errorf("querying user %s: %w", userID, err)
+	}
+	return email, nil
+}

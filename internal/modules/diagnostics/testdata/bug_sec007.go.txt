@@ -1,0 +1,3 @@
+package main
+
+const DatabasePassword = "prod-secret-password-123"

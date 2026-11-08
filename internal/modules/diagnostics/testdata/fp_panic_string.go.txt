@@ -1,0 +1,8 @@
+package main
+
+import "fmt"
+
+func LogNotice() {
+	msg := "Received report about panic( recovery failure"
+	fmt.Println(msg)
+}
