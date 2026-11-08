@@ -75,6 +75,10 @@ func (s *Server) SetShuttingDown(val bool) {
 	s.shuttingDown.Store(val)
 }
 
+func (s *Server) Analyzer() *diagnostics.Analyzer {
+	return s.analyzer
+}
+
 func (s *Server) Handler() http.Handler {
 	limiter := NewRateLimiterWithTrusted(s.cfg.RateLimitRPS, s.cfg.RateLimitBurst, s.cfg.TrustedProxyCIDRs)
 	var h http.Handler = s.mux

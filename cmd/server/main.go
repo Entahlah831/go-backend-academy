@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/gobackendacademy/platform/internal/config"
 	"github.com/gobackendacademy/platform/internal/platform/database"
@@ -75,6 +76,21 @@ func main() {
 	}
 
 	srv := httpplatform.NewServer(cfg, log, store)
+
+	if cfg.AIProvider != "none" {
+		checkCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+		if p, ok := srv.Analyzer().AIProvider(); ok {
+			if err := p.CheckConnection(checkCtx); err != nil {
+				log.Warn("optional local AI provider connection check failed; falling back to deterministic analysis",
+					slog.String("ai_provider", cfg.AIProvider),
+					slog.String("error", err.Error()))
+			} else {
+				log.Info("optional local AI provider connected",
+					slog.String("ai_provider", cfg.AIProvider))
+			}
+		}
+		cancel()
+	}
 
 	httpServer := &http.Server{
 		Addr:              cfg.ListenAddr(),

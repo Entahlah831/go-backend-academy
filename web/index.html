@@ -1029,7 +1029,7 @@ Origin: http://localhost:8080</textarea>
         </div>
       </section>
 
-      <!-- VIEW 9: OFFLINE GO CODE REVIEW & DIAGNOSTICS LAB (Replaces Fake AI Mentor) -->
+      <!-- VIEW 9: OFFLINE GO CODE REVIEW & DIAGNOSTICS LAB -->
       <section id="view-diagnostics" class="hidden view-stack">
         <div class="surface-card">
           <div class="surface-header">
@@ -1179,7 +1179,7 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
     </main>
 
-    <!-- RIGHT PANEL: Quick Offline Code Diagnostics Dock (Replaces Fake AI Mentor) -->
+    <!-- RIGHT PANEL: Quick Offline Code Diagnostics Dock -->
     <aside id="right-diag-panel" class="diag-dock hidden" aria-label="Offline Code Diagnostics Inspector">
       <div class="diag-dock-inner">
         <div class="surface-header">
@@ -5334,7 +5334,7 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
         summary_status: findings[0].rule_id === 'GO-INFO-000' ? 'no_finding_detected' : 'findings_detected',
         findings,
         static_analysis_limitations: 'Static rules inspect syntax and local code patterns in isolation. They cannot prove business-logic authorization (BOLA), multi-service deadlocks, or database index selectivity. Always combine static checks with go vet, staticcheck, and go test -race.',
-        optional_ai_status: 'AI_PROVIDER=none (100% Offline Deterministic Diagnostics Active)'
+        optional_ai_status: 'AI_PROVIDER=none (Analisis Deterministik Offline Aktif · Tanpa Cloud AI)'
       };
     }
 

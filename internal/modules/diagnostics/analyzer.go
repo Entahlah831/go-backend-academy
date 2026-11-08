@@ -142,6 +142,14 @@ func NewAnalyzer(enableLocalToolchain bool, sandboxTimeout time.Duration, aiProv
 	}
 }
 
+// AIProvider returns the configured optional assistant provider if active.
+func (a *Analyzer) AIProvider() (OptionalAssistantProvider, bool) {
+	if a.aiProvider != nil && a.aiProvider.Name() != "none" {
+		return a.aiProvider, true
+	}
+	return nil, false
+}
+
 var vetSem = make(chan struct{}, 2) // max 2 concurrent go vet processes
 
 func (a *Analyzer) AnalyzeCode(ctx context.Context, code string) AnalysisReport {
@@ -212,7 +220,7 @@ func (a *Analyzer) AnalyzeCode(ctx context.Context, code string) AnalysisReport 
 		SummaryStatus:             summaryStatus,
 		Findings:                  findings,
 		StaticAnalysisLimitations: "Static analysis inspects syntax and known code patterns in isolation. It cannot prove business-logic authorization (BOLA), runtime lock ordering across services, or database index selectivity. Never treat '0 static findings' as a substitute for 'go test -race', fuzzing, and integration tests.",
-		OptionalAIStatus:          "AI_PROVIDER=" + a.aiProvider.Name() + " (100% offline deterministic analysis active)",
+		OptionalAIStatus:          "AI_PROVIDER=" + a.aiProvider.Name() + " (Analisis deterministik offline aktif · Tanpa Cloud AI)",
 		AnalyzedAt:                time.Now().UTC(),
 	}
 }
