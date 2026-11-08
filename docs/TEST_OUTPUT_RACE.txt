@@ -1,0 +1,28 @@
+﻿go : # runtime/cgo
+At line:2 char:21
++ $env:CGO_ENABLED=1; go test -race -count=1 ./... 2>&1 | Out-File -Fil ...
++                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (# runtime/cgo:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+cgo: C compiler "gcc" not found: exec: "gcc": executable file not found in %PATH%
+FAIL	github.com/gobackendacademy/platform/cmd/academy [build failed]
+FAIL	github.com/gobackendacademy/platform/cmd/server [build failed]
+FAIL	github.com/gobackendacademy/platform/internal/config [build failed]
+FAIL	github.com/gobackendacademy/platform/internal/modules/assessments [build failed]
+?   	github.com/gobackendacademy/platform/internal/modules/case_studies	[no test files]
+?   	github.com/gobackendacademy/platform/internal/modules/curriculum	[no test files]
+FAIL	github.com/gobackendacademy/platform/internal/modules/diagnostics [build failed]
+FAIL	github.com/gobackendacademy/platform/internal/modules/exercises [build failed]
+?   	github.com/gobackendacademy/platform/internal/modules/lessons	[no test files]
+FAIL	github.com/gobackendacademy/platform/internal/modules/recommendations [build failed]
+FAIL	github.com/gobackendacademy/platform/internal/modules/sql_playground [build failed]
+?   	github.com/gobackendacademy/platform/internal/platform/database	[no test files]
+FAIL	github.com/gobackendacademy/platform/internal/platform/http [build failed]
+?   	github.com/gobackendacademy/platform/internal/platform/logger	[no test files]
+?   	github.com/gobackendacademy/platform/internal/shared	[no test files]
+?   	github.com/gobackendacademy/platform/migrations	[no test files]
+?   	github.com/gobackendacademy/platform/seed	[no test files]
+FAIL	github.com/gobackendacademy/platform/tests [build failed]
+FAIL	github.com/gobackendacademy/platform/tools/gen-content [build failed]
+FAIL

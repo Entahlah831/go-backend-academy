@@ -567,7 +567,6 @@ func TestProgressAndBookmarksRoundTripAndValidation(t *testing.T) {
 
 	// Regression: invalid status='started' must return 400 Bad Request
 	badStatus, _ := json.Marshal(map[string]string{
-		"user_id":   "usr_local_default",
 		"lesson_id": "l0-backend-http-lifecycle",
 		"status":    "started",
 	})
@@ -582,7 +581,6 @@ func TestProgressAndBookmarksRoundTripAndValidation(t *testing.T) {
 
 	// Regression: unknown lesson_id must return 400 Bad Request
 	badLesson, _ := json.Marshal(map[string]string{
-		"user_id":   "usr_local_default",
 		"lesson_id": "nope-unknown-lesson",
 		"status":    "completed",
 	})
@@ -597,7 +595,6 @@ func TestProgressAndBookmarksRoundTripAndValidation(t *testing.T) {
 
 	// Regression: invalid bookmark item_type='quiz' must return 400 Bad Request
 	badBookmark, _ := json.Marshal(map[string]string{
-		"user_id":   "usr_local_default",
 		"item_type": "quiz",
 		"item_id":   "qz-1",
 	})
@@ -616,7 +613,6 @@ func TestExerciseVerifyMultipleAttemptsAndCommentStuffingRejection(t *testing.T)
 
 	// 1. Comment-stuffed payload must fail even if required token appears inside a comment
 	stuffedPayload, _ := json.Marshal(map[string]any{
-		"user_id":         "usr_local_default",
 		"exercise_id":     "ex-l0-stage-a-what-is-backend",
 		"code":            "package main\n// \":8080\"\nfunc DefaultPort() string { return \"\" }",
 		"required_tokens": []string{},
@@ -640,7 +636,6 @@ func TestExerciseVerifyMultipleAttemptsAndCommentStuffingRejection(t *testing.T)
 
 	// 2. Second attempt on the exact same exercise must succeed with a distinct AttemptID
 	validPayload, _ := json.Marshal(map[string]any{
-		"user_id":         "usr_local_default",
 		"exercise_id":     "ex-l0-stage-a-what-is-backend",
 		"code":            "package main\nfunc DefaultPort() string { return \":8080\" }",
 		"required_tokens": []string{},
@@ -769,7 +764,6 @@ func TestAllExercisesServerSideVerification(t *testing.T) {
 		// 1. Starter code with // STEP: removed and empty required_tokens MUST fail via DB required_pattern
 		bypassAttempt := bytes.ReplaceAll([]byte(detail.Exercise.StarterCode), []byte("// STEP:"), []byte("// DONE:"))
 		rawFail := postJSON(t, ts.URL+"/api/v1/exercises/verify", map[string]any{
-			"user_id":         "usr_local_default",
 			"exercise_id":     detail.Exercise.ID,
 			"code":            string(bypassAttempt),
 			"required_tokens": []string{},
@@ -784,7 +778,6 @@ func TestAllExercisesServerSideVerification(t *testing.T) {
 
 		// 2. Solution code with empty required_tokens MUST pass via DB required_pattern
 		rawPass := postJSON(t, ts.URL+"/api/v1/exercises/verify", map[string]any{
-			"user_id":         "usr_local_default",
 			"exercise_id":     detail.Exercise.ID,
 			"code":            detail.Exercise.SolutionCode,
 			"required_tokens": []string{},
@@ -846,7 +839,6 @@ func TestServerSideQuizEvaluationAndBridgeQuizzes(t *testing.T) {
 		}
 
 		rawRes := postJSON(t, ts.URL+"/api/v1/quizzes/"+qid+"/attempts", map[string]any{
-			"user_id": "usr_test_quiz_eval",
 			"answers": expectedAnswers,
 		}, http.StatusOK)
 
@@ -884,7 +876,6 @@ func TestServerRejectStringStuffingBypass(t *testing.T) {
 
 	// F-01 regression: submitting calls inside string literals must fail AST verification
 	rawFail := postJSON(t, ts.URL+"/api/v1/exercises/verify", map[string]any{
-		"user_id":     "usr_attacker",
 		"exercise_id": "ex-l5-db-ecosystem-comparison",
 		"code": `package repo
 
@@ -1365,7 +1356,6 @@ func TestCurriculumExpansionAndStructuredSections(t *testing.T) {
 
 	// 3. Test grading attempt on new quiz qz-l3-http-servers
 	rawAttempt := postJSON(t, ts.URL+"/api/v1/quizzes/qz-l3-http-servers/attempts", map[string]any{
-		"user_id": "usr_test_l3",
 		"answers": []int{1, 1, 0},
 	}, http.StatusOK)
 	var res struct {
@@ -1507,9 +1497,8 @@ func TestNoCookieCreatesSessionOnlyForUserRoutes(t *testing.T) {
 func TestExplicitUserIDNoEmptySessionRow(t *testing.T) {
 	srv, ts := setupTestServer(t)
 
-	// Send POST with explicit attacker user_id in body and query
+	// Send POST with query parameter user_id (query user_id must be ignored)
 	payload, _ := json.Marshal(map[string]string{
-		"user_id":   "usr_injected_attacker",
 		"lesson_id": "l0-backend-http-lifecycle",
 		"status":    "completed",
 	})
@@ -1521,12 +1510,27 @@ func TestExplicitUserIDNoEmptySessionRow(t *testing.T) {
 
 	// Verify no session with empty id or explicit injected id was created directly in sessions.id
 	var emptyCount int
-	err = srv.Store().DB().QueryRow("SELECT COUNT(*) FROM sessions WHERE id = '' OR id = 'usr_injected_attacker'").Scan(&emptyCount)
+	err = srv.Store().DB().QueryRow("SELECT COUNT(*) FROM sessions WHERE id = '' OR id = 'usr_query_injected'").Scan(&emptyCount)
 	if err != nil {
 		t.Fatalf("querying sessions: %v", err)
 	}
 	if emptyCount != 0 {
 		t.Fatalf("found %d invalid session rows with empty or unhashed token id", emptyCount)
+	}
+
+	// Verify that sending unexpected user_id in JSON body is rejected by strict JSON decoding
+	injectedPayload, _ := json.Marshal(map[string]string{
+		"user_id":   "usr_injected_attacker",
+		"lesson_id": "l0-backend-http-lifecycle",
+		"status":    "completed",
+	})
+	injResp, err := http.Post(ts.URL+"/api/v1/progress", "application/json", bytes.NewReader(injectedPayload))
+	if err != nil {
+		t.Fatalf("POST failed: %v", err)
+	}
+	_ = injResp.Body.Close()
+	if injResp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request when body contains unknown user_id field, got %d", injResp.StatusCode)
 	}
 }
 
@@ -1667,13 +1671,87 @@ func TestClaimLegacyUserProgress(t *testing.T) {
 		t.Fatalf("claimed progress not transferred, got: %+v", data.Progress)
 	}
 
-	// 5. Claiming again when session already has progress returns 409 Conflict
-	claimResp2, err := client.Post(ts.URL+"/api/v1/session/claim-legacy", "application/json", bytes.NewReader(claimPayload))
+	// 5. Attempting to claim the same legacy ID again fails with 404 (already consumed/deleted)
+	doubleClaimResp, err := client.Post(ts.URL+"/api/v1/session/claim-legacy", "application/json", bytes.NewReader(claimPayload))
 	if err != nil {
-		t.Fatalf("second claim failed: %v", err)
+		t.Fatalf("second claim request failed: %v", err)
 	}
-	defer claimResp2.Body.Close()
-	if claimResp2.StatusCode != http.StatusConflict {
-		t.Fatalf("expected 409 Conflict on claiming when session already has data, got %d", claimResp2.StatusCode)
+	_ = doubleClaimResp.Body.Close()
+	if doubleClaimResp.StatusCode != http.StatusNotFound {
+		t.Fatalf("expected 404 Not Found on claiming already claimed legacy ID, got %d", doubleClaimResp.StatusCode)
+	}
+
+	// 6. Attempting to claim another legacy ID into a session that already has progress returns 409 Conflict
+	secondLegacy := "usr_legacy_student_888"
+	_ = srv.Store().SetLessonProgress(ctx, secondLegacy, "l0-stateless-vs-stateful-arch", "completed")
+	claimPayload2, _ := json.Marshal(map[string]string{
+		"legacy_user_id": secondLegacy,
+	})
+	conflictResp, err := client.Post(ts.URL+"/api/v1/session/claim-legacy", "application/json", bytes.NewReader(claimPayload2))
+	if err != nil {
+		t.Fatalf("conflict claim request failed: %v", err)
+	}
+	_ = conflictResp.Body.Close()
+	if conflictResp.StatusCode != http.StatusConflict {
+		t.Fatalf("expected 409 Conflict on claiming into a session with existing progress, got %d", conflictResp.StatusCode)
+	}
+
+	// 7. Attempting to claim 'usr_local_default' fails with 400 Bad Request
+	guestPayload, _ := json.Marshal(map[string]string{
+		"legacy_user_id": "usr_local_default",
+	})
+	guestResp, err := client.Post(ts.URL+"/api/v1/session/claim-legacy", "application/json", bytes.NewReader(guestPayload))
+	if err != nil {
+		t.Fatalf("guest claim request failed: %v", err)
+	}
+	_ = guestResp.Body.Close()
+	if guestResp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request on claiming usr_local_default, got %d", guestResp.StatusCode)
+	}
+}
+
+func TestGoVersionClaimsMatchGoMod(t *testing.T) {
+	// 1. Read go.mod version
+	modBytes, err := os.ReadFile("../go.mod")
+	if err != nil {
+		t.Fatalf("reading go.mod: %v", err)
+	}
+	var goModVer string
+	for _, line := range strings.Split(string(modBytes), "\n") {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "go ") {
+			fields := strings.Fields(trimmed)
+			if len(fields) >= 2 {
+				goModVer = fields[1]
+				break
+			}
+		}
+	}
+	if goModVer == "" {
+		t.Fatalf("could not determine go version from go.mod")
+	}
+	parts := strings.Split(goModVer, ".")
+	if len(parts) < 2 {
+		t.Fatalf("invalid go.mod version format: %s", goModVer)
+	}
+	majorMinor := strings.Join(parts[:2], ".")
+	expectedTag := fmt.Sprintf("Go %s+", majorMinor)
+
+	// 2. Check web/index.html header badge
+	htmlBytes, err := os.ReadFile("../web/index.html")
+	if err != nil {
+		t.Fatalf("reading web/index.html: %v", err)
+	}
+	if !strings.Contains(string(htmlBytes), expectedTag) {
+		t.Errorf("web/index.html header badge does not contain %q matching go.mod (%s)", expectedTag, goModVer)
+	}
+
+	// 3. Check README.md
+	readmeBytes, err := os.ReadFile("../README.md")
+	if err != nil {
+		t.Fatalf("reading README.md: %v", err)
+	}
+	if !strings.Contains(string(readmeBytes), expectedTag) {
+		t.Errorf("README.md does not contain %q matching go.mod (%s)", expectedTag, goModVer)
 	}
 }

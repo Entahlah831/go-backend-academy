@@ -1,0 +1,19 @@
+# ============================================================================
+# Go Backend Academy — Development Compose Override (docker-compose.dev.yml)
+# ============================================================================
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+#
+# Provides fallback defaults for local convenience without compromising
+# the strict production security guards in the primary docker-compose.yml.
+# ============================================================================
+
+services:
+  academy-server:
+    environment:
+      - APP_ENV=development
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-academy_dev_password_only}
+
+  postgres:
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-academy_dev_password_only}

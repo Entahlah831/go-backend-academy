@@ -12,12 +12,12 @@ services:
       - APP_ENV=${APP_ENV:-production}
       - HOST=0.0.0.0
       - PORT=${PORT:-8080}
-      - DB_DRIVER=${DB_DRIVER:-postgres}
+      - DB_DRIVER=postgres
       - SQLITE_PATH=/app/data/academy.db
       - POSTGRES_HOST=${COMPOSE_POSTGRES_HOST:-postgres}
       - POSTGRES_PORT=5432
       - POSTGRES_USER=${POSTGRES_USER:-academy}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-academy_secure_password_2026}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       - POSTGRES_DB=${POSTGRES_DB:-gobackendacademy}
       - POSTGRES_SSLMODE=${POSTGRES_SSLMODE:-disable}
       - DB_AUTO_MIGRATE=${DB_AUTO_MIGRATE:-true}
@@ -36,7 +36,7 @@ services:
     container_name: academy-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-academy}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-academy_secure_password_2026}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       POSTGRES_DB: ${POSTGRES_DB:-gobackendacademy}
     ports:
       - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"

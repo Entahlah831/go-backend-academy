@@ -285,6 +285,9 @@ func (s *Store) ClaimLegacyUser(ctx context.Context, legacyUID, targetUID string
 	if legacyUID == "" || targetUID == "" || legacyUID == targetUID {
 		return errors.New("invalid legacy or target user ID")
 	}
+	if legacyUID == "usr_local_default" {
+		return errors.New("cannot claim default local guest user")
+	}
 	var existingLegacy string
 	if err := s.db.QueryRowContext(ctx, `SELECT id FROM users WHERE id = $1`, legacyUID).Scan(&existingLegacy); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -296,11 +299,13 @@ func (s *Store) ClaimLegacyUser(ctx context.Context, legacyUID, targetUID string
 		return err
 	}
 
-	var pCount, nCount, bCount int
+	var pCount, nCount, bCount, eCount, qCount int
 	_ = s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM user_progress WHERE user_id = $1`, targetUID).Scan(&pCount)
 	_ = s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM user_notes WHERE user_id = $1`, targetUID).Scan(&nCount)
 	_ = s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM user_bookmarks WHERE user_id = $1`, targetUID).Scan(&bCount)
-	if (pCount + nCount + bCount) > 0 {
+	_ = s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM exercise_attempts WHERE user_id = $1`, targetUID).Scan(&eCount)
+	_ = s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM quiz_attempts WHERE user_id = $1`, targetUID).Scan(&qCount)
+	if (pCount + nCount + bCount + eCount + qCount) > 0 {
 		return errors.New("target session already contains learning progress")
 	}
 
@@ -317,6 +322,11 @@ func (s *Store) ClaimLegacyUser(ctx context.Context, legacyUID, targetUID string
 			return fmt.Errorf("migrating %s: %w", tbl, err)
 		}
 	}
+	_, _ = tx.ExecContext(ctx, `DELETE FROM sessions WHERE user_id = $1`, legacyUID)
+	if _, err := tx.ExecContext(ctx, `DELETE FROM users WHERE id = $1`, legacyUID); err != nil {
+		return fmt.Errorf("deleting claimed legacy user: %w", err)
+	}
+
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("committing claim: %w", err)
 	}

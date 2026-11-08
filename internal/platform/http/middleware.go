@@ -176,6 +176,31 @@ func (rl *RateLimiter) cleanupLoop() {
 	}
 }
 
+func (rl *RateLimiter) Allow(ip string) bool {
+	rl.mu.Lock()
+	defer rl.mu.Unlock()
+	now := time.Now()
+	b, exists := rl.buckets[ip]
+	if !exists {
+		b = &tokenBucket{tokens: rl.burst, lastRefill: now}
+		rl.buckets[ip] = b
+	} else {
+		elapsed := now.Sub(b.lastRefill).Seconds()
+		if elapsed > 0 {
+			b.tokens += elapsed * rl.rate
+			if b.tokens > rl.burst {
+				b.tokens = rl.burst
+			}
+			b.lastRefill = now
+		}
+	}
+	if b.tokens < 1.0 {
+		return false
+	}
+	b.tokens -= 1.0
+	return true
+}
+
 func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		host := ClientIP(r, rl.trustedProxies)

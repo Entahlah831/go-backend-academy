@@ -1,0 +1,188 @@
+=== BUKTI AUDIT & STATUS SISTEM GO BACKEND ACADEMY ===
+Tanggal: 8 November 2026
+Mesin: Antigravity Local Workspace (Windows amd64)
+Repo: go-backend-academy (master)
+
+================================================================================
+1. GIT STATE & REMOTE VERIFICATION
+================================================================================
+
+$ git fetch origin
+(clean fetch)
+
+$ git log --oneline -8
+59063b5 feat(curriculum): adopt go-lesson-author skill and record clean test outputs
+8f35d95 fix(compose): add default postgres password and dynamic DB_DRIVER fallback
+5e532d7 fix(build): align go.mod with Go 1.24 for Alpine Docker builder
+2c7024d fix(P0-2, P0-3, P1-2, P1-3, P1-7, P2): populate 41 exercise rules and tests, expand quizzes, untrack binary, and polish diagnostics and docs
+f4e42da fix(P0-1, P1-6): derive user identity strictly from session cookie and secure session lifecycle
+0ff314f fix(ci): normalize CRLF in content hash check and enforce LF in .gitattributes
+9c3cb67 ci(t4.5): add curriculum code compilation test and gofmt cleanliness verification
+f5e21e2 feat(t4.4): expand curriculum material, structured sections, and bridge quizzes
+
+$ git rev-parse HEAD
+59063b55f5d37d34ca407753fde079a17fc5f406
+
+$ git ls-remote origin refs/heads/master
+59063b55f5d37d34ca407753fde079a17fc5f406	refs/heads/master
+
+$ git status -sb
+## master...origin/master
+
+================================================================================
+2. GIT COMMIT STATS (8f35d95, 5e532d7, 2c7024d, f4e42da)
+================================================================================
+
+$ git show --stat 8f35d95
+commit 8f35d9506343d6263c01466eb371c99257d9e9cd
+Author: Antigravity Agent <agent@gobackendacademy.local>
+Date:   Sun Nov 8 12:51:06 2026 +0700
+
+    fix(compose): add default postgres password and dynamic DB_DRIVER fallback
+
+ docker-compose.yml | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+$ git show --stat 5e532d7
+commit 5e532d7db8b5e251e89be0a99e706d17d2418a02
+Author: Antigravity Agent <agent@gobackendacademy.local>
+Date:   Sun Nov 8 12:46:10 2026 +0700
+
+    fix(build): align go.mod with Go 1.24 for Alpine Docker builder
+
+ go.mod | 20 ++++++++++--------
+ go.sum | 74 ++++++++++++++++++++++++++++++++----------------------------------
+ 2 files changed, 47 insertions(+), 47 deletions(-)
+
+$ git show --stat 2c7024d
+commit 2c7024d54e37a002d98bad6e37841c7879b06fe1
+Author: Antigravity Agent <agent@gobackendacademy.local>
+Date:   Sun Nov 8 12:25:17 2026 +0700
+
+    fix(P0-2, P0-3, P1-2, P1-3, P1-7, P2): populate 41 exercise rules and tests, expand quizzes, untrack binary, and polish diagnostics and docs
+
+ Dockerfile                                      |   2 +-
+ bin/go-backend-academy.exe                      | Bin 11159040 -> 0 bytes
+ content/casestudies.json                        | 138 ++---
+ content/curriculum.json                         | 248 ++++----
+ content/exercises.json                          | 761 +++++++++++++++++++++---
+ content/manifest.json                           |   6 +-
+ docs/BASELINE.md                                |  50 ++
+ docs/CHANGELOG.md                               |  34 ++
+ docs/TEST_REPORT.md                             |  80 +--
+ FIX_PLAN.md => docs/archive/FIX_PLAN.md         |   0
+ MASTER_PLAN.md => docs/archive/MASTER_PLAN.md   |   0
+ internal/config/config.go                       |   2 +-
+ internal/modules/diagnostics/analyzer.go        | 150 +++--
+ internal/modules/diagnostics/analyzer_test.go   |  64 ++
+ internal/modules/exercises/ast_verifier.go      |  62 +-
+ internal/modules/exercises/ast_verifier_test.go | 160 ++++-
+ internal/modules/exercises/service.go           |   2 +-
+ seed/postgres/002_beginner_stages_seed.sql      | 694 ++++++++++++++++++---
+ seed/sqlite/002_beginner_stages_seed.sql        | 694 ++++++++++++++++++---
+ tests/server_integration_test.go                |  16 +-
+ web/index.html                                  |  19 +-
+ 21 files changed, 2638 insertions(+), 544 deletions(-)
+
+$ git show --stat f4e42da
+commit f4e42da7f93b0a66d1ed4571b3f6661a89fd2c2d
+Author: Antigravity Agent <agent@gobackendacademy.local>
+Date:   Sun Nov 8 12:08:43 2026 +0700
+
+    fix(P0-1, P1-6): derive user identity strictly from session cookie and secure session lifecycle
+
+ cmd/server/main.go                    |   1 +
+ internal/modules/exercises/service.go |   2 +-
+ internal/platform/database/db.go      |  59 ++++-
+ internal/platform/http/router.go      | 243 +++++++++++++++------
+ tests/server_integration_test.go      | 395 +++++++++++++++++++++++++++++++---
+ web/app-bridge.js                     |  57 ++---
+ web/index.html                        |  23 +-
+ 7 files changed, 641 insertions(+), 139 deletions(-)
+
+================================================================================
+3. TOOLCHAIN & CONTAINER RUNTIME DEFINITIONS
+================================================================================
+
+$ go version
+go version go1.27.1 windows/amd64
+
+$ Get-Content go.mod | Select-String "^go |toolchain"
+go 1.24.0
+
+$ Get-Content Dockerfile | Select-String "FROM"
+FROM golang:1.24-alpine AS builder
+FROM alpine:3.21
+
+$ Get-Content docker-compose.yml | Select-String "DB_DRIVER|POSTGRES_PASSWORD|image:" -Context 0, 1
+>       - DB_DRIVER=${DB_DRIVER:-postgres}
+        - SQLITE_PATH=/app/data/academy.db
+>       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-academy_secure_password_2026}
+        - POSTGRES_DB=${POSTGRES_DB:-gobackendacademy}
+>     image: postgres:17-alpine
+      container_name: academy-postgres
+>       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-academy_secure_password_2026}
+        POSTGRES_DB: ${POSTGRES_DB:-gobackendacademy}
+>     image: redis:7.4-alpine
+      container_name: academy-redis
+
+Note: docker engine tidak terpasang di host Windows ini (pengujian docker berjalan di VPS Debian host).
+
+================================================================================
+4. BUKTI AUDIT P0 (SESSION & IDENTITY, RULES & TESTS, T.LOG)
+================================================================================
+
+$ Select-String -Path internal\platform\http\router.go -Pattern "func \(s \*Server\) resolveUser" -Context 0,12
+internal\platform\http\router.go:204:func (s *Server) resolveUser(w http.ResponseWriter, r *http.Request) (string, error) {
+internal\platform\http\router.go:205:	if uid, ok := r.Context().Value(userContextKey).(string); ok && uid != "" {
+internal\platform\http\router.go:206:		return uid, nil
+internal\platform\http\router.go:207:	}
+internal\platform\http\router.go:208:	return s.issueUserSession(w, r)
+internal\platform\http\router.go:209:}
+internal\platform\http\router.go:210:
+internal\platform\http\router.go:211:func (s *Server) StartBackgroundWorkers(ctx context.Context) {
+internal\platform\http\router.go:212:	go func() {
+internal\platform\http\router.go:213:		ticker := time.NewTicker(1 * time.Hour)
+internal\platform\http\router.go:214:		defer ticker.Stop()
+internal\platform\http\router.go:215:		for {
+internal\platform\http\router.go:216:			select {
+
+$ (Select-String -Path seed\sqlite\*.sql -Pattern "^INSERT INTO exercise_rules").Count
+41
+
+$ (Select-String -Path seed\sqlite\*.sql -Pattern "^INSERT INTO exercise_tests").Count
+41
+
+$ (Select-String -Path seed\postgres\*.sql -Pattern "^INSERT INTO exercise_rules").Count
+41
+
+$ (Select-String -Path seed\postgres\*.sql -Pattern "^INSERT INTO exercise_tests").Count
+41
+
+$ Get-ChildItem -Recurse -Include *.go,*.json,*.sql | Select-String -Pattern "t\.Log\(" | Select-Object -First 20
+(Empty output - zero matches across whole codebase)
+
+================================================================================
+5. TEST EXECUTION & GATE VERIFICATION
+================================================================================
+
+$ go test -count=1 -v ./... > docs\TEST_OUTPUT.txt
+$ Select-String docs\TEST_OUTPUT.txt -Pattern "^--- FAIL","^FAIL"
+(Empty output - zero failures)
+
+$ (Select-String docs\TEST_OUTPUT.txt -Pattern "^--- PASS").Count
+55
+
+$ $env:CGO_ENABLED=1; go test -race -count=1 ./... > docs\TEST_OUTPUT_RACE.txt
+cgo: C compiler "gcc" not found: exec: "gcc": executable file not found in %PATH%
+FAIL	github.com/gobackendacademy/platform/cmd/academy [build failed]
+(Recorded: GCC is not installed on the local Windows host; requires MinGW/WSL/CI for CGO race detector)
+
+$ gofmt -l .
+(Empty output - 100% clean formatting)
+
+$ go vet ./...
+(Empty output - 100% clean vetting)
+
+$ go run ./tools/gen-content -verify
+PASS: Content and seed files are in sync with zero drift.

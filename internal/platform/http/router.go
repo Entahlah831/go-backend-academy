@@ -34,7 +34,6 @@ import (
 	"github.com/gobackendacademy/platform/internal/shared"
 )
 
-const defaultUserID = "usr_local_default"
 const sessionCookieName = "gba_sid"
 
 type contextKey string
@@ -43,6 +42,9 @@ const userContextKey contextKey = "gba_user_id"
 
 // userIDPattern matches the users.id VARCHAR(64) column and keeps IDs URL/log safe.
 var userIDPattern = regexp.MustCompile(`^[A-Za-z0-9_.\-]{1,64}$`)
+
+// legacyClaimExpiry defines the cutoff date for migrating legacy browser IDs.
+var legacyClaimExpiry = time.Date(2027, 2, 15, 0, 0, 0, 0, time.UTC)
 
 type Server struct {
 	cfg            *config.Config
@@ -56,6 +58,7 @@ type Server struct {
 	analyzer       *diagnostics.Analyzer
 	sqlSandbox     *sqlplayground.Sandbox
 	recEngine      *recommendations.Engine
+	claimLimiter   *RateLimiter
 	shuttingDown   atomic.Bool
 	mux            *http.ServeMux
 }
@@ -73,6 +76,7 @@ func NewServer(cfg *config.Config, logger *slog.Logger, store *database.Store) *
 		analyzer:       diagnostics.NewAnalyzer(cfg.EnableLocalToolchain, cfg.SandboxTimeout, cfg.AIProvider, cfg.AIBaseURL, cfg.AIModel),
 		sqlSandbox:     sqlplayground.NewSandbox(cfg.SandboxTimeout),
 		recEngine:      recommendations.NewEngine(),
+		claimLimiter:   NewRateLimiterWithTrusted(5.0/3600.0, 5, cfg.TrustedProxyCIDRs),
 		mux:            http.NewServeMux(),
 	}
 	s.registerRoutes()
@@ -301,21 +305,9 @@ func writeDecodeError(w http.ResponseWriter, r *http.Request, err error, hint st
 	WriteProblem(w, r, http.StatusBadRequest, "INVALID_JSON", "Bad Request", hint+" ("+err.Error()+")")
 }
 
-// resolveUserID applies the local default and validates the format.
-func resolveUserID(raw string) (string, bool) {
-	if raw == "" {
-		return defaultUserID, true
-	}
-	return raw, userIDPattern.MatchString(raw)
-}
-
 func (s *Server) writeDBError(w http.ResponseWriter, r *http.Request, err error) {
 	s.logger.Error("database operation failed", slog.String("path", r.URL.Path), slog.String("error", err.Error()))
 	WriteProblem(w, r, http.StatusInternalServerError, "DB_ERROR", "Database Error", "The database operation failed. Check server logs for details.")
-}
-
-func writeInvalidUser(w http.ResponseWriter, r *http.Request) {
-	WriteProblem(w, r, http.StatusBadRequest, "INVALID_USER_ID", "Bad Request", "user_id must be 1-64 characters of letters, digits, '_', '-', or '.'.")
 }
 
 // ---------- health ----------
@@ -405,12 +397,16 @@ func (s *Server) handleGetLesson(w http.ResponseWriter, r *http.Request) {
 // ---------- exercises ----------
 
 func (s *Server) handleVerifyExercise(w http.ResponseWriter, r *http.Request) {
-	var req exercises.SubmissionRequest
-	if err := s.decodeJSON(w, r, &req); err != nil {
-		writeDecodeError(w, r, err, "Body must be a JSON object with exercise_id, code, and optional user_id/required_tokens.")
+	var payload struct {
+		ExerciseID     string   `json:"exercise_id"`
+		Code           string   `json:"code"`
+		RequiredTokens []string `json:"required_tokens"`
+	}
+	if err := s.decodeJSON(w, r, &payload); err != nil {
+		writeDecodeError(w, r, err, "Body must be a JSON object with exercise_id and code.")
 		return
 	}
-	if req.ExerciseID == "" {
+	if payload.ExerciseID == "" {
 		WriteProblem(w, r, http.StatusBadRequest, "INVALID_PAYLOAD", "Bad Request", "exercise_id and code are required.")
 		return
 	}
@@ -419,7 +415,12 @@ func (s *Server) handleVerifyExercise(w http.ResponseWriter, r *http.Request) {
 		s.writeDBError(w, r, err)
 		return
 	}
-	req.UserID = uid
+	req := exercises.SubmissionRequest{
+		UserID:         uid,
+		ExerciseID:     payload.ExerciseID,
+		Code:           payload.Code,
+		RequiredTokens: payload.RequiredTokens,
+	}
 	res, err := s.exercisesSvc.VerifySubmission(r.Context(), req)
 	if err != nil {
 		if errors.Is(err, exercises.ErrUnknownExercise) {
@@ -486,11 +487,10 @@ func (s *Server) handleGetQuiz(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleGradeQuiz(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		UserID  string `json:"user_id"`
-		Answers []int  `json:"answers"`
+		Answers []int `json:"answers"`
 	}
 	if err := s.decodeJSON(w, r, &req); err != nil {
-		writeDecodeError(w, r, err, "Body must be {\"answers\": [<option index per question>], \"user_id\": optional}.")
+		writeDecodeError(w, r, err, `Body must be {"answers": [<option index per question>]}.`)
 		return
 	}
 	uid, err := s.resolveUser(w, r)
@@ -578,11 +578,24 @@ func (s *Server) handleSQLPlaygroundExecute(w http.ResponseWriter, r *http.Reque
 // ---------- static frontend ----------
 
 func (s *Server) handleClaimLegacySession(w http.ResponseWriter, r *http.Request) {
+	if time.Now().UTC().After(legacyClaimExpiry) {
+		WriteProblem(w, r, http.StatusGone, "FEATURE_EXPIRED", "Feature Expired", "Legacy session migration window has expired.")
+		return
+	}
+	clientIP := ClientIP(r, s.cfg.TrustedProxyCIDRs)
+	if !s.claimLimiter.Allow(clientIP) {
+		WriteProblem(w, r, http.StatusTooManyRequests, "RATE_LIMIT_EXCEEDED", "Too Many Requests", "Too many claim attempts from this IP address. Please try again later.")
+		return
+	}
 	var payload struct {
 		LegacyUserID string `json:"legacy_user_id"`
 	}
 	if err := s.decodeJSON(w, r, &payload); err != nil {
 		writeDecodeError(w, r, err, "Body must contain legacy_user_id.")
+		return
+	}
+	if payload.LegacyUserID == "usr_local_default" {
+		WriteProblem(w, r, http.StatusBadRequest, "INVALID_LEGACY_USER_ID", "Invalid Legacy User ID", "Default local guest user cannot be claimed.")
 		return
 	}
 	if !userIDPattern.MatchString(payload.LegacyUserID) {
@@ -600,7 +613,11 @@ func (s *Server) handleClaimLegacySession(w http.ResponseWriter, r *http.Request
 	}
 	if err := s.store.ClaimLegacyUser(r.Context(), payload.LegacyUserID, currentUID); err != nil {
 		if errors.Is(err, database.ErrNotFound) {
-			WriteProblem(w, r, http.StatusNotFound, "LEGACY_USER_NOT_FOUND", "Legacy User Not Found", "No data exists for the provided legacy_user_id.")
+			WriteProblem(w, r, http.StatusNotFound, "LEGACY_USER_NOT_FOUND", "Legacy User Not Found", "No data exists for the provided legacy_user_id, or it has already been claimed.")
+			return
+		}
+		if strings.Contains(err.Error(), "cannot claim default") {
+			WriteProblem(w, r, http.StatusBadRequest, "INVALID_LEGACY_USER_ID", "Invalid Legacy User ID", "Default local guest user cannot be claimed.")
 			return
 		}
 		if strings.Contains(err.Error(), "already contains learning progress") {
@@ -705,12 +722,11 @@ func (s *Server) handleGetProgress(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleSaveProgress(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
-		UserID   string `json:"user_id"`
 		LessonID string `json:"lesson_id"`
 		Status   string `json:"status"`
 	}
 	if err := s.decodeJSON(w, r, &payload); err != nil {
-		writeDecodeError(w, r, err, "Body must be a JSON object with lesson_id, optional status and user_id.")
+		writeDecodeError(w, r, err, "Body must be a JSON object with lesson_id and optional status.")
 		return
 	}
 	if payload.LessonID == "" {
@@ -761,13 +777,12 @@ func (s *Server) handleGetBookmarks(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleSaveBookmark(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
-		UserID   string `json:"user_id"`
 		ItemType string `json:"item_type"`
 		ItemID   string `json:"item_id"`
 		Note     string `json:"note"`
 	}
 	if err := s.decodeJSON(w, r, &payload); err != nil {
-		writeDecodeError(w, r, err, "Body must be a JSON object with item_id, optional item_type, note, and user_id.")
+		writeDecodeError(w, r, err, "Body must be a JSON object with item_id, optional item_type, and note.")
 		return
 	}
 	if payload.ItemID == "" || len(payload.ItemID) > 64 {
@@ -814,12 +829,11 @@ func (s *Server) handleGetNotes(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleSaveNote(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
-		UserID   string `json:"user_id"`
 		LessonID string `json:"lesson_id"`
 		Content  string `json:"content"`
 	}
 	if err := s.decodeJSON(w, r, &payload); err != nil {
-		writeDecodeError(w, r, err, "Body must be a JSON object with lesson_id, content, and optional user_id.")
+		writeDecodeError(w, r, err, "Body must be a JSON object with lesson_id and content.")
 		return
 	}
 	if payload.LessonID == "" {

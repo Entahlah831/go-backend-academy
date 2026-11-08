@@ -1,35 +1,35 @@
 ﻿=== RUN   TestRunFetch_Success
 [OK] Mengunduh paket latihan: Konfigurasi Alamat Listen Port Default
 ID Latihan: ex-l0-stage-a-what-is-backend
-Direktori : C:\Users\12\AppData\Local\Temp\TestRunFetch_Success4181613887\001\ex-out
+Direktori : C:\Users\12\AppData\Local\Temp\TestRunFetch_Success2971923159\001\ex-out
 
-  + Menulis README.md (13 bytes)
   + Menulis go.mod (21 bytes)
   + Menulis main.go (59 bytes)
   + Menulis main_test.go (129 bytes)
+  + Menulis README.md (13 bytes)
 
 Langkah selanjutnya untuk menguji secara offline di laptop Anda:
-  cd C:\Users\12\AppData\Local\Temp\TestRunFetch_Success4181613887\001\ex-out
+  cd C:\Users\12\AppData\Local\Temp\TestRunFetch_Success2971923159\001\ex-out
   go test -v ./...
 --- PASS: TestRunFetch_Success (0.03s)
 === RUN   TestRunFetch_NotFound
---- PASS: TestRunFetch_NotFound (0.01s)
+--- PASS: TestRunFetch_NotFound (0.00s)
 PASS
-ok  	github.com/gobackendacademy/platform/cmd/academy	2.441s
+ok  	github.com/gobackendacademy/platform/cmd/academy	2.206s
 ?   	github.com/gobackendacademy/platform/cmd/server	[no test files]
 === RUN   TestProductionPostgresPasswordGuard
-2026/11/08 13:05:29 WARN production security warning: POSTGRES_SSLMODE is set to 'disable'; transport encryption should be enabled in production
-2026/11/08 13:05:29 WARN production security warning: POSTGRES_SSLMODE is set to 'disable'; transport encryption should be enabled in production
-2026/11/08 13:05:29 WARN production security warning: POSTGRES_SSLMODE is set to 'disable'; transport encryption should be enabled in production
+2026/11/08 13:25:59 WARN production security warning: POSTGRES_SSLMODE is set to 'disable'; transport encryption should be enabled in production
+2026/11/08 13:25:59 WARN production security warning: POSTGRES_SSLMODE is set to 'disable'; transport encryption should be enabled in production
+2026/11/08 13:25:59 WARN production security warning: POSTGRES_SSLMODE is set to 'disable'; transport encryption should be enabled in production
 --- PASS: TestProductionPostgresPasswordGuard (0.00s)
 === RUN   TestDefaultEnableLocalToolchainIsFalse
 --- PASS: TestDefaultEnableLocalToolchainIsFalse (0.00s)
 PASS
-ok  	github.com/gobackendacademy/platform/internal/config	0.872s
+ok  	github.com/gobackendacademy/platform/internal/config	0.689s
 === RUN   TestAssessmentsServiceGrade
 --- PASS: TestAssessmentsServiceGrade (0.00s)
 PASS
-ok  	github.com/gobackendacademy/platform/internal/modules/assessments	0.720s
+ok  	github.com/gobackendacademy/platform/internal/modules/assessments	0.581s
 ?   	github.com/gobackendacademy/platform/internal/modules/case_studies	[no test files]
 ?   	github.com/gobackendacademy/platform/internal/modules/curriculum	[no test files]
 === RUN   TestAnalyzerDetectsHardcodedSecretAndPort
@@ -37,7 +37,7 @@ ok  	github.com/gobackendacademy/platform/internal/modules/assessments	0.720s
 === RUN   TestAnalyzerCleanCodeNoFindings
 --- PASS: TestAnalyzerCleanCodeNoFindings (0.00s)
 === RUN   TestIsolatedGoVetClassification
---- PASS: TestIsolatedGoVetClassification (3.04s)
+--- PASS: TestIsolatedGoVetClassification (3.07s)
 === RUN   TestDiagnosticLinesAreReal
 --- PASS: TestDiagnosticLinesAreReal (0.00s)
 === RUN   TestDBRowsScopePerFunction
@@ -85,9 +85,9 @@ ok  	github.com/gobackendacademy/platform/internal/modules/assessments	0.720s
     --- PASS: TestGoldenDiagnostics/fp_panic_string (0.00s)
     --- PASS: TestGoldenDiagnostics/fp_update_log (0.00s)
 PASS
-ok  	github.com/gobackendacademy/platform/internal/modules/diagnostics	5.162s
+ok  	github.com/gobackendacademy/platform/internal/modules/diagnostics	5.094s
 === RUN   TestVerifySubmissionRecordsZeroExecutionMs
---- PASS: TestVerifySubmissionRecordsZeroExecutionMs (0.08s)
+--- PASS: TestVerifySubmissionRecordsZeroExecutionMs (0.06s)
 === RUN   TestCheckASTValidSolution
 --- PASS: TestCheckASTValidSolution (0.00s)
 === RUN   TestCheckASTRejectsStringStuffingBypass
@@ -105,14 +105,14 @@ ok  	github.com/gobackendacademy/platform/internal/modules/diagnostics	5.162s
 === RUN   TestAllExercisesHaveRulesAndPassingSolutions
 --- PASS: TestAllExercisesHaveRulesAndPassingSolutions (0.01s)
 PASS
-ok  	github.com/gobackendacademy/platform/internal/modules/exercises	0.346s
+ok  	github.com/gobackendacademy/platform/internal/modules/exercises	0.249s
 ?   	github.com/gobackendacademy/platform/internal/modules/lessons	[no test files]
 === RUN   TestEngineEmptySnapshotRecommendsStageA
 --- PASS: TestEngineEmptySnapshotRecommendsStageA (0.00s)
 === RUN   TestEngineProgressiveProgression
 --- PASS: TestEngineProgressiveProgression (0.00s)
 PASS
-ok  	github.com/gobackendacademy/platform/internal/modules/recommendations	0.764s
+ok  	github.com/gobackendacademy/platform/internal/modules/recommendations	0.568s
 === RUN   TestSQLSandboxSafetyRules
 === RUN   TestSQLSandboxSafetyRules/SELECT_with_newline
 === RUN   TestSQLSandboxSafetyRules/SELECT_with_semicolon_inside_string_literal
@@ -130,16 +130,16 @@ ok  	github.com/gobackendacademy/platform/internal/modules/recommendations	0.764
 === RUN   TestSQLSandboxExplainQueryPlan
 --- PASS: TestSQLSandboxExplainQueryPlan (0.00s)
 PASS
-ok  	github.com/gobackendacademy/platform/internal/modules/sql_playground	1.640s
+ok  	github.com/gobackendacademy/platform/internal/modules/sql_playground	1.544s
 ?   	github.com/gobackendacademy/platform/internal/platform/database	[no test files]
 === RUN   TestClientIPResolutionWithTrustedProxies
 --- PASS: TestClientIPResolutionWithTrustedProxies (0.00s)
 === RUN   TestRateLimiterDistinguishesProxiedClients
 --- PASS: TestRateLimiterDistinguishesProxiedClients (0.00s)
 === RUN   TestStaticFrontendBlocksDotfiles
---- PASS: TestStaticFrontendBlocksDotfiles (0.18s)
+--- PASS: TestStaticFrontendBlocksDotfiles (0.13s)
 PASS
-ok  	github.com/gobackendacademy/platform/internal/platform/http	0.446s
+ok  	github.com/gobackendacademy/platform/internal/platform/http	0.332s
 ?   	github.com/gobackendacademy/platform/internal/platform/logger	[no test files]
 ?   	github.com/gobackendacademy/platform/internal/shared	[no test files]
 ?   	github.com/gobackendacademy/platform/migrations	[no test files]
@@ -186,7 +186,7 @@ ok  	github.com/gobackendacademy/platform/internal/platform/http	0.446s
 === RUN   TestAllCurriculumCodeSnippetsAndSolutionsCompile/exercise_ex-l9-caching-queues-outbox-sagas
 === RUN   TestAllCurriculumCodeSnippetsAndSolutionsCompile/exercise_ex-l9-grpc-websockets-otel-tracing
 === RUN   TestAllCurriculumCodeSnippetsAndSolutionsCompile/exercise_ex-l9-stage-i-redis-cache-aside-backoff
---- PASS: TestAllCurriculumCodeSnippetsAndSolutionsCompile (0.06s)
+--- PASS: TestAllCurriculumCodeSnippetsAndSolutionsCompile (0.05s)
     --- PASS: TestAllCurriculumCodeSnippetsAndSolutionsCompile/exercise_ex-l0-backend-http-lifecycle (0.00s)
     --- PASS: TestAllCurriculumCodeSnippetsAndSolutionsCompile/exercise_ex-l0-rest-json-api-contracts (0.00s)
     --- PASS: TestAllCurriculumCodeSnippetsAndSolutionsCompile/exercise_ex-l0-stage-a-git-go-workspace (0.00s)
@@ -229,19 +229,19 @@ ok  	github.com/gobackendacademy/platform/internal/platform/http	0.446s
     --- PASS: TestAllCurriculumCodeSnippetsAndSolutionsCompile/exercise_ex-l9-grpc-websockets-otel-tracing (0.00s)
     --- PASS: TestAllCurriculumCodeSnippetsAndSolutionsCompile/exercise_ex-l9-stage-i-redis-cache-aside-backoff (0.00s)
 === RUN   TestLivenessAndReadinessSeparation
---- PASS: TestLivenessAndReadinessSeparation (0.11s)
+--- PASS: TestLivenessAndReadinessSeparation (0.10s)
 === RUN   TestReadyzFailsWhenDatabaseClosedAndOpenFailsOnUnreachablePostgres
---- PASS: TestReadyzFailsWhenDatabaseClosedAndOpenFailsOnUnreachablePostgres (0.11s)
+--- PASS: TestReadyzFailsWhenDatabaseClosedAndOpenFailsOnUnreachablePostgres (0.08s)
 === RUN   TestDotEnvAndDynamicDatabasePortConfig
---- PASS: TestDotEnvAndDynamicDatabasePortConfig (0.01s)
+--- PASS: TestDotEnvAndDynamicDatabasePortConfig (0.00s)
 === RUN   TestPersistenceAcrossServerRestartsAndMigrationsCycle
---- PASS: TestPersistenceAcrossServerRestartsAndMigrationsCycle (0.20s)
+--- PASS: TestPersistenceAcrossServerRestartsAndMigrationsCycle (0.16s)
 === RUN   TestUnknownRouteReturns404ProblemJSON
 --- PASS: TestUnknownRouteReturns404ProblemJSON (0.08s)
 === RUN   TestCurriculumLessonsCaseStudiesAndSQLPlaygroundEndpoints
---- PASS: TestCurriculumLessonsCaseStudiesAndSQLPlaygroundEndpoints (0.21s)
+--- PASS: TestCurriculumLessonsCaseStudiesAndSQLPlaygroundEndpoints (0.15s)
 === RUN   TestStrictJSONDecodingRejectsUnknownFieldsAndTrailingData
---- PASS: TestStrictJSONDecodingRejectsUnknownFieldsAndTrailingData (0.10s)
+--- PASS: TestStrictJSONDecodingRejectsUnknownFieldsAndTrailingData (0.09s)
 === RUN   TestOfflineCodeDiagnosticsLab
 --- PASS: TestOfflineCodeDiagnosticsLab (0.10s)
 === RUN   TestAnalyzerFalsePositiveAndFalseNegativeProbes
@@ -263,17 +263,17 @@ ok  	github.com/gobackendacademy/platform/internal/platform/http	0.446s
     --- PASS: TestAnalyzerFalsePositiveAndFalseNegativeProbes/FN5_http.Client{}_no_timeout (0.00s)
     --- PASS: TestAnalyzerFalsePositiveAndFalseNegativeProbes/FN6_unchecked_error (0.00s)
 === RUN   TestProgressAndBookmarksRoundTripAndValidation
---- PASS: TestProgressAndBookmarksRoundTripAndValidation (0.10s)
+--- PASS: TestProgressAndBookmarksRoundTripAndValidation (0.13s)
 === RUN   TestExerciseVerifyMultipleAttemptsAndCommentStuffingRejection
---- PASS: TestExerciseVerifyMultipleAttemptsAndCommentStuffingRejection (0.08s)
+--- PASS: TestExerciseVerifyMultipleAttemptsAndCommentStuffingRejection (0.10s)
 === RUN   TestAllExercisesServerSideVerification
---- PASS: TestAllExercisesServerSideVerification (0.48s)
+--- PASS: TestAllExercisesServerSideVerification (0.51s)
 === RUN   TestServerSideQuizEvaluationAndBridgeQuizzes
---- PASS: TestServerSideQuizEvaluationAndBridgeQuizzes (0.08s)
+--- PASS: TestServerSideQuizEvaluationAndBridgeQuizzes (0.09s)
 === RUN   TestServerRejectStringStuffingBypass
 --- PASS: TestServerRejectStringStuffingBypass (0.07s)
 === RUN   TestExercisePackageAndLocalExecution
---- PASS: TestExercisePackageAndLocalExecution (2.85s)
+--- PASS: TestExercisePackageAndLocalExecution (3.14s)
 === RUN   TestDiagnosticRulesInSyncWithCode
 --- PASS: TestDiagnosticRulesInSyncWithCode (0.06s)
 === RUN   TestSeedFilesUniqueAndContentHashing
@@ -285,19 +285,21 @@ ok  	github.com/gobackendacademy/platform/internal/platform/http	0.446s
 === RUN   TestServerSideSessionIssuanceAndBounds
 --- PASS: TestServerSideSessionIssuanceAndBounds (0.06s)
 === RUN   TestCurriculumExpansionAndStructuredSections
---- PASS: TestCurriculumExpansionAndStructuredSections (0.09s)
+--- PASS: TestCurriculumExpansionAndStructuredSections (0.14s)
 === RUN   TestUserIdFromQueryIgnored
 --- PASS: TestUserIdFromQueryIgnored (0.06s)
 === RUN   TestNoCookieCreatesSessionOnlyForUserRoutes
---- PASS: TestNoCookieCreatesSessionOnlyForUserRoutes (0.06s)
+--- PASS: TestNoCookieCreatesSessionOnlyForUserRoutes (0.05s)
 === RUN   TestExplicitUserIDNoEmptySessionRow
---- PASS: TestExplicitUserIDNoEmptySessionRow (0.06s)
+--- PASS: TestExplicitUserIDNoEmptySessionRow (0.05s)
 === RUN   TestSecureCookieBehindHTTPSProxy
 --- PASS: TestSecureCookieBehindHTTPSProxy (0.06s)
 === RUN   TestExpiredSessionsPurged
 --- PASS: TestExpiredSessionsPurged (0.06s)
 === RUN   TestClaimLegacyUserProgress
---- PASS: TestClaimLegacyUserProgress (0.06s)
+--- PASS: TestClaimLegacyUserProgress (0.07s)
+=== RUN   TestGoVersionClaimsMatchGoMod
+--- PASS: TestGoVersionClaimsMatchGoMod (0.00s)
 PASS
-ok  	github.com/gobackendacademy/platform/tests	5.629s
+ok  	github.com/gobackendacademy/platform/tests	5.784s
 ?   	github.com/gobackendacademy/platform/tools/gen-content	[no test files]

@@ -12,7 +12,7 @@
 2. **Engine-Specific Versioned Database Migrations & Normalized 20-Table Schema**:
    * Separate verified migrations and seeds for **PostgreSQL 17/18** (`migrations/postgres/`, `seed/postgres/`) and **SQLite 3.40+ WAL** (`migrations/sqlite/`, `seed/sqlite/`) with explicit `.up.sql` and `.down.sql` rollback scripts.
 3. **Pragmatic Modular Monolith Architecture**:
-   * Clean separation across `cmd/server`, `internal/config`, `internal/platform/{database,http,logger}`, and `internal/modules/{diagnostics,recommendations,...}` using pure Go 1.23+ standard library packages (`net/http`, `database/sql`, `log/slog`).
+   * Clean separation across `cmd/server`, `internal/config`, `internal/platform/{database,http,logger}`, and `internal/modules/{diagnostics,recommendations,...}` using pure Go 1.24+ standard library packages (`net/http`, `database/sql`, `log/slog`).
    * Built-in `RequestID`, `CORSAllowlist` (with `Vary: Origin`), `TokenBucket` rate limiting, `PanicRecovery`, `http.MaxBytesReader`, decoupled `/healthz` (liveness) vs `/readyz` (readiness with DB `PingContext`), and static web serving at `GET /`.
 4. **Hardened Docker & DevOps Setup**:
    * `make docker-down` safely stops containers without destroying persistent PostgreSQL volumes (`pgdata`), while `make docker-clean-volumes` provides an explicit warning before volume removal.
