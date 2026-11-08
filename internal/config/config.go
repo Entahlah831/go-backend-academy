@@ -79,7 +79,7 @@ func Load() (*Config, error) {
 		}
 	}
 
-	trustedCIDRSRaw := getEnv("TRUSTED_PROXY_CIDRS", "127.0.0.1/32,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16")
+	trustedCIDRSRaw := getEnv("TRUSTED_PROXY_CIDRS", "127.0.0.1/32,::1/128")
 	var trustedNets []*net.IPNet
 	for _, cidr := range strings.Split(trustedCIDRSRaw, ",") {
 		if trimmed := strings.TrimSpace(cidr); trimmed != "" {

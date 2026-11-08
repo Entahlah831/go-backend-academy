@@ -1,5 +1,5 @@
 # Stage 1: Build static Go binary with embedded SQL migrations and seed data
-FROM golang:alpine AS builder
+FROM golang:1.24-alpine AS builder
 ARG TARGETARCH
 WORKDIR /src
 

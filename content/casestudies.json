@@ -152,7 +152,7 @@
     },
     {
       "case_study_id": "cs-01-task-api",
-      "content_text": "POST /api/v1/tasks (create task with title, priority, due_at)\nGET /api/v1/tasks?status=pending\u0026cursor=... (cursor-paginated list)\nPATCH /api/v1/tasks/{id}/complete (idempotent completion)",
+      "content_text": "POST /api/v1/tasks (create task with title, priority, due_at)\r\nGET /api/v1/tasks?status=pending\u0026cursor=... (cursor-paginated list)\r\nPATCH /api/v1/tasks/{id}/complete (idempotent completion)",
       "id": "cs-01-task-api-step-2",
       "section_key": "functional_reqs",
       "step_number": 2,
@@ -160,7 +160,7 @@
     },
     {
       "case_study_id": "cs-01-task-api",
-      "content_text": "p99 latency \u003c 15ms\nStrict BOLA isolation (users only see their own tasks)\nZero SQL injection via parameterized queries",
+      "content_text": "p99 latency \u003c 15ms\r\nStrict BOLA isolation (users only see their own tasks)\r\nZero SQL injection via parameterized queries",
       "id": "cs-01-task-api-step-3",
       "section_key": "non_functional_reqs",
       "step_number": 3,
@@ -184,7 +184,7 @@
     },
     {
       "case_study_id": "cs-01-task-api",
-      "content_text": "CREATE TABLE tasks (\n    id TEXT PRIMARY KEY,\n    user_id TEXT NOT NULL,\n    title TEXT NOT NULL CHECK (length(title) BETWEEN 1 AND 200),\n    priority INTEGER NOT NULL DEFAULT 2 CHECK (priority BETWEEN 1 AND 3),\n    status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'DONE')),\n    due_at TIMESTAMP,\n    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP\n);\nCREATE INDEX idx_tasks_user_status_created ON tasks(user_id, status, created_at DESC);",
+      "content_text": "CREATE TABLE tasks (\r\n    id TEXT PRIMARY KEY,\r\n    user_id TEXT NOT NULL,\r\n    title TEXT NOT NULL CHECK (length(title) BETWEEN 1 AND 200),\r\n    priority INTEGER NOT NULL DEFAULT 2 CHECK (priority BETWEEN 1 AND 3),\r\n    status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'DONE')),\r\n    due_at TIMESTAMP,\r\n    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP\r\n);\r\nCREATE INDEX idx_tasks_user_status_created ON tasks(user_id, status, created_at DESC);",
       "id": "cs-01-task-api-step-6",
       "section_key": "schema",
       "step_number": 6,
@@ -192,7 +192,7 @@
     },
     {
       "case_study_id": "cs-01-task-api",
-      "content_text": "POST /api/v1/tasks (create task with title, priority, due_at)\nGET /api/v1/tasks?status=pending\u0026cursor=... (cursor-paginated list)\nPATCH /api/v1/tasks/{id}/complete (idempotent completion)\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "content_text": "POST /api/v1/tasks (create task with title, priority, due_at)\r\nGET /api/v1/tasks?status=pending\u0026cursor=... (cursor-paginated list)\r\nPATCH /api/v1/tasks/{id}/complete (idempotent completion)\r\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\r\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
       "id": "cs-01-task-api-step-7",
       "section_key": "api_design",
       "step_number": 7,
@@ -200,7 +200,7 @@
     },
     {
       "case_study_id": "cs-01-task-api",
-      "content_text": "func (s *TaskStore) CompleteTask(ctx context.Context, taskID, userID string) error {\n\tres, err := s.db.ExecContext(ctx, `\n\t\tUPDATE tasks SET status = 'DONE'\n\t\tWHERE id = $1 AND user_id = $2\n\t`, taskID, userID)\n\tif err != nil {\n\t\treturn err\n\t}\n\tif n, _ := res.RowsAffected(); n == 0 {\n\t\treturn ErrTaskNotFound\n\t}\n\treturn nil\n}",
+      "content_text": "func (s *TaskStore) CompleteTask(ctx context.Context, taskID, userID string) error {\r\n\tres, err := s.db.ExecContext(ctx, `\r\n\t\tUPDATE tasks SET status = 'DONE'\r\n\t\tWHERE id = $1 AND user_id = $2\r\n\t`, taskID, userID)\r\n\tif err != nil {\r\n\t\treturn err\r\n\t}\r\n\tif n, _ := res.RowsAffected(); n == 0 {\r\n\t\treturn ErrTaskNotFound\r\n\t}\r\n\treturn nil\r\n}",
       "id": "cs-01-task-api-step-8",
       "section_key": "go_implementation",
       "step_number": 8,
@@ -264,7 +264,7 @@
     },
     {
       "case_study_id": "cs-02-auth-service",
-      "content_text": "POST /v1/auth/register (Argon2id hash)\nPOST /v1/auth/login (rate-limited + constant-time verify)\nPOST /v1/auth/refresh (rotates token; revokes entire family if used token is replayed)",
+      "content_text": "POST /v1/auth/register (Argon2id hash)\r\nPOST /v1/auth/login (rate-limited + constant-time verify)\r\nPOST /v1/auth/refresh (rotates token; revokes entire family if used token is replayed)",
       "id": "cs-02-auth-service-step-2",
       "section_key": "functional_reqs",
       "step_number": 2,
@@ -272,7 +272,7 @@
     },
     {
       "case_study_id": "cs-02-auth-service",
-      "content_text": "Argon2id tuned to 64MB RAM, 3 iterations, 4 threads, bounded by a Go semaphore of 8 concurrent hashes\nZero timing side-channels",
+      "content_text": "Argon2id tuned to 64MB RAM, 3 iterations, 4 threads, bounded by a Go semaphore of 8 concurrent hashes\r\nZero timing side-channels",
       "id": "cs-02-auth-service-step-3",
       "section_key": "non_functional_reqs",
       "step_number": 3,
@@ -296,7 +296,7 @@
     },
     {
       "case_study_id": "cs-02-auth-service",
-      "content_text": "CREATE TABLE refresh_tokens (\n    token_hash BYTEA PRIMARY KEY,\n    family_id UUID NOT NULL,\n    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,\n    is_used BOOLEAN NOT NULL DEFAULT FALSE,\n    revoked_at TIMESTAMPTZ,\n    expires_at TIMESTAMPTZ NOT NULL\n);\nCREATE INDEX idx_refresh_family ON refresh_tokens(family_id);",
+      "content_text": "CREATE TABLE refresh_tokens (\r\n    token_hash BYTEA PRIMARY KEY,\r\n    family_id UUID NOT NULL,\r\n    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,\r\n    is_used BOOLEAN NOT NULL DEFAULT FALSE,\r\n    revoked_at TIMESTAMPTZ,\r\n    expires_at TIMESTAMPTZ NOT NULL\r\n);\r\nCREATE INDEX idx_refresh_family ON refresh_tokens(family_id);",
       "id": "cs-02-auth-service-step-6",
       "section_key": "schema",
       "step_number": 6,
@@ -304,7 +304,7 @@
     },
     {
       "case_study_id": "cs-02-auth-service",
-      "content_text": "POST /v1/auth/register (Argon2id hash)\nPOST /v1/auth/login (rate-limited + constant-time verify)\nPOST /v1/auth/refresh (rotates token; revokes entire family if used token is replayed)\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "content_text": "POST /v1/auth/register (Argon2id hash)\r\nPOST /v1/auth/login (rate-limited + constant-time verify)\r\nPOST /v1/auth/refresh (rotates token; revokes entire family if used token is replayed)\r\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\r\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
       "id": "cs-02-auth-service-step-7",
       "section_key": "api_design",
       "step_number": 7,
@@ -312,7 +312,7 @@
     },
     {
       "case_study_id": "cs-02-auth-service",
-      "content_text": "// If an already-used refresh token is presented again, an attacker stole the token!\n// Immediately revoke the entire token family for that session.\nif tokenRecord.IsUsed {\n\t_, _ = tx.ExecContext(ctx, `UPDATE refresh_tokens SET revoked_at = NOW() WHERE family_id = $1`, tokenRecord.FamilyID)\n\t_ = tx.Commit()\n\treturn nil, ErrCompromisedTokenFamily\n}",
+      "content_text": "// If an already-used refresh token is presented again, an attacker stole the token!\r\n// Immediately revoke the entire token family for that session.\r\nif tokenRecord.IsUsed {\r\n\t_, _ = tx.ExecContext(ctx, `UPDATE refresh_tokens SET revoked_at = NOW() WHERE family_id = $1`, tokenRecord.FamilyID)\r\n\t_ = tx.Commit()\r\n\treturn nil, ErrCompromisedTokenFamily\r\n}",
       "id": "cs-02-auth-service-step-8",
       "section_key": "go_implementation",
       "step_number": 8,
@@ -376,7 +376,7 @@
     },
     {
       "case_study_id": "cs-03-url-shortener",
-      "content_text": "POST /v1/shorten (generates Base62 ID from distributed Snowflake/sequence)\nGET /{code} (307 Redirect + non-blocking click event enqueue)\nGET /v1/urls/{code}/stats",
+      "content_text": "POST /v1/shorten (generates Base62 ID from distributed Snowflake/sequence)\r\nGET /{code} (307 Redirect + non-blocking click event enqueue)\r\nGET /v1/urls/{code}/stats",
       "id": "cs-03-url-shortener-step-2",
       "section_key": "functional_reqs",
       "step_number": 2,
@@ -384,7 +384,7 @@
     },
     {
       "case_study_id": "cs-03-url-shortener",
-      "content_text": "10,000 redirects/sec per node\np99 redirect latency \u003c 3ms\nSSRF/open-redirect target validation",
+      "content_text": "10,000 redirects/sec per node\r\np99 redirect latency \u003c 3ms\r\nSSRF/open-redirect target validation",
       "id": "cs-03-url-shortener-step-3",
       "section_key": "non_functional_reqs",
       "step_number": 3,
@@ -408,7 +408,7 @@
     },
     {
       "case_study_id": "cs-03-url-shortener",
-      "content_text": "CREATE TABLE short_urls (\n    code VARCHAR(12) PRIMARY KEY,\n    original_url TEXT NOT NULL,\n    creator_id UUID NOT NULL,\n    expires_at TIMESTAMPTZ,\n    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);",
+      "content_text": "CREATE TABLE short_urls (\r\n    code VARCHAR(12) PRIMARY KEY,\r\n    original_url TEXT NOT NULL,\r\n    creator_id UUID NOT NULL,\r\n    expires_at TIMESTAMPTZ,\r\n    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\r\n);",
       "id": "cs-03-url-shortener-step-6",
       "section_key": "schema",
       "step_number": 6,
@@ -416,7 +416,7 @@
     },
     {
       "case_study_id": "cs-03-url-shortener",
-      "content_text": "POST /v1/shorten (generates Base62 ID from distributed Snowflake/sequence)\nGET /{code} (307 Redirect + non-blocking click event enqueue)\nGET /v1/urls/{code}/stats\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "content_text": "POST /v1/shorten (generates Base62 ID from distributed Snowflake/sequence)\r\nGET /{code} (307 Redirect + non-blocking click event enqueue)\r\nGET /v1/urls/{code}/stats\r\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\r\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
       "id": "cs-03-url-shortener-step-7",
       "section_key": "api_design",
       "step_number": 7,
@@ -424,7 +424,7 @@
     },
     {
       "case_study_id": "cs-03-url-shortener",
-      "content_text": "// Resolve redirect using singleflight to prevent cache stampede on viral links\nval, err, _ := s.sfGroup.Do(code, func() (any, error) {\n\tif cached, err := s.redis.Get(ctx, \"url:\"+code).Result(); err == nil {\n\t\treturn cached, nil\n\t}\n\torigURL, err := s.repo.GetOriginalURL(ctx, code)\n\tif err != nil {\n\t\treturn \"\", err\n\t}\n\t_ = s.redis.Set(ctx, \"url:\"+code, origURL, 15*time.Minute).Err()\n\treturn origURL, nil\n})",
+      "content_text": "// Resolve redirect using singleflight to prevent cache stampede on viral links\r\nval, err, _ := s.sfGroup.Do(code, func() (any, error) {\r\n\tif cached, err := s.redis.Get(ctx, \"url:\"+code).Result(); err == nil {\r\n\t\treturn cached, nil\r\n\t}\r\n\torigURL, err := s.repo.GetOriginalURL(ctx, code)\r\n\tif err != nil {\r\n\t\treturn \"\", err\r\n\t}\r\n\t_ = s.redis.Set(ctx, \"url:\"+code, origURL, 15*time.Minute).Err()\r\n\treturn origURL, nil\r\n})",
       "id": "cs-03-url-shortener-step-8",
       "section_key": "go_implementation",
       "step_number": 8,
@@ -488,7 +488,7 @@
     },
     {
       "case_study_id": "cs-04-blog-cms",
-      "content_text": "POST /v1/articles\nPOST /v1/articles/{id}/publish\nGET /v1/articles/search?q=golang+concurrency",
+      "content_text": "POST /v1/articles\r\nPOST /v1/articles/{id}/publish\r\nGET /v1/articles/search?q=golang+concurrency",
       "id": "cs-04-blog-cms-step-2",
       "section_key": "functional_reqs",
       "step_number": 2,
@@ -496,7 +496,7 @@
     },
     {
       "case_study_id": "cs-04-blog-cms",
-      "content_text": "Full-text search p95 \u003c 10ms\nZero XSS via strict HTML sanitization (`bluemonday`) on rendered markdown",
+      "content_text": "Full-text search p95 \u003c 10ms\r\nZero XSS via strict HTML sanitization (`bluemonday`) on rendered markdown",
       "id": "cs-04-blog-cms-step-3",
       "section_key": "non_functional_reqs",
       "step_number": 3,
@@ -520,7 +520,7 @@
     },
     {
       "case_study_id": "cs-04-blog-cms",
-      "content_text": "CREATE TABLE articles (\n    id UUID PRIMARY KEY,\n    slug VARCHAR(200) NOT NULL UNIQUE,\n    title TEXT NOT NULL,\n    body_markdown TEXT NOT NULL,\n    status VARCHAR(20) NOT NULL DEFAULT 'DRAFT',\n    search_tsv TSVECTOR GENERATED ALWAYS AS (\n        setweight(to_tsvector('english', coalesce(title, '')), 'A') ||\n        setweight(to_tsvector('english', coalesce(body_markdown, '')), 'B')\n    ) STORED\n);\nCREATE INDEX idx_articles_search_gin ON articles USING GIN (search_tsv);",
+      "content_text": "CREATE TABLE articles (\r\n    id UUID PRIMARY KEY,\r\n    slug VARCHAR(200) NOT NULL UNIQUE,\r\n    title TEXT NOT NULL,\r\n    body_markdown TEXT NOT NULL,\r\n    status VARCHAR(20) NOT NULL DEFAULT 'DRAFT',\r\n    search_tsv TSVECTOR GENERATED ALWAYS AS (\r\n        setweight(to_tsvector('english', coalesce(title, '')), 'A') ||\r\n        setweight(to_tsvector('english', coalesce(body_markdown, '')), 'B')\r\n    ) STORED\r\n);\r\nCREATE INDEX idx_articles_search_gin ON articles USING GIN (search_tsv);",
       "id": "cs-04-blog-cms-step-6",
       "section_key": "schema",
       "step_number": 6,
@@ -528,7 +528,7 @@
     },
     {
       "case_study_id": "cs-04-blog-cms",
-      "content_text": "POST /v1/articles\nPOST /v1/articles/{id}/publish\nGET /v1/articles/search?q=golang+concurrency\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "content_text": "POST /v1/articles\r\nPOST /v1/articles/{id}/publish\r\nGET /v1/articles/search?q=golang+concurrency\r\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\r\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
       "id": "cs-04-blog-cms-step-7",
       "section_key": "api_design",
       "step_number": 7,
@@ -536,7 +536,7 @@
     },
     {
       "case_study_id": "cs-04-blog-cms",
-      "content_text": "const searchSQL = `\nSELECT id, slug, title, ts_rank_cd(search_tsv, websearch_to_tsquery('english', $1)) AS rank\nFROM articles\nWHERE status = 'PUBLISHED' AND search_tsv @@ websearch_to_tsquery('english', $1)\nORDER BY rank DESC LIMIT 20;`",
+      "content_text": "const searchSQL = `\r\nSELECT id, slug, title, ts_rank_cd(search_tsv, websearch_to_tsquery('english', $1)) AS rank\r\nFROM articles\r\nWHERE status = 'PUBLISHED' AND search_tsv @@ websearch_to_tsquery('english', $1)\r\nORDER BY rank DESC LIMIT 20;`",
       "id": "cs-04-blog-cms-step-8",
       "section_key": "go_implementation",
       "step_number": 8,
@@ -600,7 +600,7 @@
     },
     {
       "case_study_id": "cs-05-ecommerce-backend",
-      "content_text": "POST /v1/checkout (requires Idempotency-Key)\nPOST /v1/webhooks/payment (verifies HMAC-SHA256 signature)",
+      "content_text": "POST /v1/checkout (requires Idempotency-Key)\r\nPOST /v1/webhooks/payment (verifies HMAC-SHA256 signature)",
       "id": "cs-05-ecommerce-backend-step-2",
       "section_key": "functional_reqs",
       "step_number": 2,
@@ -608,7 +608,7 @@
     },
     {
       "case_study_id": "cs-05-ecommerce-backend",
-      "content_text": "Zero double-charges on client network retries\nExact integer money arithmetic",
+      "content_text": "Zero double-charges on client network retries\r\nExact integer money arithmetic",
       "id": "cs-05-ecommerce-backend-step-3",
       "section_key": "non_functional_reqs",
       "step_number": 3,
@@ -632,7 +632,7 @@
     },
     {
       "case_study_id": "cs-05-ecommerce-backend",
-      "content_text": "CREATE TABLE orders (\n    id UUID PRIMARY KEY,\n    idempotency_key VARCHAR(128) NOT NULL UNIQUE,\n    user_id UUID NOT NULL,\n    total_cents BIGINT NOT NULL CHECK (total_cents \u003e= 0),\n    status VARCHAR(32) NOT NULL DEFAULT 'AWAITING_PAYMENT',\n    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);",
+      "content_text": "CREATE TABLE orders (\r\n    id UUID PRIMARY KEY,\r\n    idempotency_key VARCHAR(128) NOT NULL UNIQUE,\r\n    user_id UUID NOT NULL,\r\n    total_cents BIGINT NOT NULL CHECK (total_cents \u003e= 0),\r\n    status VARCHAR(32) NOT NULL DEFAULT 'AWAITING_PAYMENT',\r\n    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\r\n);",
       "id": "cs-05-ecommerce-backend-step-6",
       "section_key": "schema",
       "step_number": 6,
@@ -640,7 +640,7 @@
     },
     {
       "case_study_id": "cs-05-ecommerce-backend",
-      "content_text": "POST /v1/checkout (requires Idempotency-Key)\nPOST /v1/webhooks/payment (verifies HMAC-SHA256 signature)\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "content_text": "POST /v1/checkout (requires Idempotency-Key)\r\nPOST /v1/webhooks/payment (verifies HMAC-SHA256 signature)\r\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\r\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
       "id": "cs-05-ecommerce-backend-step-7",
       "section_key": "api_design",
       "step_number": 7,
@@ -648,7 +648,7 @@
     },
     {
       "case_study_id": "cs-05-ecommerce-backend",
-      "content_text": "// Verify webhook HMAC signature in constant time before processing payment event\nmac := hmac.New(sha256.New, webhookSecret)\nmac.Write(rawBody)\nexpectedMAC := mac.Sum(nil)\nif !hmac.Equal(providedMAC, expectedMAC) {\n\treturn ErrInvalidWebhookSignature\n}",
+      "content_text": "// Verify webhook HMAC signature in constant time before processing payment event\r\nmac := hmac.New(sha256.New, webhookSecret)\r\nmac.Write(rawBody)\r\nexpectedMAC := mac.Sum(nil)\r\nif !hmac.Equal(providedMAC, expectedMAC) {\r\n\treturn ErrInvalidWebhookSignature\r\n}",
       "id": "cs-05-ecommerce-backend-step-8",
       "section_key": "go_implementation",
       "step_number": 8,
@@ -712,7 +712,7 @@
     },
     {
       "case_study_id": "cs-06-inventory-system",
-      "content_text": "POST /v1/inventory/reserve\nPOST /v1/inventory/commit\nBackground Worker: ReleaseExpiredHolds",
+      "content_text": "POST /v1/inventory/reserve\r\nPOST /v1/inventory/commit\r\nBackground Worker: ReleaseExpiredHolds",
       "id": "cs-06-inventory-system-step-2",
       "section_key": "functional_reqs",
       "step_number": 2,
@@ -720,7 +720,7 @@
     },
     {
       "case_study_id": "cs-06-inventory-system",
-      "content_text": "Zero overselling invariant (`available_qty \u003e= 0`)\nAutomatic hold expiration",
+      "content_text": "Zero overselling invariant (`available_qty \u003e= 0`)\r\nAutomatic hold expiration",
       "id": "cs-06-inventory-system-step-3",
       "section_key": "non_functional_reqs",
       "step_number": 3,
@@ -744,7 +744,7 @@
     },
     {
       "case_study_id": "cs-06-inventory-system",
-      "content_text": "CREATE TABLE inventory_skus (\n    sku VARCHAR(64) PRIMARY KEY,\n    available_qty INTEGER NOT NULL CHECK (available_qty \u003e= 0),\n    reserved_qty INTEGER NOT NULL CHECK (reserved_qty \u003e= 0),\n    version BIGINT NOT NULL DEFAULT 1\n);",
+      "content_text": "CREATE TABLE inventory_skus (\r\n    sku VARCHAR(64) PRIMARY KEY,\r\n    available_qty INTEGER NOT NULL CHECK (available_qty \u003e= 0),\r\n    reserved_qty INTEGER NOT NULL CHECK (reserved_qty \u003e= 0),\r\n    version BIGINT NOT NULL DEFAULT 1\r\n);",
       "id": "cs-06-inventory-system-step-6",
       "section_key": "schema",
       "step_number": 6,
@@ -752,7 +752,7 @@
     },
     {
       "case_study_id": "cs-06-inventory-system",
-      "content_text": "POST /v1/inventory/reserve\nPOST /v1/inventory/commit\nBackground Worker: ReleaseExpiredHolds\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "content_text": "POST /v1/inventory/reserve\r\nPOST /v1/inventory/commit\r\nBackground Worker: ReleaseExpiredHolds\r\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\r\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
       "id": "cs-06-inventory-system-step-7",
       "section_key": "api_design",
       "step_number": 7,
@@ -760,7 +760,7 @@
     },
     {
       "case_study_id": "cs-06-inventory-system",
-      "content_text": "UPDATE inventory_skus\nSET available_qty = available_qty - $1,\n    reserved_qty = reserved_qty + $1,\n    version = version + 1\nWHERE sku = $2 AND available_qty \u003e= $1;",
+      "content_text": "UPDATE inventory_skus\r\nSET available_qty = available_qty - $1,\r\n    reserved_qty = reserved_qty + $1,\r\n    version = version + 1\r\nWHERE sku = $2 AND available_qty \u003e= $1;",
       "id": "cs-06-inventory-system-step-8",
       "section_key": "go_implementation",
       "step_number": 8,
@@ -824,7 +824,7 @@
     },
     {
       "case_study_id": "cs-07-realtime-chat",
-      "content_text": "GET /v1/ws (WebSocket upgrade with read/write pumps)\nPOST /v1/rooms/{id}/messages\nGET /v1/rooms/{id}/messages?before={msg_id}",
+      "content_text": "GET /v1/ws (WebSocket upgrade with read/write pumps)\r\nPOST /v1/rooms/{id}/messages\r\nGET /v1/rooms/{id}/messages?before={msg_id}",
       "id": "cs-07-realtime-chat-step-2",
       "section_key": "functional_reqs",
       "step_number": 2,
@@ -832,7 +832,7 @@
     },
     {
       "case_study_id": "cs-07-realtime-chat",
-      "content_text": "Bound per-client outgoing send channel (`make(chan []byte, 64)`) to drop/disconnect slow consumers before OOM\nHeartbeat Ping/Pong every 30s",
+      "content_text": "Bound per-client outgoing send channel (`make(chan []byte, 64)`) to drop/disconnect slow consumers before OOM\r\nHeartbeat Ping/Pong every 30s",
       "id": "cs-07-realtime-chat-step-3",
       "section_key": "non_functional_reqs",
       "step_number": 3,
@@ -856,7 +856,7 @@
     },
     {
       "case_study_id": "cs-07-realtime-chat",
-      "content_text": "-- Partitioned by channel_id, ordered by time-sortable message_id (UUIDv7 / Snowflake)\nCREATE TABLE chat_messages (\n    channel_id UUID NOT NULL,\n    message_id UUID NOT NULL,\n    sender_id UUID NOT NULL,\n    body TEXT NOT NULL,\n    PRIMARY KEY (channel_id, message_id)\n);",
+      "content_text": "-- Partitioned by channel_id, ordered by time-sortable message_id (UUIDv7 / Snowflake)\r\nCREATE TABLE chat_messages (\r\n    channel_id UUID NOT NULL,\r\n    message_id UUID NOT NULL,\r\n    sender_id UUID NOT NULL,\r\n    body TEXT NOT NULL,\r\n    PRIMARY KEY (channel_id, message_id)\r\n);",
       "id": "cs-07-realtime-chat-step-6",
       "section_key": "schema",
       "step_number": 6,
@@ -864,7 +864,7 @@
     },
     {
       "case_study_id": "cs-07-realtime-chat",
-      "content_text": "GET /v1/ws (WebSocket upgrade with read/write pumps)\nPOST /v1/rooms/{id}/messages\nGET /v1/rooms/{id}/messages?before={msg_id}\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "content_text": "GET /v1/ws (WebSocket upgrade with read/write pumps)\r\nPOST /v1/rooms/{id}/messages\r\nGET /v1/rooms/{id}/messages?before={msg_id}\r\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\r\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
       "id": "cs-07-realtime-chat-step-7",
       "section_key": "api_design",
       "step_number": 7,
@@ -872,7 +872,7 @@
     },
     {
       "case_study_id": "cs-07-realtime-chat",
-      "content_text": "// Non-blocking fan-out to client send buffer: evict slow client instead of blocking entire room hub!\nselect {\ncase client.sendCh \u003c- msgBytes:\ndefault:\n\tclose(client.sendCh)\n\tdelete(h.clients, client)\n}",
+      "content_text": "// Non-blocking fan-out to client send buffer: evict slow client instead of blocking entire room hub!\r\nselect {\r\ncase client.sendCh \u003c- msgBytes:\r\ndefault:\r\n\tclose(client.sendCh)\r\n\tdelete(h.clients, client)\r\n}",
       "id": "cs-07-realtime-chat-step-8",
       "section_key": "go_implementation",
       "step_number": 8,
@@ -936,7 +936,7 @@
     },
     {
       "case_study_id": "cs-08-file-storage",
-      "content_text": "POST /v1/files/upload-intent (returns Pre-Signed PUT URL)\nPOST /v1/files/{id}/finalize (verifies object header via http.DetectContentType)",
+      "content_text": "POST /v1/files/upload-intent (returns Pre-Signed PUT URL)\r\nPOST /v1/files/{id}/finalize (verifies object header via http.DetectContentType)",
       "id": "cs-08-file-storage-step-2",
       "section_key": "functional_reqs",
       "step_number": 2,
@@ -944,7 +944,7 @@
     },
     {
       "case_study_id": "cs-08-file-storage",
-      "content_text": "Never trust client-provided Content-Type header or file extension\nZero path traversal (`filepath.Clean` + UUID object keys)",
+      "content_text": "Never trust client-provided Content-Type header or file extension\r\nZero path traversal (`filepath.Clean` + UUID object keys)",
       "id": "cs-08-file-storage-step-3",
       "section_key": "non_functional_reqs",
       "step_number": 3,
@@ -968,7 +968,7 @@
     },
     {
       "case_study_id": "cs-08-file-storage",
-      "content_text": "CREATE TABLE stored_files (\n    id UUID PRIMARY KEY,\n    owner_id UUID NOT NULL,\n    object_key TEXT NOT NULL UNIQUE,\n    detected_mime VARCHAR(120) NOT NULL,\n    size_bytes BIGINT NOT NULL CHECK (size_bytes \u003e 0),\n    sha256_hex CHAR(64) NOT NULL,\n    status VARCHAR(24) NOT NULL DEFAULT 'PENDING'\n);",
+      "content_text": "CREATE TABLE stored_files (\r\n    id UUID PRIMARY KEY,\r\n    owner_id UUID NOT NULL,\r\n    object_key TEXT NOT NULL UNIQUE,\r\n    detected_mime VARCHAR(120) NOT NULL,\r\n    size_bytes BIGINT NOT NULL CHECK (size_bytes \u003e 0),\r\n    sha256_hex CHAR(64) NOT NULL,\r\n    status VARCHAR(24) NOT NULL DEFAULT 'PENDING'\r\n);",
       "id": "cs-08-file-storage-step-6",
       "section_key": "schema",
       "step_number": 6,
@@ -976,7 +976,7 @@
     },
     {
       "case_study_id": "cs-08-file-storage",
-      "content_text": "POST /v1/files/upload-intent (returns Pre-Signed PUT URL)\nPOST /v1/files/{id}/finalize (verifies object header via http.DetectContentType)\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "content_text": "POST /v1/files/upload-intent (returns Pre-Signed PUT URL)\r\nPOST /v1/files/{id}/finalize (verifies object header via http.DetectContentType)\r\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\r\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
       "id": "cs-08-file-storage-step-7",
       "section_key": "api_design",
       "step_number": 7,
@@ -984,7 +984,7 @@
     },
     {
       "case_study_id": "cs-08-file-storage",
-      "content_text": "// Read first 512 bytes to detect true MIME magic number (prevents .html disguised as .png XSS)\nheaderBuf := make([]byte, 512)\nn, _ := io.ReadFull(fileStream, headerBuf)\ntrueMIME := http.DetectContentType(headerBuf[:n])",
+      "content_text": "// Read first 512 bytes to detect true MIME magic number (prevents .html disguised as .png XSS)\r\nheaderBuf := make([]byte, 512)\r\nn, _ := io.ReadFull(fileStream, headerBuf)\r\ntrueMIME := http.DetectContentType(headerBuf[:n])",
       "id": "cs-08-file-storage-step-8",
       "section_key": "go_implementation",
       "step_number": 8,
@@ -1048,7 +1048,7 @@
     },
     {
       "case_study_id": "cs-09-notification-service",
-      "content_text": "POST /v1/notifications/send\nWorker: Retry with Full Jitter up to 5 attempts -\u003e route to DLQ",
+      "content_text": "POST /v1/notifications/send\r\nWorker: Retry with Full Jitter up to 5 attempts -\u003e route to DLQ",
       "id": "cs-09-notification-service-step-2",
       "section_key": "functional_reqs",
       "step_number": 2,
@@ -1056,7 +1056,7 @@
     },
     {
       "case_study_id": "cs-09-notification-service",
-      "content_text": "Idempotent deduplication by `(notification_id, channel)`\nCircuit breaker automatic failover from Primary SMTP to Backup SES",
+      "content_text": "Idempotent deduplication by `(notification_id, channel)`\r\nCircuit breaker automatic failover from Primary SMTP to Backup SES",
       "id": "cs-09-notification-service-step-3",
       "section_key": "non_functional_reqs",
       "step_number": 3,
@@ -1080,7 +1080,7 @@
     },
     {
       "case_study_id": "cs-09-notification-service",
-      "content_text": "CREATE TABLE notification_deliveries (\n    id UUID PRIMARY KEY,\n    idempotency_key VARCHAR(128) NOT NULL UNIQUE,\n    channel VARCHAR(24) NOT NULL,\n    recipient TEXT NOT NULL,\n    status VARCHAR(24) NOT NULL DEFAULT 'QUEUED',\n    attempt_count INTEGER NOT NULL DEFAULT 0,\n    next_retry_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);",
+      "content_text": "CREATE TABLE notification_deliveries (\r\n    id UUID PRIMARY KEY,\r\n    idempotency_key VARCHAR(128) NOT NULL UNIQUE,\r\n    channel VARCHAR(24) NOT NULL,\r\n    recipient TEXT NOT NULL,\r\n    status VARCHAR(24) NOT NULL DEFAULT 'QUEUED',\r\n    attempt_count INTEGER NOT NULL DEFAULT 0,\r\n    next_retry_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\r\n);",
       "id": "cs-09-notification-service-step-6",
       "section_key": "schema",
       "step_number": 6,
@@ -1088,7 +1088,7 @@
     },
     {
       "case_study_id": "cs-09-notification-service",
-      "content_text": "POST /v1/notifications/send\nWorker: Retry with Full Jitter up to 5 attempts -\u003e route to DLQ\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "content_text": "POST /v1/notifications/send\r\nWorker: Retry with Full Jitter up to 5 attempts -\u003e route to DLQ\r\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\r\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
       "id": "cs-09-notification-service-step-7",
       "section_key": "api_design",
       "step_number": 7,
@@ -1096,7 +1096,7 @@
     },
     {
       "case_study_id": "cs-09-notification-service",
-      "content_text": "// Poll due retries across multiple worker pods without duplicate locking:\nSELECT id, channel, recipient FROM notification_deliveries\nWHERE status = 'RETRY_SCHEDULED' AND next_retry_at \u003c= NOW()\nORDER BY next_retry_at ASC LIMIT 50\nFOR UPDATE SKIP LOCKED;",
+      "content_text": "// Poll due retries across multiple worker pods without duplicate locking:\r\nSELECT id, channel, recipient FROM notification_deliveries\r\nWHERE status = 'RETRY_SCHEDULED' AND next_retry_at \u003c= NOW()\r\nORDER BY next_retry_at ASC LIMIT 50\r\nFOR UPDATE SKIP LOCKED;",
       "id": "cs-09-notification-service-step-8",
       "section_key": "go_implementation",
       "step_number": 8,
@@ -1160,7 +1160,7 @@
     },
     {
       "case_study_id": "cs-10-booking-reservation",
-      "content_text": "POST /v1/bookings (atomic interval reservation)\nDELETE /v1/bookings/{id} (cancellation)",
+      "content_text": "POST /v1/bookings (atomic interval reservation)\r\nDELETE /v1/bookings/{id} (cancellation)",
       "id": "cs-10-booking-reservation-step-2",
       "section_key": "functional_reqs",
       "step_number": 2,
@@ -1192,7 +1192,7 @@
     },
     {
       "case_study_id": "cs-10-booking-reservation",
-      "content_text": "CREATE EXTENSION IF NOT EXISTS btree_gist;\n\nCREATE TABLE room_bookings (\n    id UUID PRIMARY KEY,\n    room_id UUID NOT NULL,\n    guest_id UUID NOT NULL,\n    stay_period TSTZRANGE NOT NULL,\n    status VARCHAR(20) NOT NULL DEFAULT 'CONFIRMED',\n    EXCLUDE USING gist (\n        room_id WITH =,\n        stay_period WITH \u0026\u0026\n    ) WHERE (status = 'CONFIRMED')\n);",
+      "content_text": "CREATE EXTENSION IF NOT EXISTS btree_gist;\r\n\r\nCREATE TABLE room_bookings (\r\n    id UUID PRIMARY KEY,\r\n    room_id UUID NOT NULL,\r\n    guest_id UUID NOT NULL,\r\n    stay_period TSTZRANGE NOT NULL,\r\n    status VARCHAR(20) NOT NULL DEFAULT 'CONFIRMED',\r\n    EXCLUDE USING gist (\r\n        room_id WITH =,\r\n        stay_period WITH \u0026\u0026\r\n    ) WHERE (status = 'CONFIRMED')\r\n);",
       "id": "cs-10-booking-reservation-step-6",
       "section_key": "schema",
       "step_number": 6,
@@ -1200,7 +1200,7 @@
     },
     {
       "case_study_id": "cs-10-booking-reservation",
-      "content_text": "POST /v1/bookings (atomic interval reservation)\nDELETE /v1/bookings/{id} (cancellation)\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "content_text": "POST /v1/bookings (atomic interval reservation)\r\nDELETE /v1/bookings/{id} (cancellation)\r\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\r\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
       "id": "cs-10-booking-reservation-step-7",
       "section_key": "api_design",
       "step_number": 7,
@@ -1208,7 +1208,7 @@
     },
     {
       "case_study_id": "cs-10-booking-reservation",
-      "content_text": "_, err := db.ExecContext(ctx, `\n\tINSERT INTO room_bookings (id, room_id, guest_id, stay_period)\n\tVALUES ($1, $2, $3, tstzrange($4::timestamptz, $5::timestamptz, '[)'))\n`, bookingID, roomID, guestID, checkIn, checkOut)\n// Postgres returns SQLSTATE 23P01 (exclusion_violation) if any overlap exists!",
+      "content_text": "_, err := db.ExecContext(ctx, `\r\n\tINSERT INTO room_bookings (id, room_id, guest_id, stay_period)\r\n\tVALUES ($1, $2, $3, tstzrange($4::timestamptz, $5::timestamptz, '[)'))\r\n`, bookingID, roomID, guestID, checkIn, checkOut)\r\n// Postgres returns SQLSTATE 23P01 (exclusion_violation) if any overlap exists!",
       "id": "cs-10-booking-reservation-step-8",
       "section_key": "go_implementation",
       "step_number": 8,
@@ -1272,7 +1272,7 @@
     },
     {
       "case_study_id": "cs-11-payment-simulation",
-      "content_text": "POST /v1/payment-intents (Authorize)\nPOST /v1/payment-intents/{id}/capture\nPOST /v1/payment-intents/{id}/refund",
+      "content_text": "POST /v1/payment-intents (Authorize)\r\nPOST /v1/payment-intents/{id}/capture\r\nPOST /v1/payment-intents/{id}/refund",
       "id": "cs-11-payment-simulation-step-2",
       "section_key": "functional_reqs",
       "step_number": 2,
@@ -1280,7 +1280,7 @@
     },
     {
       "case_study_id": "cs-11-payment-simulation",
-      "content_text": "Every transaction balances debits and credits to 0\nPCI-DSS scoping: never log raw PAN/CVV in slog",
+      "content_text": "Every transaction balances debits and credits to 0\r\nPCI-DSS scoping: never log raw PAN/CVV in slog",
       "id": "cs-11-payment-simulation-step-3",
       "section_key": "non_functional_reqs",
       "step_number": 3,
@@ -1304,7 +1304,7 @@
     },
     {
       "case_study_id": "cs-11-payment-simulation",
-      "content_text": "CREATE TABLE journal_postings (\n    id UUID PRIMARY KEY,\n    transaction_id UUID NOT NULL,\n    account_id UUID NOT NULL,\n    amount_cents BIGINT NOT NULL, -- Debits negative, Credits positive\n    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);",
+      "content_text": "CREATE TABLE journal_postings (\r\n    id UUID PRIMARY KEY,\r\n    transaction_id UUID NOT NULL,\r\n    account_id UUID NOT NULL,\r\n    amount_cents BIGINT NOT NULL, -- Debits negative, Credits positive\r\n    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\r\n);",
       "id": "cs-11-payment-simulation-step-6",
       "section_key": "schema",
       "step_number": 6,
@@ -1312,7 +1312,7 @@
     },
     {
       "case_study_id": "cs-11-payment-simulation",
-      "content_text": "POST /v1/payment-intents (Authorize)\nPOST /v1/payment-intents/{id}/capture\nPOST /v1/payment-intents/{id}/refund\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "content_text": "POST /v1/payment-intents (Authorize)\r\nPOST /v1/payment-intents/{id}/capture\r\nPOST /v1/payment-intents/{id}/refund\r\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\r\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
       "id": "cs-11-payment-simulation-step-7",
       "section_key": "api_design",
       "step_number": 7,
@@ -1320,7 +1320,7 @@
     },
     {
       "case_study_id": "cs-11-payment-simulation",
-      "content_text": "// Invariant check before committing double-entry journal batch:\nvar netSum int64\nfor _, entry := range postings {\n\tnetSum += entry.AmountCents\n}\nif netSum != 0 {\n\treturn ErrUnbalancedJournalTransaction\n}",
+      "content_text": "// Invariant check before committing double-entry journal batch:\r\nvar netSum int64\r\nfor _, entry := range postings {\r\n\tnetSum += entry.AmountCents\r\n}\r\nif netSum != 0 {\r\n\treturn ErrUnbalancedJournalTransaction\r\n}",
       "id": "cs-11-payment-simulation-step-8",
       "section_key": "go_implementation",
       "step_number": 8,
@@ -1384,7 +1384,7 @@
     },
     {
       "case_study_id": "cs-12-multitenant-saas",
-      "content_text": "Middleware extracts verified `tenant_id` from JWT\nTransaction wrapper sets `SET LOCAL app.current_tenant_id = ...`",
+      "content_text": "Middleware extracts verified `tenant_id` from JWT\r\nTransaction wrapper sets `SET LOCAL app.current_tenant_id = ...`",
       "id": "cs-12-multitenant-saas-step-2",
       "section_key": "functional_reqs",
       "step_number": 2,
@@ -1392,7 +1392,7 @@
     },
     {
       "case_study_id": "cs-12-multitenant-saas",
-      "content_text": "Defense-in-depth tenant isolation (Application filter + Postgres RLS policy)\nPer-tenant rate limiting in Redis",
+      "content_text": "Defense-in-depth tenant isolation (Application filter + Postgres RLS policy)\r\nPer-tenant rate limiting in Redis",
       "id": "cs-12-multitenant-saas-step-3",
       "section_key": "non_functional_reqs",
       "step_number": 3,
@@ -1416,7 +1416,7 @@
     },
     {
       "case_study_id": "cs-12-multitenant-saas",
-      "content_text": "CREATE TABLE projects (\n    id UUID PRIMARY KEY,\n    tenant_id UUID NOT NULL,\n    name TEXT NOT NULL\n);\nALTER TABLE projects ENABLE ROW LEVEL SECURITY;\nALTER TABLE projects FORCE ROW LEVEL SECURITY;\nCREATE POLICY tenant_isolation_policy ON projects\n    USING (tenant_id = current_setting('app.current_tenant_id', true)::uuid);",
+      "content_text": "CREATE TABLE projects (\r\n    id UUID PRIMARY KEY,\r\n    tenant_id UUID NOT NULL,\r\n    name TEXT NOT NULL\r\n);\r\nALTER TABLE projects ENABLE ROW LEVEL SECURITY;\r\nALTER TABLE projects FORCE ROW LEVEL SECURITY;\r\nCREATE POLICY tenant_isolation_policy ON projects\r\n    USING (tenant_id = current_setting('app.current_tenant_id', true)::uuid);",
       "id": "cs-12-multitenant-saas-step-6",
       "section_key": "schema",
       "step_number": 6,
@@ -1424,7 +1424,7 @@
     },
     {
       "case_study_id": "cs-12-multitenant-saas",
-      "content_text": "Middleware extracts verified `tenant_id` from JWT\nTransaction wrapper sets `SET LOCAL app.current_tenant_id = ...`\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "content_text": "Middleware extracts verified `tenant_id` from JWT\r\nTransaction wrapper sets `SET LOCAL app.current_tenant_id = ...`\r\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\r\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
       "id": "cs-12-multitenant-saas-step-7",
       "section_key": "api_design",
       "step_number": 7,
@@ -1432,7 +1432,7 @@
     },
     {
       "case_study_id": "cs-12-multitenant-saas",
-      "content_text": "// SET LOCAL scopes the setting strictly to the current transaction so pooled connections never leak tenant_id!\nif _, err := tx.ExecContext(ctx, \"SELECT set_config('app.current_tenant_id', $1, true)\", tenantID); err != nil {\n\treturn err\n}",
+      "content_text": "// SET LOCAL scopes the setting strictly to the current transaction so pooled connections never leak tenant_id!\r\nif _, err := tx.ExecContext(ctx, \"SELECT set_config('app.current_tenant_id', $1, true)\", tenantID); err != nil {\r\n\treturn err\r\n}",
       "id": "cs-12-multitenant-saas-step-8",
       "section_key": "go_implementation",
       "step_number": 8,
@@ -1496,7 +1496,7 @@
     },
     {
       "case_study_id": "cs-13-event-driven-orders",
-      "content_text": "Saga State Machine (`STARTED -\u003e STOCK_RESERVED -\u003e PAID -\u003e COMPLETED` or `COMPENSATING -\u003e CANCELED`)\nIdempotent Kafka Consumer with `processed_events` table",
+      "content_text": "Saga State Machine (`STARTED -\u003e STOCK_RESERVED -\u003e PAID -\u003e COMPLETED` or `COMPENSATING -\u003e CANCELED`)\r\nIdempotent Kafka Consumer with `processed_events` table",
       "id": "cs-13-event-driven-orders-step-2",
       "section_key": "functional_reqs",
       "step_number": 2,
@@ -1504,7 +1504,7 @@
     },
     {
       "case_study_id": "cs-13-event-driven-orders",
-      "content_text": "Eventual consistency convergence\nAt-least-once event delivery with idempotent handling",
+      "content_text": "Eventual consistency convergence\r\nAt-least-once event delivery with idempotent handling",
       "id": "cs-13-event-driven-orders-step-3",
       "section_key": "non_functional_reqs",
       "step_number": 3,
@@ -1528,7 +1528,7 @@
     },
     {
       "case_study_id": "cs-13-event-driven-orders",
-      "content_text": "CREATE TABLE saga_instances (\n    saga_id UUID PRIMARY KEY,\n    order_id UUID NOT NULL UNIQUE,\n    current_step VARCHAR(40) NOT NULL,\n    status VARCHAR(24) NOT NULL,\n    payload JSONB NOT NULL,\n    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n);",
+      "content_text": "CREATE TABLE saga_instances (\r\n    saga_id UUID PRIMARY KEY,\r\n    order_id UUID NOT NULL UNIQUE,\r\n    current_step VARCHAR(40) NOT NULL,\r\n    status VARCHAR(24) NOT NULL,\r\n    payload JSONB NOT NULL,\r\n    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\r\n);",
       "id": "cs-13-event-driven-orders-step-6",
       "section_key": "schema",
       "step_number": 6,
@@ -1536,7 +1536,7 @@
     },
     {
       "case_study_id": "cs-13-event-driven-orders",
-      "content_text": "Saga State Machine (`STARTED -\u003e STOCK_RESERVED -\u003e PAID -\u003e COMPLETED` or `COMPENSATING -\u003e CANCELED`)\nIdempotent Kafka Consumer with `processed_events` table\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "content_text": "Saga State Machine (`STARTED -\u003e STOCK_RESERVED -\u003e PAID -\u003e COMPLETED` or `COMPENSATING -\u003e CANCELED`)\r\nIdempotent Kafka Consumer with `processed_events` table\r\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\r\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
       "id": "cs-13-event-driven-orders-step-7",
       "section_key": "api_design",
       "step_number": 7,
@@ -1544,7 +1544,7 @@
     },
     {
       "case_study_id": "cs-13-event-driven-orders",
-      "content_text": "// Compensating transaction must also be idempotent and retried until acknowledged\nswitch event.Type {\ncase \"PaymentFailed\":\n\treturn s.publishOutboxCommand(ctx, tx, \"inventory.release_reservation\", event.OrderID)\n}",
+      "content_text": "// Compensating transaction must also be idempotent and retried until acknowledged\r\nswitch event.Type {\r\ncase \"PaymentFailed\":\r\n\treturn s.publishOutboxCommand(ctx, tx, \"inventory.release_reservation\", event.OrderID)\r\n}",
       "id": "cs-13-event-driven-orders-step-8",
       "section_key": "go_implementation",
       "step_number": 8,
@@ -1608,7 +1608,7 @@
     },
     {
       "case_study_id": "cs-14-high-traffic-api",
-      "content_text": "L1 in-memory cache -\u003e L2 Redis -\u003e Singleflight -\u003e Postgres Read Replica\nToken-bucket rate limiting per API key\nOpenTelemetry + Prometheus `/metrics` + `net/http/pprof`",
+      "content_text": "L1 in-memory cache -\u003e L2 Redis -\u003e Singleflight -\u003e Postgres Read Replica\r\nToken-bucket rate limiting per API key\r\nOpenTelemetry + Prometheus `/metrics` + `net/http/pprof`",
       "id": "cs-14-high-traffic-api-step-2",
       "section_key": "functional_reqs",
       "step_number": 2,
@@ -1616,7 +1616,7 @@
     },
     {
       "case_study_id": "cs-14-high-traffic-api",
-      "content_text": "\u003c 2 heap allocations per cache-hit request\nGraceful load shedding when concurrency limit is exceeded",
+      "content_text": "\u003c 2 heap allocations per cache-hit request\r\nGraceful load shedding when concurrency limit is exceeded",
       "id": "cs-14-high-traffic-api-step-3",
       "section_key": "non_functional_reqs",
       "step_number": 3,
@@ -1640,7 +1640,7 @@
     },
     {
       "case_study_id": "cs-14-high-traffic-api",
-      "content_text": "-- Partitioned high-volume table with covering index for Index-Only Scans\nCREATE INDEX idx_catalog_covering ON catalog_items (tenant_id, item_key) INCLUDE (payload_json, updated_at);",
+      "content_text": "-- Partitioned high-volume table with covering index for Index-Only Scans\r\nCREATE INDEX idx_catalog_covering ON catalog_items (tenant_id, item_key) INCLUDE (payload_json, updated_at);",
       "id": "cs-14-high-traffic-api-step-6",
       "section_key": "schema",
       "step_number": 6,
@@ -1648,7 +1648,7 @@
     },
     {
       "case_study_id": "cs-14-high-traffic-api",
-      "content_text": "L1 in-memory cache -\u003e L2 Redis -\u003e Singleflight -\u003e Postgres Read Replica\nToken-bucket rate limiting per API key\nOpenTelemetry + Prometheus `/metrics` + `net/http/pprof`\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
+      "content_text": "L1 in-memory cache -\u003e L2 Redis -\u003e Singleflight -\u003e Postgres Read Replica\r\nToken-bucket rate limiting per API key\r\nOpenTelemetry + Prometheus `/metrics` + `net/http/pprof`\r\n• Standard Error Envelope: RFC 9457 Problem Details JSON (`type`, `title`, `status`, `detail`, `instance`)\r\n• Request Correlation: `X-Request-ID` \u0026 W3C `traceparent` headers",
       "id": "cs-14-high-traffic-api-step-7",
       "section_key": "api_design",
       "step_number": 7,
@@ -1656,7 +1656,7 @@
     },
     {
       "case_study_id": "cs-14-high-traffic-api",
-      "content_text": "// Load shedding middleware: fail fast with 503 + Retry-After rather than queueing 100k requests until OOM\nselect {\ncase sem \u003c- struct{}{}:\n\tdefer func() { \u003c-sem }()\n\tnext.ServeHTTP(w, r)\ndefault:\n\tw.Header().Set(\"Retry-After\", \"2\")\n\thttp.Error(w, `{\"error\":\"server busy, shedding load\"}`, http.StatusServiceUnavailable)\n}",
+      "content_text": "// Load shedding middleware: fail fast with 503 + Retry-After rather than queueing 100k requests until OOM\r\nselect {\r\ncase sem \u003c- struct{}{}:\r\n\tdefer func() { \u003c-sem }()\r\n\tnext.ServeHTTP(w, r)\r\ndefault:\r\n\tw.Header().Set(\"Retry-After\", \"2\")\r\n\thttp.Error(w, `{\"error\":\"server busy, shedding load\"}`, http.StatusServiceUnavailable)\r\n}",
       "id": "cs-14-high-traffic-api-step-8",
       "section_key": "go_implementation",
       "step_number": 8,

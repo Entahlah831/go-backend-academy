@@ -1322,21 +1322,109 @@ UPDATE exercise_test_cases SET required_pattern = 'currentState == "HALF_OPEN" &
 UPDATE exercise_test_cases SET required_pattern = 'len(parts) != 4|parts[0] != "00"|0000000000000000' WHERE exercise_id = 'ex-l9-grpc-websockets-otel-tracing';
 UPDATE exercise_test_cases SET required_pattern = 'if attempt < 1|delay := baseMs << (attempt - 1)|if delay > maxMs' WHERE exercise_id = 'ex-l9-stage-i-redis-cache-aside-backoff';
 
--- Starter verification test suites for offline CLI practice (v2.6)
-INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
-('test-ex-l0-stage-a-what-is-backend', 'ex-l0-stage-a-what-is-backend', 'main_test.go', 'package main
+
+-- All 41 AST Rules for Server-Side Verification
+
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l0-backend-http-lifecycle', 'ex-l0-backend-http-lifecycle', 'NewHardenedServer', '["http.NewServeMux"]', '[]', '["net/http", "time"]', '["ReadHeaderTimeout", "MaxBytesReader", "DisallowUnknownFields"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l0-rest-json-api-contracts', 'ex-l0-rest-json-api-contracts', 'MergeSettings', '[]', '[]', '[]', '["patchMaxConns != nil", "patchTLS != nil"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l0-stage-a-git-go-workspace', 'ex-l0-stage-a-git-go-workspace', 'Greeting', '["fmt.Sprintf"]', '[]', '["fmt"]', '["return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l0-stage-a-what-is-backend', 'ex-l0-stage-a-what-is-backend', 'DefaultPort', '[]', '[]', '[]', '["\":8080\""]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l0-stateless-vs-stateful-arch', 'ex-l0-stateless-vs-stateful-arch', 'CanAccessDocument', '[]', '[]', '[]', '["return", "=="]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l1-interfaces-errors-generics', 'ex-l1-interfaces-errors-generics', 'ClassifyRepositoryError', '["errors.Is", "errors.As"]', '[]', '["errors"]', '["return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l1-memory-slices-maps-escape', 'ex-l1-memory-slices-maps-escape', 'SafePrefix', '["make", "copy"]', '[]', '[]', '["return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l1-stage-b-control-flow-loops-functions', 'ex-l1-stage-b-control-flow-loops-functions', 'ValidateAccountAge', '[]', '[]', '[]', '["return", "<", ">"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l1-stage-b-interfaces-errors-fundamentals', 'ex-l1-stage-b-interfaces-errors-fundamentals', 'ValidateAndWrapOrder', '["fmt.Errorf"]', '[]', '["fmt", "errors"]', '["ErrEmptyOrderID", "\"%w\""]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l1-stage-b-json-files-unit-testing', 'ex-l1-stage-b-json-files-unit-testing', 'ParseTaskJSON', '["json.Unmarshal"]', '[]', '["encoding/json"]', '["return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l1-stage-b-slices-maps-iteration', 'ex-l1-stage-b-slices-maps-iteration', 'CountStatuses', '["make"]', '[]', '[]', '["range", "return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l1-stage-b-structs-methods-pointers', 'ex-l1-stage-b-structs-methods-pointers', 'Deposit', '[]', '[]', '[]', '["return", "w.Balance"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l1-stage-b-variables-types-zerovalues', 'ex-l1-stage-b-variables-types-zerovalues', 'ComputeInvoiceCents', '[]', '[]', '[]', '["unitPriceCents * quantity", "discountCents > subtotal"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l1-toolchain-modules-packages', 'ex-l1-toolchain-modules-packages', 'IsExportedIdentifier', '["utf8.DecodeRuneInString", "unicode.IsUpper"]', '[]', '["unicode", "unicode/utf8"]', '["return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l10-devops-docker-k8s-production', 'ex-l10-devops-docker-k8s-production', 'RecommendGoMemLimitMiB', '[]', '[]', '[]', '["return", "*", "/"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l10-reverse-proxy-cicd-rollback-dr', 'ex-l10-reverse-proxy-cicd-rollback-dr', 'ResolveClientIP', '["strings.Split", "strings.TrimSpace"]', '[]', '["strings"]', '["!isTrustedPeer", "return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l10-stage-j-capstone-production-blueprint', 'ex-l10-stage-j-capstone-production-blueprint', 'EvaluateCapstoneReadiness', '[]', '[]', '[]', '["return", "errors.New"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l2-gmp-channels-context-workers', 'ex-l2-gmp-channels-context-workers', 'RunBoundedPool', '["wg.Add", "wg.Wait", "wg.Done"]', '[]', '["context", "sync"]', '["select", "<-ctx.Done()"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l2-profiling-pprof-benchmarks', 'ex-l2-profiling-pprof-benchmarks', 'ShouldReturnBufferToPool', '[]', '[]', '[]', '["return", "<="]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l2-stage-c-goroutines-channels-waitgroup', 'ex-l2-stage-c-goroutines-channels-waitgroup', 'SumSquaresSafe', '[]', '[]', '[]', '["range", "return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l3-net-http-routers', 'ex-l3-net-http-routers', 'WithRecoveryAndRequestID', '["recover"]', '[]', '["net/http"]', '["defer", "WriteHeader", "\"X-Request-ID\""]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l3-stage-d-first-http-server-crud', 'ex-l3-stage-d-first-http-server-crud', 'WriteJSONResponse', '["json.NewEncoder", "w.WriteHeader"]', '[]', '["net/http"]', '["\"Content-Type\""]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l3-validation-openapi-ratelimit', 'ex-l3-validation-openapi-ratelimit', 'ComputeAvailableTokens', '[]', '[]', '[]', '["currentTokens > burstMax", "elapsedSec * ratePerSec", "return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l4-acid-isolation-mvcc', 'ex-l4-acid-isolation-mvcc', 'LockOrder', '[]', '[]', '[]', '["return", "<"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l4-partitioning-replication-sharding', 'ex-l4-partitioning-replication-sharding', 'ChoosePool', '[]', '[]', '[]', '["return", "<"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l4-stage-e-sql-relational-fundamentals', 'ex-l4-stage-e-sql-relational-fundamentals', 'ClampPageLimit', '[]', '[]', '[]', '["return", "<", ">"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l5-db-ecosystem-comparison', 'ex-l5-db-ecosystem-comparison', 'ComputePoolLimits', '[]', '[]', '[]', '["avail / replicaCount", "maxOpen / 2", "return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l5-migrations-transactions-prepared', 'ex-l5-migrations-transactions-prepared', 'IsSafeProductionDDL', '["strings.Contains", "strings.ToUpper"]', '[]', '["strings"]', '["return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l5-stage-e-database-sql-crud-basics', 'ex-l5-stage-e-database-sql-crud-basics', 'FindUserIDByEmail', '["db.QueryRowContext", "errors.Is"]', '[]', '["context", "database/sql", "errors"]', '["ErrUserNotFound"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l6-oauth2-oidc-rbac-abac', 'ex-l6-oauth2-oidc-rbac-abac', 'HasRBACPermission', '[]', '[]', '[]', '["range", "return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l6-security-auth-owasp', 'ex-l6-security-auth-owasp', 'ValidateWebhookIP', '["netip.ParseAddr"]', '[]', '["net/netip"]', '["IsLoopback", "IsPrivate"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l6-stage-f-password-hashing-bearer-auth', 'ex-l6-stage-f-password-hashing-bearer-auth', 'ExtractBearerToken', '["strings.HasPrefix", "strings.TrimPrefix", "strings.TrimSpace"]', '[]', '["strings"]', '["return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l7-integration-testcontainers-ci', 'ex-l7-integration-testcontainers-ci', 'PutAndGetFake', '[]', '[]', '[]', '["items == nil", "items[key] = val", "return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l7-stage-g-table-driven-tests-httptest', 'ex-l7-stage-g-table-driven-tests-httptest', 'SlugifyTitle', '["strings.ToLower"]', '[]', '["strings"]', '["return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l7-testing-fuzzing-benchmarks', 'ex-l7-testing-fuzzing-benchmarks', 'SafeTruncateRunes', '[]', '[]', '[]', '["range s", "maxRunes <= 0", "return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l8-clean-hexagonal-ddd', 'ex-l8-clean-hexagonal-ddd', 'ComputeFinalInvoiceCents', '[]', '[]', '[]', '["return", "<", ">"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l8-modular-monolith-cqrs-boundaries', 'ex-l8-modular-monolith-cqrs-boundaries', 'ViolatesModuleTableBoundary', '["strings.HasPrefix"]', '[]', '["strings"]', '["return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l8-stage-h-handler-service-repo-layers', 'ex-l8-stage-h-handler-service-repo-layers', 'AddMoney', '[]', '[]', '[]', '["a.Currency != b.Currency", "a.Cents + b.Cents", "return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l9-caching-queues-outbox-sagas', 'ex-l9-caching-queues-outbox-sagas', 'ShouldTripBreaker', '[]', '[]', '[]', '["return", ">="]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l9-grpc-websockets-otel-tracing', 'ex-l9-grpc-websockets-otel-tracing', 'IsValidW3CTraceparent', '["strings.Split"]', '[]', '["strings"]', '["len(", "return"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+INSERT INTO exercise_rules (id, exercise_id, target_func, must_call, no_call, must_import, must_contain) VALUES ('rule-ex-l9-stage-i-redis-cache-aside-backoff', 'ex-l9-stage-i-redis-cache-aside-backoff', 'ComputeBackoffMs', '[]', '[]', '[]', '["return", "<", ">"]') ON CONFLICT (id) DO UPDATE SET target_func = EXCLUDED.target_func, must_call = EXCLUDED.must_call, no_call = EXCLUDED.no_call, must_import = EXCLUDED.must_import, must_contain = EXCLUDED.must_contain;
+
+-- All 41 Behavioral Test Suites for Offline CLI Practice (v2.6)
+
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l0-backend-http-lifecycle', 'ex-l0-backend-http-lifecycle', 'main_test.go', 'package main
+
+import (
+	"bytes"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
+)
+
+func TestNewHardenedServer(t *testing.T) {
+	srv := NewHardenedServer(":9090", 2*time.Second)
+	if srv == nil {
+		t.Fatal("expected non-nil server")
+	}
+	if srv.ReadHeaderTimeout != 2*time.Second {
+		t.Fatalf("ReadHeaderTimeout = %v, want 2s", srv.ReadHeaderTimeout)
+	}
+
+	handler := srv.Handler
+	// 1. Healthz check
+	req := httptest.NewRequest("GET", "/healthz", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("GET /healthz status = %d, want 200", rec.Code)
+	}
+
+	// 2. Valid echo
+	echoReq := httptest.NewRequest("POST", "/api/v1/echo", bytes.NewReader([]byte(`{"message":"hello"}`)))
+	echoRec := httptest.NewRecorder()
+	handler.ServeHTTP(echoRec, echoReq)
+	if echoRec.Code != http.StatusOK {
+		t.Fatalf("POST /api/v1/echo status = %d, want 200", echoRec.Code)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l0-rest-json-api-contracts', 'ex-l0-rest-json-api-contracts', 'main_test.go', 'package contracts
 
 import "testing"
 
-func TestDefaultPort(t *testing.T) {
-	if got := DefaultPort(); got != ":8080" {
-		t.Fatalf("DefaultPort() = %q, want %q", got, ":8080")
+func TestMergeSettings(t *testing.T) {
+	curr := Settings{Theme: "dark", Notifications: true}
+	newTheme := "solarized"
+	incoming := UpdateSettingsInput{Theme: &newTheme, Notifications: nil}
+
+	res := MergeSettings(curr, incoming)
+	if res.Theme != "solarized" {
+		t.Fatalf("Theme = %q, want solarized", res.Theme)
+	}
+	if !res.Notifications {
+		t.Fatalf("Notifications = false, want true (preserved)")
 	}
 }
-') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
-
-INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
-('test-ex-l0-stage-a-git-go-workspace', 'ex-l0-stage-a-git-go-workspace', 'main_test.go', 'package main
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l0-stage-a-git-go-workspace', 'ex-l0-stage-a-git-go-workspace', 'main_test.go', 'package main
 
 import "testing"
 
@@ -1348,28 +1436,73 @@ func TestGreeting(t *testing.T) {
 		t.Fatalf("Greeting(\"Nadia\") = %q, want \"Hello, Nadia!\"", got)
 	}
 }
-') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
-
-INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
-('test-ex-l1-stage-b-variables-types-zerovalues', 'ex-l1-stage-b-variables-types-zerovalues', 'main_test.go', 'package billing
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l0-stage-a-what-is-backend', 'ex-l0-stage-a-what-is-backend', 'main_test.go', 'package main
 
 import "testing"
 
-func TestComputeInvoiceCents(t *testing.T) {
-	if got := ComputeInvoiceCents(1000, 2, 500); got != 1500 {
-		t.Fatalf("ComputeInvoiceCents(1000, 2, 500) = %d, want 1500", got)
-	}
-	if got := ComputeInvoiceCents(1000, 0, 500); got != 0 {
-		t.Fatalf("ComputeInvoiceCents(1000, 0, 500) = %d, want 0", got)
-	}
-	if got := ComputeInvoiceCents(1000, 1, 1500); got != 0 {
-		t.Fatalf("ComputeInvoiceCents(1000, 1, 1500) = %d, want 0", got)
+func TestDefaultPort(t *testing.T) {
+	if got := DefaultPort(); got != ":8080" {
+		t.Fatalf("DefaultPort() = %q, want %q", got, ":8080")
 	}
 }
-') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l0-stateless-vs-stateful-arch', 'ex-l0-stateless-vs-stateful-arch', 'main_test.go', 'package auth
 
-INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
-('test-ex-l1-stage-b-control-flow-loops-functions', 'ex-l1-stage-b-control-flow-loops-functions', 'main_test.go', 'package auth
+import "testing"
+
+func TestCanAccessDocument(t *testing.T) {
+	if !CanAccessDocument("usr_1", "usr_1", "viewer") {
+		t.Fatal("owner should be allowed")
+	}
+	if !CanAccessDocument("usr_2", "usr_1", "admin") {
+		t.Fatal("admin should be allowed")
+	}
+	if CanAccessDocument("usr_2", "usr_1", "editor") {
+		t.Fatal("non-owner editor should be denied")
+	}
+	if CanAccessDocument("", "usr_1", "admin") {
+		t.Fatal("empty actor should be denied")
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l1-interfaces-errors-generics', 'ex-l1-interfaces-errors-generics', 'main_test.go', 'package repo
+
+import (
+	"errors"
+	"testing"
+)
+
+func TestClassifyRepositoryError(t *testing.T) {
+	if got := ClassifyRepositoryError(ErrNotFound); got != "RESOURCE_NOT_FOUND" {
+		t.Fatalf("ClassifyRepositoryError(ErrNotFound) = %q, want RESOURCE_NOT_FOUND", got)
+	}
+	if got := ClassifyRepositoryError(ErrQuotaExceeded); got != "QUOTA_EXCEEDED" {
+		t.Fatalf("ClassifyRepositoryError(ErrQuotaExceeded) = %q, want QUOTA_EXCEEDED", got)
+	}
+	if got := ClassifyRepositoryError(errors.New("db timeout")); got != "INTERNAL_ERROR" {
+		t.Fatalf("ClassifyRepositoryError(other) = %q, want INTERNAL_ERROR", got)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l1-memory-slices-maps-escape', 'ex-l1-memory-slices-maps-escape', 'main_test.go', 'package memory
+
+import "testing"
+
+func TestSafePrefix(t *testing.T) {
+	orig := []int{10, 20, 30, 40, 50}
+	prefix := SafePrefix(orig, 2)
+	if len(prefix) != 2 || prefix[0] != 10 || prefix[1] != 20 {
+		t.Fatalf("SafePrefix = %v, want [10, 20]", prefix)
+	}
+	// Verify mutation isolation
+	orig[0] = 999
+	if prefix[0] != 10 {
+		t.Fatalf("prefix[0] mutated to %d, sub-slice memory retained!", prefix[0])
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l1-stage-b-control-flow-loops-functions', 'ex-l1-stage-b-control-flow-loops-functions', 'main_test.go', 'package auth
 
 import "testing"
 
@@ -1389,10 +1522,58 @@ func TestValidateAccountAge(t *testing.T) {
 		t.Fatalf("ValidateAccountAge(25) = (%v, %v), want (true, nil)", ok, err)
 	}
 }
-') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l1-stage-b-interfaces-errors-fundamentals', 'ex-l1-stage-b-interfaces-errors-fundamentals', 'main_test.go', 'package service
 
-INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
-('test-ex-l1-stage-b-slices-maps-iteration', 'ex-l1-stage-b-slices-maps-iteration', 'main_test.go', 'package stats
+import (
+	"errors"
+	"io"
+	"testing"
+)
+
+func TestValidateAndWrapOrder(t *testing.T) {
+	if err := ValidateAndWrapOrder("", nil); !errors.Is(err, ErrEmptyOrderID) {
+		t.Fatalf("expected ErrEmptyOrderID for empty orderID, got %v", err)
+	}
+	cause := io.ErrUnexpectedEOF
+	err := ValidateAndWrapOrder("ord-123", cause)
+	if err == nil {
+		t.Fatal("expected error wrapping cause, got nil")
+	}
+	if !errors.Is(err, cause) {
+		t.Fatalf("expected wrapped error to match cause with errors.Is, got %v", err)
+	}
+	if err := ValidateAndWrapOrder("ord-123", nil); err != nil {
+		t.Fatalf("expected nil error for valid order without cause, got %v", err)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l1-stage-b-json-files-unit-testing', 'ex-l1-stage-b-json-files-unit-testing', 'main_test.go', 'package dto
+
+import "testing"
+
+func TestParseTaskJSON(t *testing.T) {
+	valid := []byte(`{"title":"Write code","done":true}`)
+	task, err := ParseTaskJSON(valid)
+	if err != nil {
+		t.Fatalf("unexpected error on valid json: %v", err)
+	}
+	if task.Title != "Write code" || !task.Done {
+		t.Fatalf("unexpected task values: %+v", task)
+	}
+
+	emptyTitle := []byte(`{"title":"","done":false}`)
+	if _, err := ParseTaskJSON(emptyTitle); err == nil {
+		t.Fatal("expected error when title is empty")
+	}
+
+	malformed := []byte(`{invalid-json`)
+	if _, err := ParseTaskJSON(malformed); err == nil {
+		t.Fatal("expected error on malformed json")
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l1-stage-b-slices-maps-iteration', 'ex-l1-stage-b-slices-maps-iteration', 'main_test.go', 'package stats
 
 import "testing"
 
@@ -1409,10 +1590,159 @@ func TestCountStatuses(t *testing.T) {
 		t.Fatal("expected empty string \"\" not to be in map")
 	}
 }
-') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l1-stage-b-structs-methods-pointers', 'ex-l1-stage-b-structs-methods-pointers', 'main_test.go', 'package wallet
 
-INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
-('test-ex-l2-stage-c-goroutines-channels-waitgroup', 'ex-l2-stage-c-goroutines-channels-waitgroup', 'main_test.go', 'package conc
+import "testing"
+
+func TestWalletDeposit(t *testing.T) {
+	var nilW *Wallet
+	if err := nilW.Deposit(100); err == nil {
+		t.Fatal("expected error for nil wallet pointer")
+	}
+
+	w := &Wallet{BalanceCents: 500}
+	if err := w.Deposit(0); err == nil {
+		t.Fatal("expected error for zero deposit amount")
+	}
+	if err := w.Deposit(-50); err == nil {
+		t.Fatal("expected error for negative deposit amount")
+	}
+
+	if err := w.Deposit(250); err != nil {
+		t.Fatalf("unexpected error on valid deposit: %v", err)
+	}
+	if w.BalanceCents != 750 {
+		t.Fatalf("expected balance 750 cents, got %d", w.BalanceCents)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l1-stage-b-variables-types-zerovalues', 'ex-l1-stage-b-variables-types-zerovalues', 'main_test.go', 'package billing
+
+import "testing"
+
+func TestComputeInvoiceCents(t *testing.T) {
+	if got := ComputeInvoiceCents(1000, 2, 500); got != 1500 {
+		t.Fatalf("ComputeInvoiceCents(1000, 2, 500) = %d, want 1500", got)
+	}
+	if got := ComputeInvoiceCents(1000, 0, 500); got != 0 {
+		t.Fatalf("ComputeInvoiceCents(1000, 0, 500) = %d, want 0", got)
+	}
+	if got := ComputeInvoiceCents(1000, 1, 1500); got != 0 {
+		t.Fatalf("ComputeInvoiceCents(1000, 1, 1500) = %d, want 0", got)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l1-toolchain-modules-packages', 'ex-l1-toolchain-modules-packages', 'main_test.go', 'package moduletools
+
+import "testing"
+
+func TestIsExportedIdentifier(t *testing.T) {
+	if !IsExportedIdentifier("Server") {
+		t.Fatal("Server should be exported")
+	}
+	if IsExportedIdentifier("server") {
+		t.Fatal("server should not be exported")
+	}
+	if IsExportedIdentifier("_private") {
+		t.Fatal("_private should not be exported")
+	}
+	if IsExportedIdentifier("") {
+		t.Fatal("empty identifier should not be exported")
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l10-devops-docker-k8s-production', 'ex-l10-devops-docker-k8s-production', 'main_test.go', 'package devops
+
+import "testing"
+
+func TestRecommendGoMemLimitMiB(t *testing.T) {
+	// 512MiB container limit -> 80-85% = ~409MiB
+	got := RecommendGoMemLimitMiB(512)
+	if got < 400 || got > 440 {
+		t.Fatalf("RecommendGoMemLimitMiB(512) = %d, want ~409 (80-85%% rule)", got)
+	}
+	if gotZero := RecommendGoMemLimitMiB(0); gotZero != 0 {
+		t.Fatalf("RecommendGoMemLimitMiB(0) = %d, want 0", gotZero)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l10-reverse-proxy-cicd-rollback-dr', 'ex-l10-reverse-proxy-cicd-rollback-dr', 'main_test.go', 'package proxy
+
+import "testing"
+
+func TestResolveClientIP(t *testing.T) {
+	trusted := map[string]bool{"127.0.0.1": true, "10.0.0.1": true}
+	// Untrusted proxy direct connection
+	if got := ResolveClientIP("198.51.100.2", "1.1.1.1", trusted); got != "198.51.100.2" {
+		t.Fatalf("untrusted proxy must return remoteIP, got %q", got)
+	}
+	// Trusted proxy multi-hop right-to-left
+	xff := "203.0.113.195, 10.0.0.1"
+	if got := ResolveClientIP("127.0.0.1", xff, trusted); got != "203.0.113.195" {
+		t.Fatalf("trusted multi-hop ResolveClientIP = %q, want 203.0.113.195", got)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l10-stage-j-capstone-production-blueprint', 'ex-l10-stage-j-capstone-production-blueprint', 'main_test.go', 'package capstone
+
+import "testing"
+
+func TestEvaluateCapstoneReadiness(t *testing.T) {
+	code, err := EvaluateCapstoneReadiness(ReadinessGate{ShuttingDown: false, DBConnected: true, MigrationsUp: true})
+	if err != nil || code != 200 {
+		t.Fatalf("ready gate = (%d, %v), want (200, nil)", code, err)
+	}
+	code, err = EvaluateCapstoneReadiness(ReadinessGate{ShuttingDown: true, DBConnected: true, MigrationsUp: true})
+	if err == nil || code != 503 {
+		t.Fatalf("shutting down gate = (%d, %v), want (503, error)", code, err)
+	}
+	code, err = EvaluateCapstoneReadiness(ReadinessGate{ShuttingDown: false, DBConnected: false, MigrationsUp: true})
+	if err == nil || code != 503 {
+		t.Fatalf("db disconnected gate = (%d, %v), want (503, error)", code, err)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l2-gmp-channels-context-workers', 'ex-l2-gmp-channels-context-workers', 'main_test.go', 'package workers
+
+import (
+	"context"
+	"sync/atomic"
+	"testing"
+	"time"
+)
+
+func TestRunBoundedPool(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	var processed int64
+	job := func() {
+		atomic.AddInt64(&processed, 1)
+	}
+
+	jobs := []func(){job, job, job, job, job}
+	RunBoundedPool(ctx, 2, jobs)
+
+	if got := atomic.LoadInt64(&processed); got != 5 {
+		t.Fatalf("processed jobs = %d, want 5", got)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l2-profiling-pprof-benchmarks', 'ex-l2-profiling-pprof-benchmarks', 'main_test.go', 'package pool
+
+import "testing"
+
+func TestShouldReturnBufferToPool(t *testing.T) {
+	if !ShouldReturnBufferToPool(1024, 65536) {
+		t.Fatal("1KB buffer should be returned to pool")
+	}
+	if ShouldReturnBufferToPool(131072, 65536) {
+		t.Fatal("128KB buffer should exceed 64KB cap and not be returned")
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l2-stage-c-goroutines-channels-waitgroup', 'ex-l2-stage-c-goroutines-channels-waitgroup', 'main_test.go', 'package conc
 
 import "testing"
 
@@ -1423,10 +1753,34 @@ func TestSumSquaresSafe(t *testing.T) {
 		t.Fatalf("SumSquaresSafe(%v) = %d, want %d", nums, got, want)
 	}
 }
-') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l3-net-http-routers', 'ex-l3-net-http-routers', 'main_test.go', 'package middleware
 
-INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
-('test-ex-l3-stage-d-first-http-server-crud', 'ex-l3-stage-d-first-http-server-crud', 'main_test.go', 'package api
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestWithRecoveryAndRequestID(t *testing.T) {
+	panicky := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		panic("unexpected nil pointer!")
+	})
+
+	wrapped := WithRecoveryAndRequestID(panicky)
+	req := httptest.NewRequest("GET", "/panic", nil)
+	rec := httptest.NewRecorder()
+
+	wrapped.ServeHTTP(rec, req)
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500 on panic recovery, got %d", rec.Code)
+	}
+	if reqID := rec.Header().Get("X-Request-ID"); reqID == "" {
+		t.Fatal("expected X-Request-ID header to be populated")
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l3-stage-d-first-http-server-crud', 'ex-l3-stage-d-first-http-server-crud', 'main_test.go', 'package api
 
 import (
 	"net/http"
@@ -1452,10 +1806,51 @@ func TestWriteJSONResponse(t *testing.T) {
 		t.Fatalf("body = %q, want to contain \"hello\"", body)
 	}
 }
-') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l3-validation-openapi-ratelimit', 'ex-l3-validation-openapi-ratelimit', 'main_test.go', 'package ratelimit
 
-INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
-('test-ex-l4-stage-e-sql-relational-fundamentals', 'ex-l4-stage-e-sql-relational-fundamentals', 'main_test.go', 'package sqlutil
+import "testing"
+
+func TestComputeAvailableTokens(t *testing.T) {
+	// capacity 10, had 0, 5 seconds elapsed at 2 tokens/sec -> 10 tokens
+	tokens := ComputeAvailableTokens(10, 0, 5.0, 2.0)
+	if tokens != 10 {
+		t.Fatalf("ComputeAvailableTokens = %f, want 10", tokens)
+	}
+	// Cap at capacity
+	capped := ComputeAvailableTokens(10, 5, 10.0, 2.0)
+	if capped != 10 {
+		t.Fatalf("ComputeAvailableTokens = %f, want 10 (capped)", capped)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l4-acid-isolation-mvcc', 'ex-l4-acid-isolation-mvcc', 'main_test.go', 'package ledger
+
+import "testing"
+
+func TestLockOrder(t *testing.T) {
+	first, second := LockOrder("acc_99", "acc_10")
+	if first != "acc_10" || second != "acc_99" {
+		t.Fatalf("LockOrder = (%q, %q), want (acc_10, acc_99)", first, second)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l4-partitioning-replication-sharding', 'ex-l4-partitioning-replication-sharding', 'main_test.go', 'package dbrouter
+
+import "testing"
+
+func TestChoosePool(t *testing.T) {
+	// Write occurred 500ms ago, window is 1000ms -> stick to primary
+	if got := ChoosePool(500, 1000); got != "primary" {
+		t.Fatalf("ChoosePool = %q, want primary (within write window)", got)
+	}
+	// Write occurred 2000ms ago, window is 1000ms -> route to replica
+	if got := ChoosePool(2000, 1000); got != "replica" {
+		t.Fatalf("ChoosePool = %q, want replica (safe for read replica)", got)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l4-stage-e-sql-relational-fundamentals', 'ex-l4-stage-e-sql-relational-fundamentals', 'main_test.go', 'package sqlutil
 
 import "testing"
 
@@ -1469,10 +1864,101 @@ func TestClampPageLimit(t *testing.T) {
 		t.Fatalf("ClampPageLimit(500, 40) = (%d, %d), want (100, 40)", l, o)
 	}
 }
-') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l5-db-ecosystem-comparison', 'ex-l5-db-ecosystem-comparison', 'main_test.go', 'package dbconfig
 
-INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
-('test-ex-l6-stage-f-password-hashing-bearer-auth', 'ex-l6-stage-f-password-hashing-bearer-auth', 'main_test.go', 'package auth
+import "testing"
+
+func TestComputePoolLimits(t *testing.T) {
+	// 100 max DB conns, 4 replicas, 20 reserved for admin/migrations -> (100 - 20) / 4 = 20
+	maxOpen, maxIdle := ComputePoolLimits(100, 4, 20)
+	if maxOpen != 20 {
+		t.Fatalf("maxOpen = %d, want 20", maxOpen)
+	}
+	if maxIdle != 10 {
+		t.Fatalf("maxIdle = %d, want 10 (50%% of maxOpen)", maxIdle)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l5-migrations-transactions-prepared', 'ex-l5-migrations-transactions-prepared', 'main_test.go', 'package migrationguard
+
+import "testing"
+
+func TestIsSafeProductionDDL(t *testing.T) {
+	if !IsSafeProductionDDL("CREATE INDEX CONCURRENTLY idx_users_email ON users(email);") {
+		t.Fatal("CREATE INDEX CONCURRENTLY should be safe")
+	}
+	if IsSafeProductionDDL("CREATE INDEX idx_users_email ON users(email);") {
+		t.Fatal("CREATE INDEX without CONCURRENTLY must be rejected")
+	}
+	if IsSafeProductionDDL("ALTER TABLE orders ADD COLUMN status VARCHAR(32);") {
+		t.Fatal("ALTER TABLE without LOCK_TIMEOUT must be rejected")
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l5-stage-e-database-sql-crud-basics', 'ex-l5-stage-e-database-sql-crud-basics', 'main_test.go', 'package users
+
+import (
+	"context"
+	"database/sql"
+	"testing"
+)
+
+func TestFindUserIDByEmailNotFound(t *testing.T) {
+	db, err := sql.Open("sqlite3", ":memory:")
+	if err != nil {
+		t.Skip("sqlite3 not linked in unit test environment")
+	}
+	defer db.Close()
+
+	_, _ = db.Exec("CREATE TABLE users (id TEXT, email TEXT)")
+	_, err = FindUserIDByEmail(context.Background(), db, "unknown@example.com")
+	if err != ErrUserNotFound {
+		t.Fatalf("expected ErrUserNotFound, got %v", err)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l6-oauth2-oidc-rbac-abac', 'ex-l6-oauth2-oidc-rbac-abac', 'main_test.go', 'package rbac
+
+import "testing"
+
+func TestHasRBACPermission(t *testing.T) {
+	rolePerms := map[string][]string{
+		"editor": {"articles:read", "articles:write"},
+		"admin":  {"articles:read", "articles:write", "articles:delete"},
+	}
+
+	if !HasRBACPermission("admin", "articles:delete", rolePerms) {
+		t.Fatal("admin should have articles:delete")
+	}
+	if HasRBACPermission("editor", "articles:delete", rolePerms) {
+		t.Fatal("editor should not have articles:delete")
+	}
+	if HasRBACPermission("viewer", "articles:read", rolePerms) {
+		t.Fatal("unknown role should have no permissions")
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l6-security-auth-owasp', 'ex-l6-security-auth-owasp', 'main_test.go', 'package security
+
+import "testing"
+
+func TestValidateWebhookIP(t *testing.T) {
+	if err := ValidateWebhookIP("127.0.0.1"); err == nil {
+		t.Fatal("expected error for loopback 127.0.0.1 (SSRF prevention)")
+	}
+	if err := ValidateWebhookIP("10.0.0.1"); err == nil {
+		t.Fatal("expected error for private 10.0.0.1 (SSRF prevention)")
+	}
+	if err := ValidateWebhookIP("169.254.169.254"); err == nil {
+		t.Fatal("expected error for link-local metadata address (SSRF prevention)")
+	}
+	if err := ValidateWebhookIP("93.184.216.34"); err != nil {
+		t.Fatalf("expected valid public IP, got %v", err)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l6-stage-f-password-hashing-bearer-auth', 'ex-l6-stage-f-password-hashing-bearer-auth', 'main_test.go', 'package auth
 
 import "testing"
 
@@ -1490,10 +1976,21 @@ func TestExtractBearerToken(t *testing.T) {
 		t.Fatal("expected false for empty token")
 	}
 }
-') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l7-integration-testcontainers-ci', 'ex-l7-integration-testcontainers-ci', 'main_test.go', 'package testrepo
 
-INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
-('test-ex-l7-stage-g-table-driven-tests-httptest', 'ex-l7-stage-g-table-driven-tests-httptest', 'main_test.go', 'package slug
+import "testing"
+
+func TestPutAndGetFake(t *testing.T) {
+	repo := NewThreadSafeFakeRepo()
+	repo.PutAndGetFake("user_1", "Alice")
+	got, ok := repo.Get("user_1")
+	if !ok || got != "Alice" {
+		t.Fatalf("Get(user_1) = (%q, %v), want (Alice, true)", got, ok)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l7-stage-g-table-driven-tests-httptest', 'ex-l7-stage-g-table-driven-tests-httptest', 'main_test.go', 'package slug
 
 import "testing"
 
@@ -1513,10 +2010,56 @@ func TestSlugifyTitle(t *testing.T) {
 		}
 	}
 }
-') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l7-testing-fuzzing-benchmarks', 'ex-l7-testing-fuzzing-benchmarks', 'main_test.go', 'package utf8tools
 
-INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
-('test-ex-l8-stage-h-handler-service-repo-layers', 'ex-l8-stage-h-handler-service-repo-layers', 'main_test.go', 'package money
+import "testing"
+
+func TestSafeTruncateRunes(t *testing.T) {
+	// Multi-byte Unicode: "Gophers 🚀✨" (🚀 is 4 bytes, ✨ is 3 bytes)
+	input := "Gophers 🚀✨"
+	// Truncating to 9 runes preserves the rocket emoji cleanly without slicing its bytes in half!
+	got := SafeTruncateRunes(input, 9)
+	if got != "Gophers 🚀" {
+		t.Fatalf("SafeTruncateRunes = %q, want ''Gophers 🚀''", got)
+	}
+	if gotAll := SafeTruncateRunes("Go", 10); gotAll != "Go" {
+		t.Fatalf("SafeTruncateRunes = %q, want ''Go''", gotAll)
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l8-clean-hexagonal-ddd', 'ex-l8-clean-hexagonal-ddd', 'main_test.go', 'package billing
+
+import "testing"
+
+func TestComputeFinalInvoiceCents(t *testing.T) {
+	// subtotal 10000 cents ($100), discount 15% -> 8500 cents ($85)
+	cents, err := ComputeFinalInvoiceCents(10000, 15)
+	if err != nil || cents != 8500 {
+		t.Fatalf("ComputeFinalInvoiceCents(10000, 15) = (%d, %v), want (8500, nil)", cents, err)
+	}
+	if _, err := ComputeFinalInvoiceCents(-100, 0); err == nil {
+		t.Fatal("expected error for negative subtotal")
+	}
+	if _, err := ComputeFinalInvoiceCents(100, 101); err == nil {
+		t.Fatal("expected error for discount > 100%")
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l8-modular-monolith-cqrs-boundaries', 'ex-l8-modular-monolith-cqrs-boundaries', 'main_test.go', 'package monolithguard
+
+import "testing"
+
+func TestViolatesModuleTableBoundary(t *testing.T) {
+	if ViolatesModuleTableBoundary("orders", "orders_items") {
+		t.Fatal("orders module owns orders_items table")
+	}
+	if !ViolatesModuleTableBoundary("billing", "orders_items") {
+		t.Fatal("billing module reaching into orders_items violates boundary")
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l8-stage-h-handler-service-repo-layers', 'ex-l8-stage-h-handler-service-repo-layers', 'main_test.go', 'package money
 
 import "testing"
 
@@ -1535,10 +2078,44 @@ func TestAddMoney(t *testing.T) {
 		t.Fatal("expected error when currencies differ")
 	}
 }
-') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l9-caching-queues-outbox-sagas', 'ex-l9-caching-queues-outbox-sagas', 'main_test.go', 'package circuitbreaker
 
-INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
-('test-ex-l9-stage-i-redis-cache-aside-backoff', 'ex-l9-stage-i-redis-cache-aside-backoff', 'main_test.go', 'package retry
+import "testing"
+
+func TestShouldTripBreaker(t *testing.T) {
+	// Threshold = 5 failures
+	if ShouldTripBreaker("CLOSED", 4, 5) {
+		t.Fatal("4 consecutive failures should not trip breaker with threshold 5")
+	}
+	if !ShouldTripBreaker("CLOSED", 5, 5) {
+		t.Fatal("5 consecutive failures must trip breaker to OPEN state")
+	}
+	if !ShouldTripBreaker("HALF_OPEN", 1, 5) {
+		t.Fatal("single failure in HALF_OPEN must trip breaker back to OPEN state")
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l9-grpc-websockets-otel-tracing', 'ex-l9-grpc-websockets-otel-tracing', 'main_test.go', 'package telemetry
+
+import "testing"
+
+func TestIsValidW3CTraceparent(t *testing.T) {
+	valid := "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+	if !IsValidW3CTraceparent(valid) {
+		t.Fatal("valid W3C traceparent should pass")
+	}
+	invalidVersion := "01-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+	if IsValidW3CTraceparent(invalidVersion) {
+		t.Fatal("unsupported version 01 should be rejected")
+	}
+	allZeroTrace := "00-00000000000000000000000000000000-00f067aa0ba902b7-01"
+	if IsValidW3CTraceparent(allZeroTrace) {
+		t.Fatal("all-zero trace ID must be rejected")
+	}
+}
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
+INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES ('test-ex-l9-stage-i-redis-cache-aside-backoff', 'ex-l9-stage-i-redis-cache-aside-backoff', 'main_test.go', 'package retry
 
 import "testing"
 
@@ -1553,28 +2130,7 @@ func TestComputeBackoffMs(t *testing.T) {
 		t.Fatalf("attempt 5 = %d, want 1000 (capped)", got)
 	}
 }
-') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
-
-INSERT INTO exercise_tests (id, exercise_id, filename, test_code) VALUES
-('test-ex-l10-stage-j-capstone-production-blueprint', 'ex-l10-stage-j-capstone-production-blueprint', 'main_test.go', 'package capstone
-
-import "testing"
-
-func TestEvaluateCapstoneReadiness(t *testing.T) {
-	code, err := EvaluateCapstoneReadiness(ReadinessGate{ShuttingDown: false, DBConnected: true, MigrationsUp: true})
-	if err != nil || code != 200 {
-		t.Fatalf("ready gate = (%d, %v), want (200, nil)", code, err)
-	}
-	code, err = EvaluateCapstoneReadiness(ReadinessGate{ShuttingDown: true, DBConnected: true, MigrationsUp: true})
-	if err == nil || code != 503 {
-		t.Fatalf("shutting down gate = (%d, %v), want (503, error)", code, err)
-	}
-	code, err = EvaluateCapstoneReadiness(ReadinessGate{ShuttingDown: false, DBConnected: false, MigrationsUp: true})
-	if err == nil || code != 503 {
-		t.Fatalf("db disconnected gate = (%d, %v), want (503, error)", code, err)
-	}
-}
-') ON CONFLICT (id) DO UPDATE SET test_code = EXCLUDED.test_code;
+') ON CONFLICT (id) DO UPDATE SET exercise_id = EXCLUDED.exercise_id, filename = EXCLUDED.filename, test_code = EXCLUDED.test_code;
 
 -- Diagnostic rules synchronization (v2.6)
 INSERT INTO diagnostic_rules (rule_id, category, classification, severity, title, description, why_it_matters, suggested_fix, related_lesson_id, doc_url) VALUES

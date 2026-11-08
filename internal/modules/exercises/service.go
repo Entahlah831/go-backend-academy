@@ -107,7 +107,7 @@ func (s *Service) FetchPackage(ctx context.Context, exerciseID string) (*Exercis
 		}
 		testCode = testRec.TestCode
 	} else {
-		testCode = fmt.Sprintf("package %s\n\nimport \"testing\"\n\nfunc TestVerification(t *testing.T) {\n\tt.Log(\"Verifikasi lokal untuk latihan: %s\")\n}\n", pkgName, ex.Title)
+		testCode = fmt.Sprintf("package %s\n\nimport \"testing\"\n\nfunc TestVerification(t *testing.T) {\n\tt.Skip(\"Belum ada tes unit lokal resmi untuk latihan: %s\")\n}\n", pkgName, ex.Title)
 	}
 
 	moduleName := "exercise"

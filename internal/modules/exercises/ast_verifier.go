@@ -79,12 +79,17 @@ func CheckAST(src string, r Rule) ASTCheckResult {
 		}
 	}
 
+	var targetFuncDecl *ast.FuncDecl
+
 	// Traverse AST to collect declared functions, call expressions, and AST identifiers
 	ast.Inspect(f, func(n ast.Node) bool {
 		switch node := n.(type) {
 		case *ast.FuncDecl:
 			if node.Name != nil {
 				seenFuncs[node.Name.Name] = true
+				if r.TargetFunc != "" && node.Name.Name == r.TargetFunc {
+					targetFuncDecl = node
+				}
 			}
 		case *ast.CallExpr:
 			recordCallExpr(node, seenCalls)
@@ -93,6 +98,17 @@ func CheckAST(src string, r Rule) ASTCheckResult {
 		}
 		return true
 	})
+
+	// Collect calls strictly inside the target function body
+	targetCalls := make(map[string]bool)
+	if targetFuncDecl != nil && targetFuncDecl.Body != nil {
+		ast.Inspect(targetFuncDecl.Body, func(n ast.Node) bool {
+			if call, ok := n.(*ast.CallExpr); ok {
+				recordCallExpr(call, targetCalls)
+			}
+			return true
+		})
+	}
 
 	var missing []string
 	var violations []string
@@ -109,18 +125,26 @@ func CheckAST(src string, r Rule) ASTCheckResult {
 		}
 	}
 
-	// 3. Verify Required Calls
+	// 3. Verify Required Calls (scoped strictly to TargetFunc if specified)
+	callLookup := seenCalls
+	if r.TargetFunc != "" {
+		callLookup = targetCalls
+	}
 	for _, want := range r.MustCall {
 		wantClean := strings.TrimSpace(want)
 		if wantClean == "" {
 			continue
 		}
-		if !hasMatchingCall(wantClean, seenCalls) {
-			missing = append(missing, fmt.Sprintf("harus memanggil %s", wantClean))
+		if !hasMatchingCall(wantClean, callLookup) {
+			if r.TargetFunc != "" {
+				missing = append(missing, fmt.Sprintf("harus memanggil %s di dalam fungsi %s()", wantClean, r.TargetFunc))
+			} else {
+				missing = append(missing, fmt.Sprintf("harus memanggil %s", wantClean))
+			}
 		}
 	}
 
-	// 4. Verify Prohibited Calls
+	// 4. Verify Prohibited Calls (anywhere in submission)
 	for _, bad := range r.NoCall {
 		badClean := strings.TrimSpace(bad)
 		if badClean == "" {
@@ -131,15 +155,37 @@ func CheckAST(src string, r Rule) ASTCheckResult {
 		}
 	}
 
-	// 5. Verify MustContain non-comment tokens
-	uncommented := StripGoComments(trimmed)
+	// 5. Verify MustContain non-comment, non-string tokens
+	// Blank string literal byte spans to prevent string-stuffing bypasses
+	srcBytes := []byte(codeToParse)
+	ast.Inspect(f, func(n ast.Node) bool {
+		if lit, ok := n.(*ast.BasicLit); ok && lit.Kind == token.STRING {
+			start := fset.Position(lit.Pos()).Offset
+			end := fset.Position(lit.End()).Offset
+			if start >= 0 && end <= len(srcBytes) && start < end {
+				for i := start; i < end; i++ {
+					srcBytes[i] = ' '
+				}
+			}
+		}
+		return true
+	})
+	uncommented := StripGoComments(codeToParse)
+	unstringedAndUncommented := StripGoComments(string(srcBytes))
 	for _, tok := range r.MustContain {
 		tokClean := strings.TrimSpace(tok)
 		if tokClean == "" {
 			continue
 		}
-		if !strings.Contains(uncommented, tokClean) {
-			missing = append(missing, fmt.Sprintf("harus memuat pola %q", tokClean))
+		targetText := unstringedAndUncommented
+		patternToMatch := tokClean
+		if (strings.HasPrefix(tokClean, "\"") && strings.HasSuffix(tokClean, "\"") && len(tokClean) >= 2) ||
+			(strings.HasPrefix(tokClean, "`") && strings.HasSuffix(tokClean, "`") && len(tokClean) >= 2) {
+			patternToMatch = tokClean[1 : len(tokClean)-1]
+			targetText = uncommented
+		}
+		if !strings.Contains(targetText, patternToMatch) {
+			missing = append(missing, fmt.Sprintf("harus memuat pola %q", patternToMatch))
 		}
 	}
 

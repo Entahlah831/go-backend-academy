@@ -98,3 +98,53 @@ Isi layanan yang terdefinisi pada `docker-compose.yml`:
 3. `redis` (profil `cache`):
    - Image: `redis:7.4-alpine`
 4. Volumes: `pgdata`, `appdata`.
+
+---
+
+## 4. Fase 5 Baseline (perbaikan pasca v2.6)
+
+> Date: November 8, 2026 (11:51:30 +07:00)  
+> Environment: Windows host (x86_64), `go version go1.27.1 windows/amd64`  
+> Git Branch: `fase-5` (head `0ff314f`)
+
+### Perintah & Hasil Nyata:
+
+1. `go version`:
+```
+go version go1.27.1 windows/amd64
+```
+
+2. `go vet ./...`:
+```
+Exit code: 0
+Output: (clean, 0 warnings, 0 errors)
+```
+
+3. `go test -count=1 ./...`:
+```
+ok  	github.com/gobackendacademy/platform/cmd/academy	2.823s
+?   	github.com/gobackendacademy/platform/cmd/server	[no test files]
+ok  	github.com/gobackendacademy/platform/internal/config	0.826s
+ok  	github.com/gobackendacademy/platform/internal/modules/assessments	0.636s
+?   	github.com/gobackendacademy/platform/internal/modules/case_studies	[no test files]
+?   	github.com/gobackendacademy/platform/internal/modules/curriculum	[no test files]
+ok  	github.com/gobackendacademy/platform/internal/modules/diagnostics	3.383s
+ok  	github.com/gobackendacademy/platform/internal/modules/exercises	0.232s
+?   	github.com/gobackendacademy/platform/internal/modules/lessons	[no test files]
+ok  	github.com/gobackendacademy/platform/internal/modules/recommendations	0.670s
+ok  	github.com/gobackendacademy/platform/internal/modules/sql_playground	1.941s
+?   	github.com/gobackendacademy/platform/internal/platform/database	[no test files]
+ok  	github.com/gobackendacademy/platform/internal/platform/http	0.315s
+?   	github.com/gobackendacademy/platform/internal/platform/logger	[no test files]
+?   	github.com/gobackendacademy/platform/internal/shared	[no test files]
+?   	github.com/gobackendacademy/platform/migrations	[no test files]
+?   	github.com/gobackendacademy/platform/seed	[no test files]
+ok  	github.com/gobackendacademy/platform/tests	6.160s
+?   	github.com/gobackendacademy/platform/tools/gen-content	[no test files]
+```
+
+4. `docker compose config`:
+```
+docker : The term 'docker' is not recognized (Docker daemon runs on remote VPS Linux environment)
+```
+

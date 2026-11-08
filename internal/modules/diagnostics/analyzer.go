@@ -362,48 +362,82 @@ func (a *Analyzer) analyzeAST(code string) ([]DiagnosticFinding, bool) {
 	hasMaxBytesReader := false
 	hasSqlOpen := false
 	hasSetMaxOpenConns := false
-	var rowsVarNames []string
+	var sqlOpenPos token.Pos
+
+	type queryCursor struct {
+		varName string
+		fn      *ast.FuncDecl
+		pos     token.Pos
+	}
+	var queryCursors []queryCursor
+	var currentFunc *ast.FuncDecl
 
 	ast.Inspect(f, func(n ast.Node) bool {
-		call, ok := n.(*ast.CallExpr)
-		if !ok {
-			return true
-		}
-
-		sel, isSel := call.Fun.(*ast.SelectorExpr)
-		if isSel {
-			selName := sel.Sel.Name
-			if id, ok := sel.X.(*ast.Ident); ok {
-				if id.Name == "http" && selName == "MaxBytesReader" {
-					hasMaxBytesReader = true
+		switch node := n.(type) {
+		case *ast.FuncDecl:
+			currentFunc = node
+		case *ast.CallExpr:
+			if sel, ok := node.Fun.(*ast.SelectorExpr); ok {
+				selName := sel.Sel.Name
+				if id, ok := sel.X.(*ast.Ident); ok {
+					if id.Name == "http" && selName == "MaxBytesReader" {
+						hasMaxBytesReader = true
+					}
+					if id.Name == "sql" && selName == "Open" {
+						hasSqlOpen = true
+						if sqlOpenPos == 0 {
+							sqlOpenPos = node.Pos()
+						}
+					}
 				}
-				if id.Name == "sql" && selName == "Open" {
-					hasSqlOpen = true
+				if selName == "SetMaxOpenConns" {
+					hasSetMaxOpenConns = true
 				}
 			}
-			if selName == "SetMaxOpenConns" {
-				hasSetMaxOpenConns = true
+		case *ast.AssignStmt:
+			for i, rhs := range node.Rhs {
+				call, ok := rhs.(*ast.CallExpr)
+				if !ok {
+					continue
+				}
+				if sel, ok := call.Fun.(*ast.SelectorExpr); ok {
+					if sel.Sel.Name == "Query" || sel.Sel.Name == "QueryContext" {
+						if i < len(node.Lhs) {
+							if id, ok := node.Lhs[i].(*ast.Ident); ok && id.Name != "_" {
+								queryCursors = append(queryCursors, queryCursor{
+									varName: id.Name,
+									fn:      currentFunc,
+									pos:     call.Pos(),
+								})
+							}
+						}
+					}
+				}
 			}
-		}
-		return true
-	})
-
-	// Detect sql.Rows cursor assignment
-	ast.Inspect(f, func(n ast.Node) bool {
-		as, ok := n.(*ast.AssignStmt)
-		if !ok {
-			return true
-		}
-		for i, rhs := range as.Rhs {
-			call, ok := rhs.(*ast.CallExpr)
-			if !ok {
-				continue
-			}
-			if sel, ok := call.Fun.(*ast.SelectorExpr); ok {
-				if sel.Sel.Name == "Query" || sel.Sel.Name == "QueryContext" {
-					if i < len(as.Lhs) {
-						if id, ok := as.Lhs[i].(*ast.Ident); ok && id.Name != "_" {
-							rowsVarNames = append(rowsVarNames, id.Name)
+			// GO-SEC-007 check for := assignments inside function bodies
+			for i, lhs := range node.Lhs {
+				if id, ok := lhs.(*ast.Ident); ok {
+					identLower := strings.ToLower(id.Name)
+					if reSecretIdent.MatchString(identLower) && !reEnvNameSuffix.MatchString(identLower) {
+						if i < len(node.Rhs) {
+							if lit, ok := node.Rhs[i].(*ast.BasicLit); ok && lit.Kind == token.STRING {
+								val := strings.Trim(lit.Value, "`\"")
+								if val != "" && !reEnvValue.MatchString(val) {
+									addFinding(DiagnosticFinding{
+										RuleID:              "GO-SEC-007",
+										Classification:      ClassificationPotentialIssue,
+										Severity:            "high",
+										Line:                posToLine(lit.Pos()),
+										Title:               "Hardcoded Secret or Credential Detected",
+										Description:         "A password, API key, JWT secret, or private token appears hardcoded as a string literal in source code.",
+										WhyItMatters:        "Committing secrets to source control or container images risks credential exposure and prevents rotation without recompilation.",
+										SuggestedCorrection: "Read credentials from environment variables (e.g. os.Getenv) or a secure secrets manager.",
+										CorrectedExample:    `password := os.Getenv("DATABASE_PASSWORD")`,
+										RelatedLessonID:     "l0-backend-http-lifecycle",
+										ReferenceURL:        "https://owasp.org/www-community/Source_Code_Analysis_Tools",
+									})
+								}
+							}
 						}
 					}
 				}
@@ -738,35 +772,33 @@ func (a *Analyzer) analyzeAST(code string) ([]DiagnosticFinding, bool) {
 		return true
 	})
 
-	// Rule GO-DB-001: Check if any opened rows cursors lack defer rows.Close()
-	if len(rowsVarNames) > 0 {
-		unclosed := false
-		for _, varName := range rowsVarNames {
-			hasClose := false
-			ast.Inspect(f, func(n ast.Node) bool {
-				if defStmt, ok := n.(*ast.DeferStmt); ok {
-					if call, ok := defStmt.Call.Fun.(*ast.SelectorExpr); ok {
-						if id, ok := call.X.(*ast.Ident); ok && id.Name == varName && call.Sel.Name == "Close" {
-							hasClose = true
-						}
+	// Rule GO-DB-001: Check if any opened rows cursors lack defer rows.Close() in the same enclosing function
+	for _, qc := range queryCursors {
+		hasClose := false
+		searchRoot := ast.Node(f)
+		if qc.fn != nil && qc.fn.Body != nil {
+			searchRoot = qc.fn.Body
+		}
+		ast.Inspect(searchRoot, func(n ast.Node) bool {
+			if defStmt, ok := n.(*ast.DeferStmt); ok {
+				if call, ok := defStmt.Call.Fun.(*ast.SelectorExpr); ok {
+					if id, ok := call.X.(*ast.Ident); ok && id.Name == qc.varName && call.Sel.Name == "Close" {
+						hasClose = true
 					}
 				}
-				return true
-			})
-			if !hasClose {
-				unclosed = true
-				break
 			}
-		}
-		if unclosed {
+			return true
+		})
+		if !hasClose {
+			lineNo := posToLine(qc.pos)
 			addFinding(DiagnosticFinding{
 				RuleID:              "GO-DB-001",
 				Classification:      ClassificationPotentialIssue,
 				Severity:            "high",
-				Line:                1,
+				Line:                lineNo,
 				Title:               "sql.Rows Cursor Opened Without defer rows.Close()",
 				Description:         "Query or QueryContext returns an *sql.Rows cursor that holds a database connection until its own .Close() method is called.",
-				WhyItMatters:        "If the function returns early or closes an unrelated resource instead of the rows cursor, the pooled DB connection is permanently leaked until MaxOpenConns freezes.",
+				WhyItMatters:        "If the function returns early or closes an unrelated resource instead of the rows cursor, the pooled database connection remains held until the rows cursor is closed, which can exhaust the connection pool.",
 				SuggestedCorrection: "Immediately after checking if err != nil, call defer rows.Close(), and check rows.Err() after the loop.",
 				CorrectedExample:    `rows, err := db.QueryContext(ctx, query, arg); if err != nil { return err }; defer rows.Close()`,
 				RelatedLessonID:     "l5-db-ecosystem-comparison",
@@ -777,11 +809,15 @@ func (a *Analyzer) analyzeAST(code string) ([]DiagnosticFinding, bool) {
 
 	// Rule GO-DB-002: sql.Open without pool bounds
 	if hasSqlOpen && !hasSetMaxOpenConns {
+		lineNo := 1
+		if sqlOpenPos != 0 {
+			lineNo = posToLine(sqlOpenPos)
+		}
 		addFinding(DiagnosticFinding{
 			RuleID:              "GO-DB-002",
 			Classification:      ClassificationEducationalHeuristic,
 			Severity:            "medium",
-			Line:                1,
+			Line:                lineNo,
 			Title:               "sql.Open Initialized Without Connection Pool Bounds",
 			Description:         "sql.Open defaults to MaxOpenConns = 0 (unlimited), allowing traffic spikes to exhaust database max_connections.",
 			WhyItMatters:        "Unbounded connection opening under load triggers 'too many clients' errors on PostgreSQL/MySQL.",

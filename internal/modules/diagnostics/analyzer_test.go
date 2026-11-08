@@ -105,3 +105,67 @@ func main() {
 		}
 	}
 }
+
+
+func TestDiagnosticLinesAreReal(t *testing.T) {
+	analyzer := diagnostics.NewAnalyzer(false, 3*time.Second, "none", "", "")
+	code := `package main
+
+import "database/sql"
+
+func QueryUsers(db *sql.DB) error {
+	rows, err := db.Query("SELECT id FROM users")
+	if err != nil {
+		return err
+	}
+	_ = rows
+	return nil
+}
+`
+	report := analyzer.AnalyzeCode(context.Background(), code)
+	found := false
+	for _, f := range report.Findings {
+		if f.RuleID == "GO-DB-001" {
+			found = true
+			if f.Line != 6 {
+				t.Errorf("expected GO-DB-001 to point to line 6 (db.Query), got line %d", f.Line)
+			}
+		}
+	}
+	if !found {
+		t.Errorf("expected GO-DB-001 finding")
+	}
+}
+
+func TestDBRowsScopePerFunction(t *testing.T) {
+	analyzer := diagnostics.NewAnalyzer(false, 3*time.Second, "none", "", "")
+	// fn1 leaks rows; fn2 properly closes rows. fn1 must still be detected!
+	code := `package main
+
+import "database/sql"
+
+func LeakyQuery(db *sql.DB) {
+	rows, _ := db.Query("SELECT 1")
+	_ = rows
+}
+
+func CleanQuery(db *sql.DB) {
+	rows, _ := db.Query("SELECT 2")
+	defer rows.Close()
+	_ = rows
+}
+`
+	report := analyzer.AnalyzeCode(context.Background(), code)
+	foundLeaky := false
+	for _, f := range report.Findings {
+		if f.RuleID == "GO-DB-001" {
+			foundLeaky = true
+			if f.Line != 6 {
+				t.Errorf("expected finding on line 6 (LeakyQuery), got line %d", f.Line)
+			}
+		}
+	}
+	if !foundLeaky {
+		t.Errorf("expected GO-DB-001 finding for LeakyQuery even when CleanQuery exists in same file")
+	}
+}

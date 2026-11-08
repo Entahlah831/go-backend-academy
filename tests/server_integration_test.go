@@ -229,8 +229,8 @@ func TestPersistenceAcrossServerRestartsAndMigrationsCycle(t *testing.T) {
 
 	// 4. Record exercise attempt
 	postJSONWithCookie(t, ts1.URL+"/api/v1/exercises/verify", map[string]any{
-		"exercise_id":     "ex-l0-backend-http-lifecycle",
-		"code":            "package main\nimport \"net/http\"\nfunc ok() { r.Body = http.MaxBytesReader(w, r.Body, 64); dec.DisallowUnknownFields(); _ = &http.Server{ReadHeaderTimeout: 5} }",
+		"exercise_id":     "ex-l0-stage-a-what-is-backend",
+		"code":            "package main\nfunc DefaultPort() string { return \":8080\" }",
 		"required_tokens": []string{},
 	}, http.StatusOK, sessCookie)
 
@@ -614,12 +614,12 @@ func TestProgressAndBookmarksRoundTripAndValidation(t *testing.T) {
 func TestExerciseVerifyMultipleAttemptsAndCommentStuffingRejection(t *testing.T) {
 	_, ts := setupTestServer(t)
 
-	// 1. Comment-stuffed payload must fail even if all required tokens appear inside a comment
+	// 1. Comment-stuffed payload must fail even if required token appears inside a comment
 	stuffedPayload, _ := json.Marshal(map[string]any{
 		"user_id":         "usr_local_default",
-		"exercise_id":     "ex-l0-backend-http-lifecycle",
-		"code":            "/* MaxBytesReader DisallowUnknownFields ReadHeaderTimeout ReadTimeout */\nfunc x() {}",
-		"required_tokens": []string{"MaxBytesReader", "DisallowUnknownFields", "ReadHeaderTimeout", "ReadTimeout"},
+		"exercise_id":     "ex-l0-stage-a-what-is-backend",
+		"code":            "package main\n// \":8080\"\nfunc DefaultPort() string { return \"\" }",
+		"required_tokens": []string{},
 	})
 	resp1, err := http.Post(ts.URL+"/api/v1/exercises/verify", "application/json", bytes.NewReader(stuffedPayload))
 	if err != nil {
@@ -641,8 +641,8 @@ func TestExerciseVerifyMultipleAttemptsAndCommentStuffingRejection(t *testing.T)
 	// 2. Second attempt on the exact same exercise must succeed with a distinct AttemptID
 	validPayload, _ := json.Marshal(map[string]any{
 		"user_id":         "usr_local_default",
-		"exercise_id":     "ex-l0-backend-http-lifecycle",
-		"code":            "package httpsec\nimport \"net/http\"\nfunc ok() { r.Body = http.MaxBytesReader(w, r.Body, 64); dec.DisallowUnknownFields(); _ = &http.Server{ReadHeaderTimeout: 5} }",
+		"exercise_id":     "ex-l0-stage-a-what-is-backend",
+		"code":            "package main\nfunc DefaultPort() string { return \":8080\" }",
 		"required_tokens": []string{},
 	})
 	resp2, err := http.Post(ts.URL+"/api/v1/exercises/verify", "application/json", bytes.NewReader(validPayload))
