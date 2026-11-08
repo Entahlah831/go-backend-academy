@@ -1,0 +1,2 @@
+content/*.json text eol=lf
+*.sql text eol=lf

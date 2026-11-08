@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"bytes"
 	"crypto/sha256"
 	"encoding/json"
 	"flag"
@@ -155,7 +156,8 @@ func exportContent(contentDir string) error {
 	for _, e := range entries {
 		if strings.HasSuffix(e.Name(), ".json") && e.Name() != "manifest.json" {
 			data, _ := os.ReadFile(filepath.Join(contentDir, e.Name()))
-			manifest[e.Name()] = fmt.Sprintf("%x", sha256.Sum256(data))
+			normalized := bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))
+			manifest[e.Name()] = fmt.Sprintf("%x", sha256.Sum256(normalized))
 		}
 	}
 	return writeJSON("manifest.json", manifest)
@@ -179,7 +181,8 @@ func verifyContent(contentDir string) error {
 		if err != nil {
 			return fmt.Errorf("missing content file %s: %w", p, err)
 		}
-		actualHash := fmt.Sprintf("%x", sha256.Sum256(data))
+		normalized := bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))
+		actualHash := fmt.Sprintf("%x", sha256.Sum256(normalized))
 		if actualHash != expectedHash {
 			return fmt.Errorf("content hash mismatch for %s: expected %s, got %s", filename, expectedHash, actualHash)
 		}

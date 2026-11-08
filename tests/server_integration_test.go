@@ -1133,7 +1133,8 @@ func TestContentSingleSourceAndSeedSync(t *testing.T) {
 		if err != nil {
 			t.Fatalf("missing content file %s: %v", p, err)
 		}
-		actualHash := fmt.Sprintf("%x", sha256.Sum256(data))
+		normalized := bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))
+		actualHash := fmt.Sprintf("%x", sha256.Sum256(normalized))
 		if actualHash != expectedHash {
 			t.Errorf("content drift detected in %s: hash mismatch (run go run ./tools/gen-content -export)", filename)
 		}
