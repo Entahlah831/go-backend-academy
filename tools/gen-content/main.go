@@ -1,8 +1,8 @@
 package main
 
 import (
-	"context"
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/json"
 	"flag"

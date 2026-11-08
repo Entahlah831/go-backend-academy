@@ -106,7 +106,6 @@ func main() {
 	}
 }
 
-
 func TestDiagnosticLinesAreReal(t *testing.T) {
 	analyzer := diagnostics.NewAnalyzer(false, 3*time.Second, "none", "", "")
 	code := `package main

@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
-	"errors"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -1379,7 +1379,6 @@ func TestCurriculumExpansionAndStructuredSections(t *testing.T) {
 
 	_ = srv
 }
-
 
 // ---------------------------------------------------------------------
 // Acceptance Tests for P0-1 & P1-6: Session & Identity Hardening

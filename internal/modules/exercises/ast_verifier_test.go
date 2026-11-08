@@ -145,7 +145,6 @@ func WrongName() string {
 	}
 }
 
-
 func TestDeadCallOutsideTargetRejected(t *testing.T) {
 	src := `package main
 
