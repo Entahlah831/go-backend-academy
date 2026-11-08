@@ -759,3 +759,80 @@ func TestAllExercisesServerSideVerification(t *testing.T) {
 		t.Errorf("expected %d exercises across curriculum matching DB exercises count, got %d", dbExercisesCount, totalExercises)
 	}
 }
+
+func TestServerSideQuizEvaluationAndBridgeQuizzes(t *testing.T) {
+	_, ts := setupTestServer(t)
+
+	bridgeQuizzes := []string{"qz-0-foundations", "qz-1-go-basics", "qz-4-sql-basics"}
+	for _, qid := range bridgeQuizzes {
+		var detail struct {
+			ID        string `json:"id"`
+			Level     int    `json:"level"`
+			Title     string `json:"title"`
+			Questions []struct {
+				ID           string          `json:"id"`
+				OrderIndex   int             `json:"order_index"`
+				Question     string          `json:"question"`
+				Options      json.RawMessage `json:"options"`
+				CorrectIndex *int            `json:"correct_index,omitempty"`
+				Explanation  *string         `json:"explanation,omitempty"`
+			} `json:"questions"`
+		}
+		getJSON(t, ts.URL+"/api/v1/quizzes/"+qid, &detail)
+		if len(detail.Questions) < 3 {
+			t.Errorf("quiz %s must have >= 3 questions, got %d", qid, len(detail.Questions))
+		}
+		for i, q := range detail.Questions {
+			if q.CorrectIndex != nil {
+				t.Errorf("quiz %s question %d leaked correct_index!", qid, i+1)
+			}
+			if q.Explanation != nil {
+				t.Errorf("quiz %s question %d leaked explanation before submission!", qid, i+1)
+			}
+		}
+
+		// Grade submission on server with correct answers
+		var expectedAnswers []int
+		switch qid {
+		case "qz-0-foundations":
+			expectedAnswers = []int{1, 1, 2}
+		case "qz-1-go-basics":
+			expectedAnswers = []int{2, 0, 0}
+		case "qz-4-sql-basics":
+			expectedAnswers = []int{1, 1, 1}
+		}
+
+		rawRes := postJSON(t, ts.URL+"/api/v1/quizzes/"+qid+"/attempts", map[string]any{
+			"user_id": "usr_test_quiz_eval",
+			"answers": expectedAnswers,
+		}, http.StatusOK)
+
+		var attemptRes struct {
+			Score          int `json:"score"`
+			TotalQuestions int `json:"total_questions"`
+			Results        []struct {
+				QuestionID   string `json:"question_id"`
+				Selected     int    `json:"selected"`
+				CorrectIndex int    `json:"correct_index"`
+				Correct      bool   `json:"correct"`
+				Explanation  string `json:"explanation"`
+			} `json:"results"`
+		}
+		if err := json.Unmarshal(rawRes, &attemptRes); err != nil {
+			t.Fatalf("unmarshaling attempt response: %v", err)
+		}
+
+		if attemptRes.Score != len(expectedAnswers) || attemptRes.TotalQuestions != len(expectedAnswers) {
+			t.Errorf("quiz %s expected perfect score %d/%d, got %d/%d", qid, len(expectedAnswers), len(expectedAnswers), attemptRes.Score, attemptRes.TotalQuestions)
+		}
+		for i, r := range attemptRes.Results {
+			if !r.Correct {
+				t.Errorf("quiz %s question %d expected correct, got false", qid, i+1)
+			}
+			if r.Explanation == "" {
+				t.Errorf("quiz %s question %d expected explanation after evaluation, got empty string", qid, i+1)
+			}
+		}
+	}
+}
+

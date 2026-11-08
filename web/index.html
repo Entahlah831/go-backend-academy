@@ -3059,69 +3059,100 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
   ],
   "quizzes": [
     {
+      "id": "qz-0-foundations",
+      "level": 0,
+      "title": "Stage A & C Orientation & HTTP Foundations Quiz",
+      "question": "Why should a backend server read its listening port and database credentials from environment variables (or .env) instead of hardcoding them in Go source files?",
+      "options": [
+        "Because Go refuses to compile constants containing port numbers",
+        "So the exact same compiled binary can run across local, staging, and production environments without modifying code or committing secrets to Git",
+        "Because environment variables automatically encrypt network traffic",
+        "Because os.Getenv makes HTTP handlers run faster"
+      ]
+    },
+    {
+      "id": "qz-1-go-basics",
+      "level": 1,
+      "title": "Stage B Go Programming Fundamentals Quiz",
+      "question": "What happens if you declare `var counts map[string]int` (without `make` or a map literal) and immediately execute `counts[\"ok\"]++`?",
+      "options": [
+        "Go automatically initializes the map and sets counts[\"ok\"] = 1",
+        "It returns a compile-time syntax error",
+        "Reading from a nil map returns the zero value (0), but writing to a nil map triggers a runtime panic",
+        "It silently ignores the write"
+      ]
+    },
+    {
       "id": "qz-1",
       "level": 1,
+      "title": "Level 1 Diagnostic Quiz",
       "question": "A function declares `var err *ValidationError = nil` and returns `err` as an `error` return type. What does `if err := fn(); err != nil` evaluate to in the caller?",
       "options": [
         "false, because the pointer value is nil",
         "true, because the returned error interface has a non-nil type descriptor (*itab) pointing to *ValidationError",
         "Compile-time error: cannot return *ValidationError as error",
         "Runtime panic: nil pointer dereference"
-      ],
-      "correctIndex": 1,
-      "explanation": "In Go, an interface value (`runtime.iface`) consists of two words: `(itab, data)`. It equals `nil` only when both words are zero. Returning a typed nil pointer sets `itab = *ValidationError` and `data = 0x0`, so `err != nil` evaluates to `true`!"
+      ]
     },
     {
       "id": "qz-2",
       "level": 2,
+      "title": "Level 2 Diagnostic Quiz",
       "question": "In a Go HTTP handler that spawns a worker goroutine to fetch data while waiting on `select { case res := <-ch: ... case <-r.Context().Done(): ... }`, how do you prevent a goroutine leak if the client disconnects early?",
       "options": [
         "Call runtime.GC() inside the handler's defer block",
         "Create `ch := make(chan Result, 1)` (buffered size 1) and pass `r.Context()` to the downstream call",
         "Use an unbuffered channel `make(chan Result)` and close it from the receiver",
         "Increase GOMAXPROCS to match concurrent requests"
-      ],
-      "correctIndex": 1,
-      "explanation": "A buffered channel of size 1 (`make(chan Result, 1)`) allows the child goroutine to deposit its single result and exit immediately even if the parent handler already exited via `<-r.Context().Done()`."
+      ]
     },
     {
       "id": "qz-3",
       "level": 4,
+      "title": "Level 4 Diagnostic Quiz",
       "question": "You have a composite B-Tree index in PostgreSQL on `orders (tenant_id, status, created_at DESC)`. Which of the following queries CANNOT use this index as a primary leftmost B-Tree range seek?",
       "options": [
         "SELECT * FROM orders WHERE tenant_id = $1 AND status = 'PAID' ORDER BY created_at DESC LIMIT 20",
         "SELECT * FROM orders WHERE tenant_id = $1",
         "SELECT * FROM orders WHERE status = 'PENDING' ORDER BY created_at DESC",
         "SELECT * FROM orders WHERE tenant_id = $1 AND status = 'SHIPPED'"
-      ],
-      "correctIndex": 2,
-      "explanation": "Composite B-Tree indexes are sorted lexicographically by the leading column (`tenant_id`) first. A query that omits `tenant_id` and filters only on `status` cannot jump directly to a contiguous range in the B-Tree (tanpa skip scan)."
+      ]
+    },
+    {
+      "id": "qz-4-sql-basics",
+      "level": 4,
+      "title": "Stage E Relational SQL & database/sql Fundamentals Quiz",
+      "question": "In Go `database/sql`, why must you write `db.QueryRowContext(ctx, \"SELECT id FROM users WHERE email = $1\", email)` instead of `fmt.Sprintf(\"SELECT id FROM users WHERE email = '%s'\", email)`?",
+      "options": [
+        "Because fmt.Sprintf is not part of the Go standard library",
+        "Parameterized placeholders ($1) send the SQL command structure and the user data separately over the database protocol, making SQL injection impossible",
+        "Because database/sql only supports integer columns with fmt.Sprintf",
+        "Because $1 automatically creates a B-Tree index"
+      ]
     },
     {
       "id": "qz-4",
       "level": 6,
+      "title": "Level 6 Diagnostic Quiz",
       "question": "Where must IP address validation happen in Go to completely block Server-Side Request Forgery (SSRF) including DNS Rebinding attacks?",
       "options": [
         "Regex matching on the URL string before calling http.NewRequest",
         "Calling net.LookupIP(host) once before passing the URL to http.Get(url)",
         "Inside `net.Dialer.Control` attached to `http.Transport`, inspecting the resolved `netip.Addr` right before socket connection",
         "Setting `http.Client{Timeout: 5 * time.Second}`"
-      ],
-      "correctIndex": 2,
-      "explanation": "Checking the hostname before `http.Client.Do` is vulnerable to DNS rebinding (TOCTOU). Inspecting the resolved IP inside `net.Dialer.Control` verifies the exact socket address used by the OS kernel `connect()` syscall."
+      ]
     },
     {
       "id": "qz-5",
       "level": 10,
+      "title": "Level 10 Diagnostic Quiz",
       "question": "Your Go pod in Kubernetes has `resources.limits.memory: 512Mi`. What is the recommended `GOMEMLIMIT` configuration and why?",
       "options": [
         "GOMEMLIMIT=512MiB so Go uses 100% of the container limit for heap objects",
         "GOMEMLIMIT=435MiB (~85% of 512Mi) so the Go GC reclaims heap memory before total RSS (heap + stacks + runtime overhead) triggers the Linux OOM killer",
         "Disable GC with GOGC=off and rely on Kubernetes liveness restarts",
         "GOMEMLIMIT=2048MiB to prevent GC CPU spikes"
-      ],
-      "correctIndex": 1,
-      "explanation": "Per the official Go GC Guide, `GOMEMLIMIT` should leave 10–15% headroom below the container's hard cgroup limit to account for non-Go-heap memory (goroutine stacks, binary text, OS buffers)."
+      ]
     }
   ],
   "dbEngines": [
@@ -4948,6 +4979,7 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
       triggeredRules: SafeStore.get('triggeredRules', []),
       bookmarks: SafeStore.get('bookmarks', {}),
       quizAnswers: SafeStore.get('quizAnswers', {}),
+      quizResults: SafeStore.get('quizResults', {}),
       personalNotes: SafeStore.get('personalNotes', ''),
       learningMode: SafeStore.get('learningMode', 'beginner')
     };
@@ -6523,36 +6555,72 @@ func SafeSocketControl(network, address string, c syscall.RawConn) error {
 
       const qContainer = document.getElementById('quizzes-container');
       let correctCount = 0;
-      PLATFORM_DATA.quizzes.forEach(q => {
-        if (AppState.quizAnswers[q.id] === q.correctIndex) correctCount++;
+      Object.keys(AppState.quizResults).forEach(qid => {
+        const res = AppState.quizResults[qid];
+        if (res && res.score > 0) correctCount++;
       });
-      document.getElementById('quiz-score-badge').textContent = `Score: ${correctCount} / ${PLATFORM_DATA.quizzes.length}`;
+      document.getElementById('quiz-score-badge').textContent = `Skor: ${correctCount} / ${PLATFORM_DATA.quizzes.length}`;
 
       qContainer.innerHTML = PLATFORM_DATA.quizzes.map((q, idx) => {
+        const result = AppState.quizResults[q.id];
         const picked = AppState.quizAnswers[q.id];
-        const answered = picked !== undefined;
+        const resDetail = result && result.results && result.results[0];
+
         return `
           <div class="surface-recessed">
-            <h3>Q${idx + 1} (Level ${q.level}): ${escapeHtml(q.question)}</h3>
-            <div class="view-stack" style="gap: var(--space-xs);">
+            <div class="surface-header" style="align-items: flex-start;">
+              <div class="title-stack">
+                <h3>Q${idx + 1} (Level ${q.level}): ${escapeHtml(q.title || 'Diagnostic Quiz')}</h3>
+                <p style="font-weight: 500; color: var(--color-ink);">${escapeHtml(q.question)}</p>
+              </div>
+              ${resDetail ? `<span class="tag-pill ${resDetail.correct ? 'ok' : 'warn'}">${resDetail.correct ? 'Benar' : 'Belum Tepat'}</span>` : ''}
+            </div>
+            <div class="view-stack" style="gap: var(--space-xs); margin-top: var(--space-xs);">
               ${q.options.map((opt, optIdx) => {
                 let cls = 'quiz-opt-btn';
-                if (answered) {
-                  if (optIdx === q.correctIndex) cls += ' is-correct';
-                  else if (optIdx === picked) cls += ' is-wrong';
+                if (resDetail) {
+                  if (optIdx === resDetail.correct_index) cls += ' is-correct';
+                  else if (optIdx === resDetail.selected && !resDetail.correct) cls += ' is-wrong';
+                } else if (picked !== undefined) {
+                  if (optIdx === picked) cls += ' is-active';
                 }
                 return `<button type="button" data-quiz-id="${q.id}" data-opt-idx="${optIdx}" class="${cls}">${escapeHtml(opt)}</button>`;
               }).join('')}
             </div>
-            ${answered ? `<div class="surface-card"><p><strong>Explanation:</strong> ${escapeHtml(q.explanation)}</p></div>` : ''}
+            ${resDetail && resDetail.explanation ? `
+              <div class="surface-card" style="margin-top: var(--space-xs); border-left: 3px solid ${resDetail.correct ? 'var(--color-ok)' : 'var(--color-warn)'};">
+                <p><strong>Penjelasan:</strong> ${escapeHtml(resDetail.explanation)}</p>
+              </div>
+            ` : ''}
           </div>
         `;
       }).join('');
 
       qContainer.querySelectorAll('[data-quiz-id]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          AppState.quizAnswers[btn.getAttribute('data-quiz-id')] = parseInt(btn.getAttribute('data-opt-idx'), 10);
+        btn.addEventListener('click', async () => {
+          const quizId = btn.getAttribute('data-quiz-id');
+          const optIdx = parseInt(btn.getAttribute('data-opt-idx'), 10);
+          AppState.quizAnswers[quizId] = optIdx;
           SafeStore.set('quizAnswers', AppState.quizAnswers);
+
+          // Submit attempt to server for grading without sending answer keys to client
+          if (window.location && window.location.protocol.startsWith('http')) {
+            try {
+              const res = await window.fetch(window.location.origin + ['/api', 'v1', 'quizzes', quizId, 'attempts'].join('/'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  user_id: (window.getActiveUserId ? window.getActiveUserId() : 'usr_local_default'),
+                  answers: [optIdx]
+                })
+              });
+              if (res.ok) {
+                const data = await res.json();
+                AppState.quizResults[quizId] = data;
+                SafeStore.set('quizResults', AppState.quizResults);
+              }
+            } catch (e) {}
+          }
           renderPracticeView();
         });
       });
