@@ -418,9 +418,9 @@ Buat `internal/modules/diagnostics/testdata/*.go.txt` + `*.expected.json`: 12 sa
 - [x] T1.7 Pernyataan klaim: perbaiki §5.3, versi, "14×15", font offline.
 
 ### Fase 2 — pemula (2–4 hari)
-- [ ] T2.1 §5.1 poin 1–7 (rekomendasi, 0.0A, mode Pemula, penomoran, hero, badge, i18n awal).
-- [ ] T2.2 Glosarium + tooltip (≥40 istilah, lihat daftar di audit pertama).
-- [ ] T2.3 Kuis server-side + ≥3 soal per lesson jembatan (§2.6).
+- [x] T2.1 §5.1 poin 1–7 (rekomendasi, 0.0A, mode Pemula, penomoran, hero, badge, i18n awal).
+- [x] T2.2 Glosarium + tooltip (≥40 istilah, lihat daftar di audit pertama).
+- [x] T2.3 Kuis server-side + ≥3 soal per lesson jembatan (§2.6).
 
 ### Fase 3 — verifikasi & diagnostik (1–2 minggu)
 - [ ] T3.1 Tier B AST verifier untuk 41 latihan (tabel `exercise_rules`).
