@@ -25,6 +25,7 @@ type LessonSummary struct {
 	ModuleID     string `json:"module_id"`
 	LevelID      int    `json:"level_id"`
 	OrderIndex   int    `json:"order_index"`
+	DisplayNo    string `json:"display_no"`
 	Slug         string `json:"slug"`
 	Title        string `json:"title"`
 	Summary      string `json:"summary"`

@@ -3,8 +3,11 @@ package tests
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -19,6 +22,7 @@ import (
 	"github.com/gobackendacademy/platform/internal/platform/database"
 	httpplatform "github.com/gobackendacademy/platform/internal/platform/http"
 	"github.com/gobackendacademy/platform/internal/platform/logger"
+	"github.com/gobackendacademy/platform/seed"
 )
 
 func setupTestServer(t *testing.T) (*httpplatform.Server, *httptest.Server) {
@@ -303,12 +307,12 @@ func TestPersistenceAcrossServerRestartsAndMigrationsCycle(t *testing.T) {
 	}
 
 	// Verify MigrateDown -> MigrateUp -> Seed cycle works cleanly
-	reverted, err := store2.MigrateDown(context.Background(), 1)
-	if err != nil || len(reverted) != 1 {
+	reverted, err := store2.MigrateDown(context.Background(), 2)
+	if err != nil || len(reverted) != 2 {
 		t.Fatalf("MigrateDown failed: reverted=%v err=%v", reverted, err)
 	}
 	applied, err := store2.MigrateUp(context.Background())
-	if err != nil || len(applied) != 1 {
+	if err != nil || len(applied) != 2 {
 		t.Fatalf("MigrateUp after Down failed: applied=%v err=%v", applied, err)
 	}
 	seeded, err := store2.Seed(context.Background())
@@ -992,6 +996,122 @@ func TestDiagnosticRulesInSyncWithCode(t *testing.T) {
 	for dbRule := range dbRules {
 		if !codeRuleMap[dbRule] {
 			t.Errorf("Rule %s exists in diagnostic_rules database table but is not registered in code", dbRule)
+		}
+	}
+}
+
+func TestSeedFilesUniqueAndContentHashing(t *testing.T) {
+	for _, dialect := range []string{"sqlite", "postgres"} {
+		files, err := fs.Glob(seed.FS, dialect+"/*.sql")
+		if err != nil {
+			t.Fatalf("glob seeds for %s: %v", dialect, err)
+		}
+		if len(files) == 0 {
+			t.Fatalf("expected seed files for %s", dialect)
+		}
+		hashes := map[string]string{}
+		for _, f := range files {
+			data, err := fs.ReadFile(seed.FS, f)
+			if err != nil {
+				t.Fatalf("reading seed %s: %v", f, err)
+			}
+			h := fmt.Sprintf("%x", sha256.Sum256(data))
+			if prev, exists := hashes[h]; exists {
+				t.Fatalf("duplicate seed file hash detected in %s: %s and %s share hash %s", dialect, prev, f, h)
+			}
+			hashes[h] = f
+		}
+	}
+
+	dbPath := filepath.Join(t.TempDir(), "seed_hash_test.db")
+	t.Setenv("DB_DRIVER", "sqlite")
+	t.Setenv("SQLITE_PATH", dbPath)
+	t.Setenv("SQLITE_DSN", "")
+
+	cfg, err := config.Load()
+	if err != nil {
+		t.Fatalf("config.Load() failed: %v", err)
+	}
+	store, err := database.Open(context.Background(), cfg)
+	if err != nil {
+		t.Fatalf("database.Open failed: %v", err)
+	}
+	defer store.Close()
+
+	states, err := store.MigrationStatus(context.Background())
+	if err != nil {
+		t.Fatalf("MigrationStatus failed: %v", err)
+	}
+
+	foundHashedSeed := false
+	for _, st := range states {
+		if strings.HasPrefix(st.Version, "seed:") {
+			foundHashedSeed = true
+			if !st.Applied {
+				t.Errorf("expected seed %s to be marked applied", st.Version)
+			}
+			parts := strings.Split(st.Version, ":")
+			if len(parts) < 3 {
+				t.Errorf("expected seed version with content hash, got %s", st.Version)
+			}
+		}
+	}
+	if !foundHashedSeed {
+		t.Errorf("no seed records found in MigrationStatus")
+	}
+
+	reseeded, err := store.Reseed(context.Background())
+	if err != nil {
+		t.Fatalf("store.Reseed failed: %v", err)
+	}
+	if len(reseeded) == 0 {
+		t.Errorf("expected seeds applied on Reseed, got %v", reseeded)
+	}
+}
+
+func TestUniqueOrderIndexAndLessonListingOrder(t *testing.T) {
+	dbPath := filepath.Join(t.TempDir(), "order_test.db")
+	t.Setenv("DB_DRIVER", "sqlite")
+	t.Setenv("SQLITE_PATH", dbPath)
+	t.Setenv("SQLITE_DSN", "")
+
+	cfg, err := config.Load()
+	if err != nil {
+		t.Fatalf("config.Load() failed: %v", err)
+	}
+	store, err := database.Open(context.Background(), cfg)
+	if err != nil {
+		t.Fatalf("database.Open failed: %v", err)
+	}
+	defer store.Close()
+	ctx := context.Background()
+
+	lessons, err := store.ListLessons(ctx)
+	if err != nil {
+		t.Fatalf("ListLessons failed: %v", err)
+	}
+	if len(lessons) != 41 {
+		t.Fatalf("expected 41 lessons, got %d", len(lessons))
+	}
+
+	seenLevelOrder := map[string]string{}
+	for i, l := range lessons {
+		if l.DisplayNo == "" {
+			t.Errorf("lesson %s missing display_no", l.ID)
+		}
+		key := fmt.Sprintf("%d:%d", l.LevelID, l.OrderIndex)
+		if prev, ok := seenLevelOrder[key]; ok {
+			t.Errorf("duplicate (level_id, order_index) = %s between %s and %s", key, prev, l.ID)
+		}
+		seenLevelOrder[key] = l.ID
+
+		if i > 0 {
+			prevL := lessons[i-1]
+			if prevL.LevelID > l.LevelID {
+				t.Errorf("lessons not ordered by level: %s (level %d) after %s (level %d)", l.ID, l.LevelID, prevL.ID, prevL.LevelID)
+			} else if prevL.LevelID == l.LevelID && prevL.OrderIndex >= l.OrderIndex {
+				t.Errorf("lessons within level %d not ordered by order_index: %s (order %d) after %s (order %d)", l.LevelID, l.ID, l.OrderIndex, prevL.ID, prevL.OrderIndex)
+			}
 		}
 	}
 }

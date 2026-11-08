@@ -53,14 +53,14 @@ func (s *Store) ListModules(ctx context.Context) ([]shared.ModuleSummary, error)
 	return out, rows.Err()
 }
 
-const lessonSummaryCols = `id, module_id, level_id, order_index, slug, title, summary, difficulty, CAST(last_verified AS TEXT)`
+const lessonSummaryCols = `lessons.id, lessons.module_id, lessons.level_id, lessons.order_index, lessons.display_no, lessons.slug, lessons.title, lessons.summary, lessons.difficulty, CAST(lessons.last_verified AS TEXT)`
 
 func scanLessonSummary(sc interface{ Scan(...any) error }, l *shared.LessonSummary) error {
-	return sc.Scan(&l.ID, &l.ModuleID, &l.LevelID, &l.OrderIndex, &l.Slug, &l.Title, &l.Summary, &l.Difficulty, &l.LastVerified)
+	return sc.Scan(&l.ID, &l.ModuleID, &l.LevelID, &l.OrderIndex, &l.DisplayNo, &l.Slug, &l.Title, &l.Summary, &l.Difficulty, &l.LastVerified)
 }
 
 func (s *Store) ListLessons(ctx context.Context) ([]shared.LessonSummary, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT `+lessonSummaryCols+` FROM lessons ORDER BY order_index, id`)
+	rows, err := s.db.QueryContext(ctx, `SELECT `+lessonSummaryCols+` FROM lessons JOIN curriculum_levels cl ON lessons.level_id = cl.id ORDER BY cl.level_number, lessons.order_index, lessons.id`)
 	if err != nil {
 		return nil, fmt.Errorf("querying lessons: %w", err)
 	}

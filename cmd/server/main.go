@@ -159,6 +159,12 @@ func runMigrationCommand(ctx context.Context, cfg *config.Config, log *slog.Logg
 			return err
 		}
 		log.Info("seed complete", slog.Any("seeded", seeded))
+	case "reseed":
+		seeded, err := store.Reseed(ctx)
+		if err != nil {
+			return err
+		}
+		log.Info("reseed complete", slog.Any("seeded", seeded))
 	case "down":
 		reverted, err := store.MigrateDown(ctx, steps)
 		if err != nil {

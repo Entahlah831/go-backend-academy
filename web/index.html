@@ -239,25 +239,34 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-ac
       margin-bottom: var(--space-xs);
       overflow: hidden;
       flex-shrink: 0;
-      min-height: min-content;
+      min-height: 38px;
     }
     details.sidebar-level-group > summary {
       cursor: pointer;
+      list-style: none;
+      display: block;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      min-height: 36px;
+      line-height: normal;
+    }
+    details.sidebar-level-group > summary::-webkit-details-marker {
+      display: none;
+    }
+    .sidebar-summary-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-xs);
       padding: var(--space-xs) var(--space-sm);
       font-size: 0.82rem;
       font-weight: 600;
       line-height: 1.4;
       color: var(--color-ink);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      list-style: none;
-      user-select: none;
       box-sizing: border-box;
       min-height: 36px;
-    }
-    details.sidebar-level-group > summary::-webkit-details-marker {
-      display: none;
+      width: 100%;
     }
     details.sidebar-level-group[open] {
       padding-bottom: var(--space-2xs);
@@ -265,6 +274,8 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-ac
     details.sidebar-level-group[open] > summary {
       border-bottom: 1px solid var(--color-rule);
       background: var(--color-surface-recessed);
+    }
+    details.sidebar-level-group[open] .sidebar-summary-inner {
       color: var(--color-accent);
     }
     .sidebar-level-lessons {
@@ -5464,8 +5475,10 @@ func HandleLookup(w http.ResponseWriter, r *http.Request, db *sql.DB) {
         return `
           <details class="sidebar-level-group" ${isOpen ? 'open' : ''}>
             <summary>
-              <span>L${lvlKey}: ${escapeHtml(shortHeading)}</span>
-              <span class="nav-meta">${doneInLevel}/${group.items.length}</span>
+              <div class="sidebar-summary-inner">
+                <span>L${lvlKey}: ${escapeHtml(shortHeading)}</span>
+                <span class="nav-meta">${doneInLevel}/${group.items.length}</span>
+              </div>
             </summary>
             <div class="sidebar-level-lessons">
               ${group.items.map(item => {

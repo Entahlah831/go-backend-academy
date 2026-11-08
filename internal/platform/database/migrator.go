@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"fmt"
 	"io/fs"
@@ -198,16 +199,27 @@ func (s *Store) MigrationStatus(ctx context.Context) ([]MigrationState, error) {
 	}
 	sort.Strings(seeds)
 	for _, p := range seeds {
-		v := seedVersionPrefix + strings.TrimSuffix(path.Base(p), ".sql")
-		out = append(out, MigrationState{Version: v, Applied: applied[v]})
+		base := strings.TrimSuffix(path.Base(p), ".sql")
+		raw, _ := fs.ReadFile(seed.FS, p)
+		sum := sha256.Sum256(raw)
+		v := fmt.Sprintf("%s%s:%x", seedVersionPrefix, base, sum[:8])
+		isApplied := applied[v]
+		if !isApplied {
+			for av := range applied {
+				if strings.HasPrefix(av, seedVersionPrefix+base) {
+					isApplied = true
+					break
+				}
+			}
+		}
+		out = append(out, MigrationState{Version: v, Applied: isApplied})
 	}
 	return out, nil
 }
 
-// Seed applies each embedded seed file exactly once, tracked as "seed:<name>"
-// in schema_migrations. If curriculum rows already exist without a seed record
-// (for example a database initialised by an older docker-entrypoint script),
-// the seed is recorded as applied instead of being re-inserted.
+// Seed applies each embedded seed file, tracked as "seed:<name>:<sha256[:16]>"
+// in schema_migrations. If curriculum rows already exist without a seed record,
+// or if a seed's content hash changed, the seed is re-applied using upsert logic.
 func (s *Store) Seed(ctx context.Context) ([]string, error) {
 	files, err := fs.Glob(seed.FS, s.dialect+"/*.sql")
 	if err != nil {
@@ -220,34 +232,44 @@ func (s *Store) Seed(ctx context.Context) ([]string, error) {
 	}
 	var done []string
 	for _, p := range files {
-		version := seedVersionPrefix + strings.TrimSuffix(path.Base(p), ".sql")
-		if applied[version] {
-			continue
-		}
 		raw, err := fs.ReadFile(seed.FS, p)
 		if err != nil {
 			return done, fmt.Errorf("reading seed %s: %w", p, err)
 		}
-		var existing int
-		if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM curriculum_levels`).Scan(&existing); err != nil {
-			return done, fmt.Errorf("checking existing curriculum rows: %w", err)
+		base := strings.TrimSuffix(path.Base(p), ".sql")
+		sum := sha256.Sum256(raw)
+		version := fmt.Sprintf("%s%s:%x", seedVersionPrefix, base, sum[:8])
+		if applied[version] {
+			continue
 		}
-		// Only the base curriculum seed is guarded; later seed files always run once.
-		alreadyPresent := existing > 0 && version == seedVersionPrefix+"001_seed_data"
 		if err := s.inTx(ctx, func(tx *sql.Tx) error {
-			if !alreadyPresent {
-				if _, err := tx.ExecContext(ctx, string(raw)); err != nil {
-					return err
-				}
+			if _, err := tx.ExecContext(ctx, string(raw)); err != nil {
+				return err
+			}
+			// Clear any previous or unhashed version record for this seed file
+			pattern := seedVersionPrefix + base + "%"
+			if _, err := tx.ExecContext(ctx, `DELETE FROM schema_migrations WHERE version LIKE $1`, pattern); err != nil {
+				return err
 			}
 			_, err := tx.ExecContext(ctx, `INSERT INTO schema_migrations (version) VALUES ($1) ON CONFLICT (version) DO NOTHING`, version)
 			return err
 		}); err != nil {
-			return done, fmt.Errorf("applying seed %s: %w", p, err)
+			return done, fmt.Errorf("applying seed %s (%s): %w", p, version, err)
 		}
 		done = append(done, version)
 	}
 	return done, nil
+}
+
+// Reseed clears all seed version tracking from schema_migrations and re-executes all seeds.
+func (s *Store) Reseed(ctx context.Context) ([]string, error) {
+	if err := s.ensureMigrationsTable(ctx); err != nil {
+		return nil, err
+	}
+	if _, err := s.db.ExecContext(ctx, `DELETE FROM schema_migrations WHERE version LIKE 'seed:%'`); err != nil {
+		return nil, fmt.Errorf("clearing seed records: %w", err)
+	}
+	return s.Seed(ctx)
 }
 
 func (s *Store) inTx(ctx context.Context, fn func(tx *sql.Tx) error) error {
